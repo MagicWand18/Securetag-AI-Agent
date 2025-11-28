@@ -1,0 +1,95 @@
+services:
+  securetag-db:
+    image: postgres:18.1
+    container_name: securetag-db
+    environment:
+      POSTGRES_DB: securetag
+      POSTGRES_USER: securetag
+      POSTGRES_PASSWORD: securetagpwd
+    volumes:
+      - ./data/postgres:/var/lib/postgresql
+    networks:
+      - securetag-net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U securetag" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  securetag-app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    image: securetag-app:dev
+    container_name: securetag-app
+    ports:
+      - "8080:8080"
+    environment:
+      TENANT_ID: ${TENANT_ID:-tenantA}
+      DB_DIR: /var/securetag/${TENANT_ID:-tenantA}/db
+      UPLOADS_DIR: /var/securetag/${TENANT_ID:-tenantA}/uploads
+      WORK_DIR: /var/securetag/${TENANT_ID:-tenantA}/work
+      RESULTS_DIR: /var/securetag/${TENANT_ID:-tenantA}/results
+      DATABASE_URL: postgres://securetag:securetagpwd@securetag-db:5432/securetag
+      OLLAMA_HOST: http://ollama:11434
+    volumes:
+      - ./data:/var/securetag
+    networks:
+      - securetag-net
+    depends_on:
+      securetag-db:
+        condition: service_healthy
+
+  securetag-worker:
+    build:
+      context: .
+      dockerfile: docker/worker/Dockerfile
+    image: securetag-worker:dev
+    container_name: securetag-worker
+    environment:
+      TENANT_ID: ${TENANT_ID:-tenantA}
+      APP_HOST: securetag-app
+      APP_PORT: 8080
+      RESULTS_DIR: /var/securetag/${TENANT_ID:-tenantA}/results
+      DATABASE_URL: postgres://securetag:securetagpwd@securetag-db:5432/securetag
+      SEMGREP_APP_TOKEN: ${SEMGREP_APP_TOKEN:-}
+      SEMGREP_ANONYMOUS_USER_ID: ${SEMGREP_ANONYMOUS_USER_ID:-}
+      SEMGREP_HAS_SHOWN_METRICS_NOTIFICATION: ${SEMGREP_HAS_SHOWN_METRICS_NOTIFICATION:-true}
+      OLLAMA_HOST: http://ollama:11434
+    volumes:
+      - ./data:/var/securetag
+    networks:
+      - securetag-net
+    depends_on:
+      securetag-app:
+        condition: service_started
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: securetag-ollama
+    ports:
+      - "11434:11434"
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+    volumes:
+      - ./data/ollama:/root/.ollama
+    networks:
+      - securetag-net
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
+    healthcheck:
+      test: [ "CMD", "ollama", "list" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+networks:
+  securetag-net:
+    name: securetag-net
+    driver: bridge

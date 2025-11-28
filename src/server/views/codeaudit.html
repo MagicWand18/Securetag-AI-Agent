@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Static Application Security Testing</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;padding:20px;background:#0b1f3a;color:#fff}
+    table{border-collapse:collapse;width:100%;background:#0f294d}
+    th,td{border:1px solid #234b84;padding:8px}
+    th{background:#133b73;text-align:left;color:#fff}
+    code{background:#0a2447;padding:2px 4px;border-radius:4px;color:#cfe3ff}
+    .kpi{display:flex;gap:12px;margin:10px 0;flex-wrap:wrap}
+    .kpi div{padding:8px 12px;border-radius:6px;background:#133b73;color:#fff}
+    .kpi div.critical{background:#dc3545;color:#fff}
+    .kpi div.high{background:#fd7e14;color:#fff}
+    .kpi div.medium{background:#ffc107;color:#fff}
+    .kpi div.low{background:#28a745;color:#fff}
+    .kpi div.info{background:#17a2b8;color:#fff}
+    .badge{display:inline-block;padding:4px 8px;border-radius:999px;font-weight:600;color:#fff}
+    .severity-critical{background:#dc3545;color:#fff}
+    .severity-high{background:#fd7e14;color:#fff}
+    .severity-medium{background:#ffc107;color:#fff}
+    .severity-low{background:#28a745;color:#fff}
+    .severity-info{background:#17a2b8;color:#fff}
+    td.center{text-align:center}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:10px 0}
+    .card{border:1px solid #234b84;border-radius:8px;padding:12px;background:#0f294d;color:#fff}
+    details{border:1px solid #234b84;border-radius:8px;padding:10px;margin:8px 0;background:#0f294d}
+    summary{font-weight:600;cursor:pointer;color:#cfe3ff}
+    .tree details{margin-left:8px}
+    .tree summary.folder{color:#cfe3ff}
+    .tree ul{list-style:none;margin:4px 0 4px 14px;padding:0;border-left:1px solid #234b84}
+    .tree li.file{margin:2px 0;color:#cfe3ff}
+    .chips{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+    .chip{border:1px solid #234b84;border-radius:999px;padding:4px 10px;background:#0a2447;color:#cfe3ff}
+    pre{background:#0a2447;color:#cfe3ff;padding:10px;border-radius:8px;overflow:auto}
+    a{color:#66b2ff;text-decoration:none}
+    a:hover{text-decoration:underline}
+  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+</head>
+<body>
+  <h1>Static Application Security Testing</h1>
+  <p>Estado: {{STATUS}}</p>
+  <p>Task ID: <code>{{TASK_ID}}</code></p>
+  <div class="grid">
+    <div class="card">Versión motor: <strong>{{VERSION}}</strong></div>
+    <div class="card">Tenant: <strong>{{TENANT}}</strong></div>
+    <div class="card">Duración: <strong>{{DURATION_S}} s</strong></div>
+  </div>
+  <div class="kpi">
+    <div>Total: {{TOTAL}}</div>
+    <div class="critical">Críticas: {{CRITICAL}}</div>
+    <div class="high">Altas: {{HIGH}}</div>
+    <div class="medium">Medias: {{MEDIUM}}</div>
+    <div class="low">Bajas: {{LOW}}</div>
+    <div class="info">Info: {{INFO}}</div>
+    <div>Archivos escaneados: {{FILES_COUNT}}</div>
+    <div>Reglas ejecutadas: {{RULES_COUNT}}</div>
+  </div>
+  <details class="files"><summary>Archivos ({{FILES_COUNT}})</summary>
+    <div class="tree">{{FILES_TREE}}</div>
+  </details>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th colspan="5"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{ROWS}}
+    </tbody>
+  </table>
+
+  
+
+</body>
+</html>

@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Database & Storage
+data/
+.securetag/
+*.sqlite
+*.db
+
+# Large Models & Datasets
+datasets/
+mymodel/
+*.gguf
+*.tar.gz
+*.zip
+cai-main.zip
+securetag-model.tar.gz
+
+# Scripts (Large Data)
+scripts/finetuning/
+scripts/__pycache__/
+
+# Environment Variables
+.env
+.env.*
+!.env.production.example
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE & System
+.DS_Store
+.vscode/
+.idea/
+*.swp
+__pycache__/
+*.pyc
+
+# Testing
+test/docker/codeaudit/tests_basicos.zip
+scans/
+pcap/

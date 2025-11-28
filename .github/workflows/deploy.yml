@@ -1,0 +1,107 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      skip_health_check:
+        description: 'Skip health checks'
+        required: false
+        type: boolean
+        default: false
+  
+  release:
+    types: [published]
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  deploy-digitalocean:
+    name: Deploy to DigitalOcean
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'production' }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DIGITALOCEAN_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.DIGITALOCEAN_HOST }} >> ~/.ssh/known_hosts
+      
+      - name: Deploy to Droplet
+        env:
+          DROPLET_HOST: ${{ secrets.DIGITALOCEAN_HOST }}
+          DROPLET_USER: ${{ secrets.DIGITALOCEAN_USER || 'root' }}
+          ENVIRONMENT: ${{ github.event.inputs.environment || 'production' }}
+        run: |
+          # Copy deployment script
+          scp scripts/deploy/digitalocean.sh ${DROPLET_USER}@${DROPLET_HOST}:/tmp/
+          
+          # Copy environment file
+          scp .env.${ENVIRONMENT} ${DROPLET_USER}@${DROPLET_HOST}:/opt/securetag/.env
+          
+          # Execute deployment
+          ssh ${DROPLET_USER}@${DROPLET_HOST} "bash /tmp/digitalocean.sh"
+      
+      - name: Run health checks
+        if: ${{ !github.event.inputs.skip_health_check }}
+        env:
+          DROPLET_HOST: ${{ secrets.DIGITALOCEAN_HOST }}
+          DROPLET_USER: ${{ secrets.DIGITALOCEAN_USER || 'root' }}
+        run: |
+          ssh ${DROPLET_USER}@${DROPLET_HOST} "bash /opt/securetag/scripts/health-check.sh"
+      
+      - name: Notify deployment status
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: 'Deployment to ${{ github.event.inputs.environment || 'production' }} ${{ job.status }}'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+  deploy-runpod:
+    name: Configure RunPod LLM Service
+    runs-on: ubuntu-latest
+    if: github.event.inputs.environment == 'production' || github.event_name == 'release'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup RunPod CLI
+        run: |
+          pip install runpod
+      
+      - name: Deploy to RunPod
+        env:
+          RUNPOD_API_KEY: ${{ secrets.RUNPOD_API_KEY }}
+        run: |
+          bash scripts/deploy/runpod.sh
+      
+      - name: Verify RunPod endpoint
+        env:
+          RUNPOD_API_KEY: ${{ secrets.RUNPOD_API_KEY }}
+          RUNPOD_ENDPOINT: ${{ secrets.RUNPOD_ENDPOINT }}
+        run: |
+          # Test endpoint
+          curl -X POST "$RUNPOD_ENDPOINT/health" \
+            -H "Authorization: Bearer $RUNPOD_API_KEY"
