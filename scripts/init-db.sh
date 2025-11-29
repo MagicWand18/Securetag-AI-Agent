@@ -23,6 +23,25 @@ DB_USER="${POSTGRES_USER:-securetag}"
 DB_NAME="${POSTGRES_DB:-securetag}"
 MIGRATIONS_DIR="./migrations"
 
+# Cargar variables desde .env si existe (para obtener WORKER_API_KEY)
+if [ -f .env ]; then
+    info "Cargando variables desde .env..."
+    # Leer línea por línea para manejar comentarios y espacios
+    while IFS='=' read -r key value || [ -n "$key" ]; do
+        # Ignorar comentarios y líneas vacías
+        [[ $key =~ ^# ]] && continue
+        [[ -z $key ]] && continue
+        
+        # Limpiar valor (quitar comillas y espacios extra)
+        value=$(echo "$value" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^["'\'']//' -e 's/["'\'']$//')
+        
+        # Exportar si no existe
+        if [ -z "${!key:-}" ]; then
+            export "$key=$value"
+        fi
+    done < .env
+fi
+
 info "Inicializando base de datos PostgreSQL..."
 
 # Verificar que el contenedor está corriendo

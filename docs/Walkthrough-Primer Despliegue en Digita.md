@@ -75,6 +75,15 @@ Paso 1.5: Obtener IP del Droplet
 Una vez creado, verás:
 
 IP Address: 123.45.67.89 ← Copia esta IP
+
+
+
+
+
+
+
+
+
 🔑 Fase 2: Configurar Secretos en GitHub
 Paso 2.1: Obtener API Token de DigitalOcean
 En DigitalOcean, ve a API (menú izquierdo)
@@ -121,6 +130,15 @@ Secret: Genera un password seguro
 # Generar password
 openssl rand -base64 32
 Copia el resultado y pégalo como secreto.
+
+
+
+
+
+
+
+
+
 
 🛠️ Fase 3: Preparar Droplet
 Paso 3.1: Conectarse al Droplet
@@ -175,8 +193,15 @@ Si el repositorio es privado:
 
 # Usar token de GitHub
 git clone https://TU_TOKEN@github.com/TU_USUARIO/securetag-ai.git .
-📝 Fase 4: Configurar Variables de Entorno
 
+
+
+
+
+
+
+
+📝 Fase 4: Configurar Variables de Entorno
 
 Paso 4.1: Crear .env.production
 # Copiar plantilla
@@ -224,79 +249,94 @@ mkdir -p data/postgres
 ls -la data/
 
 
-🚀 Fase 5: Primer Despliegue
-Paso 5.1: Login a GitHub Container Registry
-# Crear token de GitHub para packages
-# Ve a: https://github.com/settings/tokens
-# Click en "Generate new token (classic)"
-# Selecciona: read:packages
-# Copia el token
-# Login
-echo "TU_GITHUB_TOKEN" | docker login ghcr.io -u TU_USUARIO_GITHUB --password-stdin
 
-Paso 5.2: Ejecutar Despliegue
-# Hacer ejecutable el script
+
+
+
+
+🚀 Fase 5: Primer Despliegue (Manual)
+Nota: Como es el primer despliegue y las imágenes aún no existen en el registro, construiremos todo localmente en el servidor.
+
+Paso 5.1: Configurar Entorno
+# Copiar configuración de producción
 cp .env.production .env
-chmod +x scripts/deploy/digitalocean.sh
+
+# Generar y configurar WORKER_API_KEY (Crucial para que el worker funcione)
+# Genera un hash aleatorio
+openssl rand -hex 32
+# Copia el resultado y agrégalo al final del archivo .env
+nano .env
+# Agrega al final:
+# WORKER_API_KEY=tu_hash_generado_aqui
+
+Paso 5.2: Construir y Desplegar
+# Construir imágenes y levantar servicios
 docker compose up -d --build
 
-Para futuros despliegues automáticos, necesitaremos actualizar el docker-compose.yml para que apunte al registro de GitHub (ghcr.io/...),
-# Ejecutar despliegue
-bash scripts/deploy/digitalocean.sh production
-⏱️ Esto tomará 5-10 minutos la primera vez (descarga de imágenes).
+⏱️ Esto tomará 5-10 minutos (descarga de base images y compilación).
 
 Verás output como:
+[+] Building ... FINISHED
+[+] Running 4/4
+ ✔ Network securetag-net       Created
+ ✔ Container securetag-db      Healthy
+ ✔ Container securetag-app     Started
+ ✔ Container securetag-worker  Started
 
-[INFO] Iniciando despliegue en ambiente: production
-[INFO] Autenticando con GitHub Container Registry...
-[INFO] Descargando imágenes Docker más recientes...
-[INFO] Iniciando servicios...
-[INFO] Esperando a que los servicios estén listos...
-[INFO] Ejecutando health checks...
-✅ Despliegue completado exitosamente!
-✅ Fase 6: Verificación
-Paso 6.1: Verificar Servicios
-# Ver servicios corriendo
-docker compose ps
-Deberías ver:
 
-NAME              STATUS
-securetag-app     Up (healthy)
-securetag-db      Up (healthy)
-securetag-worker  Up
-Paso 6.2: Health Check
-# Ejecutar health check
-bash scripts/health-check.sh
-Deberías ver:
 
-✅ Todos los health checks pasaron
-Paso 6.3: Probar API
-# Desde el Droplet
-curl http://localhost:8080/healthz
-Deberías ver:
 
-{"ok":true,"status":"healthy"}
-Paso 6.4: Probar desde Internet
-Desde tu computadora local:
 
-# Reemplaza con tu IP
-curl http://TU_IP_DEL_DROPLET:8080/healthz
-Si funciona, ¡tu API está accesible desde internet! 🎉
 
-🎯 Fase 7: Inicializar Base de Datos
-Paso 7.1: Ejecutar Migraciones
-# En el Droplet
-cd /opt/securetag
+
+✅ Fase 6: Inicializar Base de Datos
+Este paso es crítico. El script `init-db.sh` configura el esquema, las tablas y la autenticación del worker.
+
+Paso 6.1: Ejecutar Script de Inicialización
+# El script ahora carga automáticamente las variables del .env
 bash scripts/init-db.sh
-Esto creará todas las tablas necesarias.
 
-Paso 7.2: Verificar Tablas
+# Si sale error:
+[WARN] Base de datos ya está inicializada (6 tablas encontradas)
+¿Deseas reinicializar? (esto BORRARÁ todos los datos) [y/N]: Y
+
+Verás output como:
+[INFO] Cargando variables desde .env...
+[INFO] Inicializando base de datos PostgreSQL...
+[INFO] Aplicando: 003_auth_multitenancy.sql
+[INFO] Aplicando: 004_create_tasks.sql
+[INFO] Detectada WORKER_API_KEY en entorno. Configurando...
+[INFO] ✅ Worker API Key insertada exitosamente
+[INFO] ✅ Inicialización de base de datos completada
+
+Paso 6.2: Verificar Tablas (Opcional)
 # Conectarse a la DB
-docker compose exec securetag-db psql -U securetag -d securetag
-# Ver tablas
-\dt securetag.*
-# Salir
-\q
+docker compose exec securetag-db psql -U securetag -d securetag -c "\dt securetag.*"
+
+Deberías ver tablas como: api_key, finding, scan_result, task, tenant, tool_execution.
+
+
+
+
+
+✅ Fase 7: Verificación Final
+Paso 7.1: Verificar Logs del Worker
+# El worker debe estar "idle" y sin errores 401/503
+docker compose logs -f securetag-worker
+
+Deberías ver:
+{"ok":true,"idle":true,"tenant":"production"}
+
+Paso 7.2: Health Check General
+bash scripts/health-check.sh
+
+Paso 7.3: Probar API desde Internet
+curl http://TU_IP_DEL_DROPLET:8080/healthz
+
+
+
+
+
 📊 Fase 8: Monitoreo
 Paso 8.1: Ver Logs
 # Logs en tiempo real
