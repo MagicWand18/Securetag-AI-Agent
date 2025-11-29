@@ -9,9 +9,16 @@ export class WorkerClient {
   constructor() {
     this.appHost = process.env.APP_HOST || 'securetag-app'
     this.appPort = parseInt(process.env.APP_PORT || '8080', 10)
+
+    const headers: Record<string, string> = {}
+    if (process.env.WORKER_API_KEY) {
+      headers['x-api-key'] = process.env.WORKER_API_KEY
+    }
+
     this.client = axios.create({
       baseURL: `http://${this.appHost}:${this.appPort}`,
-      timeout: 10000
+      timeout: 10000,
+      headers
     })
   }
 
