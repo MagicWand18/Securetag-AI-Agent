@@ -56,6 +56,7 @@ services:
       SEMGREP_HAS_SHOWN_METRICS_NOTIFICATION: ${SEMGREP_HAS_SHOWN_METRICS_NOTIFICATION:-true}
       OLLAMA_HOST: http://ollama:11434
       WORKER_API_KEY: ${WORKER_API_KEY}
+      LOOP_MODE: ${LOOP_MODE:-false}
     volumes:
       - ./data:/var/securetag
     networks:
