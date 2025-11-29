@@ -306,8 +306,10 @@ Verás output como:
 [INFO] Aplicando: 003_auth_multitenancy.sql
 [INFO] Aplicando: 004_create_tasks.sql
 [INFO] Detectada WORKER_API_KEY en entorno. Configurando...
-[INFO] ✅ Worker API Key insertada exitosamente
+[INFO] ✅ Worker API Key configurada exitosamente
 [INFO] ✅ Inicialización de base de datos completada
+
+> **Nota Importante**: El script ahora **siempre actualiza** la API Key del worker si detecta `WORKER_API_KEY` en el `.env`, incluso si ya existe una llave anterior. Esto garantiza que el hash en la DB siempre coincida con el valor actual del `.env`.
 
 Paso 6.2: Verificar Tablas (Opcional)
 # Conectarse a la DB

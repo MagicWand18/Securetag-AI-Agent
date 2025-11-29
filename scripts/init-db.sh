@@ -95,25 +95,26 @@ else
     warn "Directorio de migraciones no encontrado: $MIGRATIONS_DIR"
 fi
 
-# Auto-insertar WORKER_API_KEY si existe en el entorno
+# Auto-insertar/actualizar WORKER_API_KEY si existe en el entorno
 if [ -n "${WORKER_API_KEY:-}" ]; then
     info "Detectada WORKER_API_KEY en entorno. Configurando..."
     
-    # Verificar si ya existe
-    KEY_EXISTS=$(docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT count(*) FROM securetag.api_key WHERE name = 'Worker Key';" | tr -d ' ')
-    
-    if [ "$KEY_EXISTS" -eq "0" ]; then
-        info "Insertando Worker API Key..."
-        # NOTA: La aplicación usa SHA256 para validar las llaves (ver src/middleware/auth.ts),
-        # por lo que debemos insertar el hash SHA256, no bcrypt.
+    # UPSERT: Actualizar si existe, insertar si no existe
+    # NOTA: La aplicación usa SHA256 para validar las llaves (ver src/middleware/auth.ts)
+    docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -c "
+        INSERT INTO securetag.api_key (key_hash, tenant_id, name, scopes) 
+        VALUES (encode(digest('$WORKER_API_KEY', 'sha256'), 'hex'), 'production', 'Worker Key', '[\"worker\"]')
+        ON CONFLICT (key_hash) 
+        DO UPDATE SET key_hash = encode(digest('$WORKER_API_KEY', 'sha256'), 'hex');
+    " 2>/dev/null || {
+        # Si falla el UPSERT (por ejemplo, si el constraint es diferente), forzar UPDATE
         docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -c "
+            DELETE FROM securetag.api_key WHERE name = 'Worker Key';
             INSERT INTO securetag.api_key (key_hash, tenant_id, name, scopes) 
             VALUES (encode(digest('$WORKER_API_KEY', 'sha256'), 'hex'), 'production', 'Worker Key', '[\"worker\"]');
         "
-        info "✅ Worker API Key insertada exitosamente"
-    else
-        info "Worker API Key ya existe en la base de datos"
-    fi
+    }
+    info "✅ Worker API Key configurada exitosamente"
 else
     warn "WORKER_API_KEY no definida en el entorno. El worker podría fallar al conectar."
 fi
