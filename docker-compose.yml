@@ -16,6 +16,31 @@ services:
       timeout: 5s
       retries: 5
 
+  #  ollama:
+  #    image: ollama/ollama:latest
+  #    container_name: securetag-ollama
+  #    ports:
+  #      - "11434:11434"
+  #    environment:
+  #      OLLAMA_HOST: 0.0.0.0:11434
+  #    volumes:
+  #      - ./data/ollama:/root/.ollama
+  #    networks:
+  #      - securetag-net
+  #    deploy:
+  #      resources:
+  #        reservations:
+  #          devices:
+  #            - driver: nvidia
+  #              count: all
+  #              capabilities: [ gpu ]
+  #    healthcheck:
+  #      test: [ "CMD", "ollama", "list" ]
+  #      interval: 30s
+  #      timeout: 10s
+  #      retries: 3
+  #      start_period: 20s
+
   securetag-app:
     build:
       context: .
@@ -63,32 +88,6 @@ services:
     depends_on:
       securetag-app:
         condition: service_started
-
-  ollama:
-    image: ollama/ollama:latest
-    container_name: securetag-ollama
-    ports:
-      - "11434:11434"
-    environment:
-      OLLAMA_HOST: 0.0.0.0:11434
-    volumes:
-      - ./data/ollama:/root/.ollama
-    networks:
-      - securetag-net
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [ gpu ]
-    healthcheck:
-      test: [ "CMD", "ollama", "list" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-
 networks:
   securetag-net:
     name: securetag-net

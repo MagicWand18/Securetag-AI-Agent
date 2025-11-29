@@ -76,6 +76,27 @@ else
     warn "Directorio de migraciones no encontrado: $MIGRATIONS_DIR"
 fi
 
+# Auto-insertar WORKER_API_KEY si existe en el entorno
+if [ -n "${WORKER_API_KEY:-}" ]; then
+    info "Detectada WORKER_API_KEY en entorno. Configurando..."
+    
+    # Verificar si ya existe
+    KEY_EXISTS=$(docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT count(*) FROM securetag.api_key WHERE name = 'Worker Key';" | tr -d ' ')
+    
+    if [ "$KEY_EXISTS" -eq "0" ]; then
+        info "Insertando Worker API Key..."
+        docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -c "
+            INSERT INTO securetag.api_key (key_hash, tenant_id, name, scopes) 
+            VALUES (crypt('$WORKER_API_KEY', gen_salt('bf')), 'production', 'Worker Key', '[\"worker\"]');
+        "
+        info "✅ Worker API Key insertada exitosamente"
+    else
+        info "Worker API Key ya existe en la base de datos"
+    fi
+else
+    warn "WORKER_API_KEY no definida en el entorno. El worker podría fallar al conectar."
+fi
+
 # Verificar tablas creadas
 info "Verificando tablas creadas..."
 TABLES=$(docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT table_name FROM information_schema.tables WHERE table_schema = 'securetag' ORDER BY table_name;")
