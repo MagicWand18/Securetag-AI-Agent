@@ -54,9 +54,9 @@ HEALTH_URL="http://${APP_HOST}:${APP_PORT}/healthz"
 
 if curl -sf "$HEALTH_URL" > /dev/null 2>&1; then
     HEALTH_RESPONSE=$(curl -s "$HEALTH_URL")
+    # Solo verificar que .ok sea true (la app no devuelve .status)
     if echo "$HEALTH_RESPONSE" | jq -e '.ok == true' > /dev/null 2>&1; then
         info "App health check: OK"
-        echo "   Response: $HEALTH_RESPONSE"
     else
         error "App health check falló"
         echo "   Response: $HEALTH_RESPONSE"
@@ -79,22 +79,26 @@ else
 fi
 echo ""
 
-# 5. Verificar Ollama (si está configurado)
-echo "5. Verificando Ollama LLM..."
-OLLAMA_HOST="${OLLAMA_HOST:-http://ollama:11434}"
+# 5. Verificar LLM (Ollama o RunPod)
+echo "5. Verificando LLM..."
+OLLAMA_HOST="${OLLAMA_HOST:-}"
 
-if [[ "$OLLAMA_HOST" == *"runpod"* ]]; then
-    info "Ollama configurado en RunPod (externo)"
-    # No podemos verificar sin API key
-elif docker compose ps | grep -q "securetag-ollama"; then
-    if curl -sf "$OLLAMA_HOST/api/version" > /dev/null 2>&1; then
-        VERSION=$(curl -s "$OLLAMA_HOST/api/version" | jq -r '.version')
-        info "Ollama está corriendo (version: $VERSION)"
-    else
-        warn "Ollama no responde"
-    fi
+if [[ -z "$OLLAMA_HOST" ]]; then
+    info "LLM no configurado (opcional para despliegue inicial)"
+elif [[ "$OLLAMA_HOST" == *"runpod"* ]]; then
+    info "LLM configurado en RunPod (externo)"
 else
-    warn "Ollama no está configurado en docker-compose"
+    # Intentar verificar Ollama local si existe
+    if docker compose ps 2>/dev/null | grep -q "ollama"; then
+        if curl -sf "$OLLAMA_HOST/api/version" > /dev/null 2>&1; then
+            VERSION=$(curl -s "$OLLAMA_HOST/api/version" | jq -r '.version' 2>/dev/null || echo "unknown")
+            info "Ollama local está corriendo (version: $VERSION)"
+        else
+            warn "Ollama local no responde en $OLLAMA_HOST"
+        fi
+    else
+        info "LLM configurado en: $OLLAMA_HOST (no verificable)"
+    fi
 fi
 echo ""
 
