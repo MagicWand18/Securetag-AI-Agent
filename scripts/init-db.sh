@@ -85,9 +85,11 @@ if [ -n "${WORKER_API_KEY:-}" ]; then
     
     if [ "$KEY_EXISTS" -eq "0" ]; then
         info "Insertando Worker API Key..."
+        # NOTA: La aplicación usa SHA256 para validar las llaves (ver src/middleware/auth.ts),
+        # por lo que debemos insertar el hash SHA256, no bcrypt.
         docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -c "
             INSERT INTO securetag.api_key (key_hash, tenant_id, name, scopes) 
-            VALUES (crypt('$WORKER_API_KEY', gen_salt('bf')), 'production', 'Worker Key', '[\"worker\"]');
+            VALUES (encode(digest('$WORKER_API_KEY', 'sha256'), 'hex'), 'production', 'Worker Key', '[\"worker\"]');
         "
         info "✅ Worker API Key insertada exitosamente"
     else
