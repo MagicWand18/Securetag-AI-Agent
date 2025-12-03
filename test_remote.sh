@@ -4,7 +4,7 @@ set -e
 SERVER_IP="143.198.61.64"
 PORT="8080"
 BASE_URL="http://${SERVER_IP}:${PORT}"
-ZIP_FILE="/Users/master/Downloads/Securetag Agent/test/docker/codeaudit/juice-shop-master.zip"
+ZIP_FILE="/Users/master/Downloads/Securetag Agent/test/docker/codeaudit/test.zip"
 # Usamos una clave por defecto o la que esté configurada en el servidor si la sabemos.
 # Asumimos que el servidor usa la misma configuración base o que no requiere auth estricta para esta prueba si no se cambió.
 # Pero en deploy.sh vimos que generó una random. Si no la sabemos, podría fallar si la auth está activa.
