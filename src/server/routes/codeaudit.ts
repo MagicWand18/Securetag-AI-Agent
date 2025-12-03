@@ -2,6 +2,8 @@ import http from 'http'
 import fs from 'fs'
 import path from 'path'
 import { dbQuery, ensureTenant } from '../../utils/db.js'
+import { authenticate, AuthenticatedRequest } from '../../middleware/auth.js'
+
 
 
 function escapeHtml(s: any) {
@@ -183,16 +185,46 @@ export async function codeauditDetail(req: http.IncomingMessage, res: http.Serve
   const method = req.method || 'GET'
   const url = req.url || '/'
   if (!(method === 'GET' && url.startsWith('/codeaudit/'))) return false
-  const tenant = process.env.TENANT_ID || 'default'
+  
   let id = url.split('/').pop() || ''
   const htmlReq = (req.headers['accept'] || '').includes('text/html') || url.includes('format=html') || id.endsWith('.html')
   if (id.endsWith('.html')) id = id.replace(/\.html$/, '')
+
+  // Determine Tenant ID
+  let tenantId = ''
+  // 1. Try authentication via header (if provided)
+  if (req.headers['x-api-key']) {
+    const authReq = req as AuthenticatedRequest
+    // authenticate writes 401 to res if fails, so we need to be careful.
+    // But here we want to allow fallback if auth fails? No, if key provided but invalid -> 401.
+    // If no key -> fallback to default tenant.
+    const isAuthenticated = await authenticate(authReq, res)
+    if (!isAuthenticated) return true // Response already sent
+    tenantId = authReq.tenantId!
+  } else {
+    // 2. Fallback to environment variable
+    const tenant = process.env.TENANT_ID || 'default'
+    try {
+      tenantId = await ensureTenant(tenant)
+    } catch (e) {
+      console.error('ensureTenant failed:', e)
+      // If ensureTenant fails, we can't proceed
+    }
+  }
+
+  if (!tenantId) {
+     // Should have been handled by ensureTenant catch or authenticate
+     send(res, 500, { ok: false, error: 'Tenant identification failed' })
+     return true
+  }
+
   let dbTask: any = null
   try {
-    const tenantId = await ensureTenant(tenant)
     const tq = await dbQuery<any>('SELECT id, status, started_at, finished_at FROM securetag.task WHERE id=$1 AND tenant_id=$2 AND type=$3 LIMIT 1', [id, tenantId, 'codeaudit'])
     dbTask = tq.rows.length ? tq.rows[0] : null
-  } catch { }
+  } catch (e) { 
+    console.error('Error fetching task:', e)
+  }
   if (dbTask) {
     if (!htmlReq) {
       if (dbTask.status === 'completed') {
@@ -351,7 +383,7 @@ export async function codeauditDetail(req: http.IncomingMessage, res: http.Serve
       .replace(/\{\{STATUS\}\}/g, escapeHtml(dbTask.status))
       .replace(/\{\{TASK_ID\}\}/g, escapeHtml(id))
       .replace(/\{\{VERSION\}\}/g, escapeHtml(String(sg?.version || '')))
-      .replace(/\{\{TENANT\}\}/g, escapeHtml(String(tenant)))
+      .replace(/\{\{TENANT\}\}/g, escapeHtml(String(tenantId)))
       .replace(/\{\{DURATION_S\}\}/g, escapeHtml(String(((Number(0)) / 1000).toFixed(2))))
       .replace(/\{\{TOTAL\}\}/g, String(summary.total))
       .replace(/\{\{CRITICAL\}\}/g, String(summary.critical))
