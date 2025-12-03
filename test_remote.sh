@@ -49,7 +49,10 @@ while true; do
   STATUS_JSON=$(curl -s -H "X-API-Key: ${API_KEY}" "${BASE_URL}/codeaudit/${TASK_ID}")
   STATUS=$(echo "${STATUS_JSON}" | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
   
-  echo "Estado: ${STATUS}"
+  echo "Respuesta cruda: ${STATUS_JSON}"
+  STATUS=$(echo "${STATUS_JSON}" | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
+  
+  echo "Estado extraído: ${STATUS}"
   
   if [ "${STATUS}" == "completed" ]; then
     echo "Análisis completado!"
