@@ -174,7 +174,8 @@ export class TaskExecutor {
 
                 // LLM Analysis
                 let analysis = null
-                if (sev === 'high' || sev === 'critical') { // Optimization: only analyze high/critical for now
+                // Analyze ALL findings regardless of severity
+                try {
                     analysis = await this.llmClient.analyzeFinding({
                         rule_id: ruleId,
                         rule_name: ruleName,
@@ -183,6 +184,10 @@ export class TaskExecutor {
                         code_snippet: codeSnippet,
                         severity: sev
                     })
+                } catch (err: any) {
+                    logger.error(`Failed to analyze finding ${fingerprint}`, err)
+                    // Optionally log to a DB table for errors if needed, 
+                    // for now we rely on the worker logs and the fact that analysis is null.
                 }
 
                 await dbQuery('INSERT INTO securetag.finding(tenant_id, task_id, source_tool, rule_id, rule_name, severity, category, cwe, cve, file_path, line, fingerprint, evidence_ref, created_at, analysis_json) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13, now(), $14)',

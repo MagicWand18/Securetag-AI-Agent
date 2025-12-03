@@ -244,6 +244,11 @@ DB_DIR=/var/securetag/production/db
 UPLOADS_DIR=/var/securetag/production/uploads
 WORK_DIR=/var/securetag/production/work
 RESULTS_DIR=/var/securetag/production/results
+# Runpod LLM Configuration
+RUNPOD_ENDPOINT_ID=1z7edlh6wl4r49
+RUNPOD_API_KEY=rpa_API_KEY
+OLLAMA_HOST=https://api.runpod.ai/v2/1z7edlh6wl4r49
+MODEL=securetag-v1
 # SEMGREP (opcional)
 SEMGREP_HAS_SHOWN_METRICS_NOTIFICATION=true
 # LOGGING
@@ -459,3 +464,26 @@ Abre un issue en GitHub con los logs
  API accesible desde internet
  Base de datos inicializada
 ¡Felicidades por tu primer despliegue! 🚀
+
+
+
+#Actualizaciones y redespliegues en digitalocean
+Para actualizar DigitalOcean con los cambios, NO es automático. Necesitas hacer un pull manual en el servidor. Aquí están los pasos:
+
+Actualizar DigitalOcean con los Cambios
+Desde tu terminal SSH que ya tienes abierta:
+
+# 1. Ir al directorio del proyecto
+cd /opt/securetag
+
+# 2. Hacer pull de los cambios
+git pull origin main
+
+# 3. Reconstruir las imágenes Docker con el código actualizado
+docker compose build securetag-worker
+
+# 4. Reiniciar los servicios
+docker compose up -d
+
+# 5. Verificar que todo esté corriendo
+docker compose ps

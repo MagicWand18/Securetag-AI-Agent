@@ -203,7 +203,7 @@ export async function codeauditDetail(req: http.IncomingMessage, res: http.Serve
           summary = sr.rows.length ? (sr.rows[0].summary_json || {}) : {}
         } catch { }
         try {
-          const f = await dbQuery<any>('SELECT rule_id, rule_name, severity, cwe, cve, file_path, line, fingerprint FROM securetag.finding WHERE task_id=$1 ORDER BY created_at DESC', [id])
+          const f = await dbQuery<any>('SELECT rule_id, rule_name, severity, cwe, cve, file_path, line, fingerprint, analysis_json FROM securetag.finding WHERE task_id=$1 ORDER BY created_at DESC', [id])
           findings = f.rows
         } catch { }
         send(res, 200, { ok: true, status: dbTask.status, taskId: id, result: { summary, findings } })

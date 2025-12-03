@@ -31,13 +31,17 @@ export class LLMClient {
 
     async analyzeFinding(finding: any): Promise<AnalysisResult | null> {
         try {
+            console.log('DEBUG: analyzeFinding called for', finding.rule_id)
             if (this.isRunPod) {
+                console.log('DEBUG: Using RunPod analysis')
                 return await this.analyzeWithRunPod(finding)
             } else {
+                console.log('DEBUG: Using Ollama analysis')
                 return await this.analyzeWithOllama(finding)
             }
         } catch (err: any) {
-            logger.warn(`LLM analysis failed for finding ${finding.fingerprint}: ${err.message}`)
+            logger.error('LLM analysis failed', err)
+            console.error('DEBUG: LLM analysis error:', err)
             return null
         }
     }
@@ -66,45 +70,69 @@ export class LLMClient {
         const prompt = this.buildPrompt(finding)
         const systemPrompt = 'Eres un ingeniero de seguridad senior. Analiza el siguiente hallazgo de análisis estático. Determina si es un hallazgo verdadero o falso. Proporciona una razón y una recomendación de remedio. Responde en formato JSON con los campos: triage, reasoning, recommendation, severity_adjustment.'
 
-        // Submit job to RunPod
-        const submitResponse = await this.client.post('/run', {
-            input: {
-                prompt: `${systemPrompt}\n\n${prompt}`
-            }
-        })
+        const payload = { input: { prompt: `${systemPrompt}\n\n${prompt}` } }
 
-        const jobId = submitResponse.data.id
-        if (!jobId) {
-            logger.warn('RunPod did not return a job ID')
+        try {
+            const res = await this.client.post('/runsync', payload)
+            const output = res.data && res.data.output ? res.data.output : null
+
+            if (!output) {
+                const submit = await this.client.post('/run', payload)
+                const jobId = submit.data && submit.data.id ? submit.data.id : null
+                if (!jobId) {
+                    logger.warn('RunPod did not return a job ID')
+                    return null
+                }
+
+                const maxAttempts = 20
+                const pollInterval = 3000
+                for (let attempt = 0; attempt < maxAttempts; attempt++) {
+                    await new Promise(resolve => setTimeout(resolve, pollInterval))
+                    const statusResponse = await this.client.get(`/status/${jobId}`)
+                    const status = statusResponse.data && statusResponse.data.status
+                    if (status === 'COMPLETED') {
+                        const o = statusResponse.data.output
+                        return this.extractAndParse(o)
+                    } else if (status === 'FAILED') {
+                        logger.warn(`RunPod job ${jobId} failed`)
+                        return null
+                    }
+                }
+                logger.warn('RunPod job timed out without completion')
+                return null
+            }
+
+            return this.extractAndParse(output)
+        } catch (err: any) {
+            logger.error('RunPod runsync call failed', err)
+            return null
+        }
+    }
+
+    private extractAndParse(output: any): AnalysisResult | null {
+        const first = Array.isArray(output) ? output[0] : output
+        let content: string | undefined
+
+        if (first && typeof first === 'object') {
+            if (first.choices && first.choices[0] && typeof first.choices[0].text === 'string') {
+                content = first.choices[0].text
+            } else if (typeof first.response === 'string') {
+                content = first.response
+            } else if (typeof first.generated_text === 'string') {
+                content = first.generated_text
+            } else if (typeof first.output === 'string') {
+                content = first.output
+            }
+        } else if (typeof first === 'string') {
+            content = first
+        }
+
+        if (!content) {
+            logger.warn('RunPod output format not recognized')
             return null
         }
 
-        // Poll for result (max 60 seconds)
-        const maxAttempts = 20
-        const pollInterval = 3000 // 3 seconds
-
-        for (let attempt = 0; attempt < maxAttempts; attempt++) {
-            await new Promise(resolve => setTimeout(resolve, pollInterval))
-
-            const statusResponse = await this.client.get(`/status/${jobId}`)
-            const status = statusResponse.data.status
-
-            if (status === 'COMPLETED') {
-                const output = statusResponse.data.output
-                if (output && output.length > 0 && output[0].choices && output[0].choices[0]) {
-                    const content = output[0].choices[0].text
-                    return this.parseResponse(content)
-                }
-                return null
-            } else if (status === 'FAILED') {
-                logger.warn(`RunPod job ${jobId} failed`)
-                return null
-            }
-            // Status is IN_QUEUE or IN_PROGRESS, continue polling
-        }
-
-        logger.warn(`RunPod job ${jobId} timed out after ${maxAttempts * pollInterval / 1000}s`)
-        return null
+        return this.parseResponse(content)
     }
 
     private buildPrompt(finding: any): string {
@@ -120,12 +148,29 @@ export class LLMClient {
 
     private parseResponse(content: string): AnalysisResult | null {
         try {
-            const parsed = JSON.parse(content)
+            // Clean up content to handle Markdown code blocks
+            let jsonStr = content.trim()
+            
+            // Extract JSON from markdown code blocks if present
+            const codeBlockRegex = /```(?:json)?\s*([\s\S]*?)\s*```/
+            const match = jsonStr.match(codeBlockRegex)
+            if (match && match[1]) {
+                jsonStr = match[1].trim()
+            } else {
+                // If no code blocks, try to find the first '{' and last '}'
+                const firstOpen = jsonStr.indexOf('{')
+                const lastClose = jsonStr.lastIndexOf('}')
+                if (firstOpen !== -1 && lastClose !== -1 && lastClose > firstOpen) {
+                    jsonStr = jsonStr.substring(firstOpen, lastClose + 1)
+                }
+            }
+
+            const parsed = JSON.parse(jsonStr)
             return {
                 triage: parsed.triage || 'Needs Review',
-                reasoning: parsed.reasoning || 'No reasoning provided',
-                recommendation: parsed.recommendation || 'No recommendation provided',
-                severity_adjustment: parsed.severity_adjustment
+                reasoning: typeof parsed.reasoning === 'string' ? parsed.reasoning : JSON.stringify(parsed.reasoning),
+                recommendation: typeof parsed.recommendation === 'string' ? parsed.recommendation : JSON.stringify(parsed.recommendation),
+                severity_adjustment: parsed.severity_adjustment?.score ? (parsed.severity_adjustment.score >= 8 ? 'critical' : 'high') : (typeof parsed.severity_adjustment === 'string' ? parsed.severity_adjustment : undefined)
             }
         } catch (err) {
             logger.warn(`Failed to parse LLM response: ${content}`)

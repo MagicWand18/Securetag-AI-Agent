@@ -62,25 +62,22 @@ tail -6 .env
 
 ## 🔄 Fase 2: Reconstruir y Reiniciar Worker
 
-El Worker necesita recompilarse con el código actualizado de `LLMClient.ts`.
+Para esto necesitamos enviar todos los cambios del proyecto a github y desplegarlos en digitalocean así, ya conectado por ssh al droplet ejecutamos:
 
-### Paso 2.1: Reconstruir Imagen
+# 1. Ir al directorio del proyecto
+cd /opt/securetag
 
-```bash
-# Desde tu máquina local
-cd /Users/master/Downloads/Securetag\ Agent
-docker build -t securetag-worker:latest -f Dockerfile.worker .
-docker tag securetag-worker:latest ghcr.io/TU_USUARIO/securetag-worker:latest
-docker push ghcr.io/TU_USUARIO/securetag-worker:latest
-```
+# 2. Hacer pull de los cambios
+git pull origin main
 
-### Paso 2.2: Actualizar en el Servidor
+# 3. Reconstruir las imágenes Docker con el código actualizado
+docker compose build securetag-worker
 
-```bash
-# En el servidor DigitalOcean
-docker compose pull securetag-worker
-docker compose restart securetag-worker
-```
+# 4. Reiniciar los servicios
+docker compose up -d
+
+# 5. Verificar que todo esté corriendo
+docker compose ps
 
 ---
 
@@ -91,7 +88,7 @@ docker compose restart securetag-worker
 ```bash
 curl -X POST https://api.runpod.ai/v2/1z7edlh6wl4r49/run \
   -H 'Content-Type: application/json' \
-  -H 'Authorization: Bearer rpa_YOUR_RUNPOD_API_KEY_HERE' \
+  -H 'Authorization: Bearer rpa_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' \
   -d '{"input":{"prompt":"Test"}}'
 ```
 
@@ -129,7 +126,30 @@ EOF
 zip test.zip test.php
 ```
 
+Asegurate de tener el token de login de semgrep en el serividor de digitalocean:
+
+El token de Semgrep se guarda en ~/.semgrep/settings.yml. Necesitas copiarlo al servidor:
+
+# En tu máquina local, copiar el archivo al servidor
+scp -i ~/.ssh/id_ed25519 ~/.semgrep/settings.yml root@143.198.61.64:/tmp/
+
+# En el servidor SSH (que ya tienes abierto)
+mkdir -p /root/.semgrep
+mv /tmp/settings.yml /root/.semgrep/
+chmod 600 /root/.semgrep/settings.yml
+
+# Verificar que se copió correctamente
+cat /root/.semgrep/settings.yml
+
+
 ### Paso 4.2: Enviar para Análisis
+
+Para obtener el worker api key necesitas ejecutar esto desde el servidor de digitalocean:
+
+cat /opt/securetag/.env | grep WORKER_API_KEY
+
+
+Despues de la computadora local ejecutar:
 
 ```bash
 curl -X POST http://143.198.61.64:8080/codeaudit/upload \

@@ -30,7 +30,9 @@ services:
       WORK_DIR: /var/securetag/${TENANT_ID:-tenantA}/work
       RESULTS_DIR: /var/securetag/${TENANT_ID:-tenantA}/results
       DATABASE_URL: postgres://securetag:securetagpwd@securetag-db:5432/securetag
-      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_HOST: ${OLLAMA_HOST}
+      RUNPOD_API_KEY: ${RUNPOD_API_KEY}
+      MODEL: ${MODEL:-securetag-v1}
     volumes:
       - ./data:/var/securetag
     networks:
@@ -54,9 +56,11 @@ services:
       SEMGREP_APP_TOKEN: ${SEMGREP_APP_TOKEN:-}
       SEMGREP_ANONYMOUS_USER_ID: ${SEMGREP_ANONYMOUS_USER_ID:-}
       SEMGREP_HAS_SHOWN_METRICS_NOTIFICATION: ${SEMGREP_HAS_SHOWN_METRICS_NOTIFICATION:-true}
-      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_HOST: ${OLLAMA_HOST}
+      RUNPOD_API_KEY: ${RUNPOD_API_KEY}
+      MODEL: ${MODEL:-securetag-v1}
       WORKER_API_KEY: ${WORKER_API_KEY}
-      LOOP_MODE: ${LOOP_MODE:-false}
+      LOOP_MODE: "true"
     volumes:
       - ./data:/var/securetag
     networks:
