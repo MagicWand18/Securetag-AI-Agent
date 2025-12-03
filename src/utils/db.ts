@@ -21,8 +21,10 @@ export async function ensureTenant(name: string): Promise<string> {
   const p = getPool()
   const r = await p.query('SELECT id FROM securetag.tenant WHERE name=$1 LIMIT 1', [name])
   if (r.rows.length > 0) return r.rows[0].id
-  const i = await p.query('INSERT INTO securetag.tenant(name, plan) VALUES($1,$2) RETURNING id', [name, 'dev'])
-  return i.rows[0].id
+  // Use name as ID (slug) if not exists
+  const id = name
+  await p.query('INSERT INTO securetag.tenant(id, name, plan) VALUES($1,$1,$2) ON CONFLICT(id) DO NOTHING', [id, 'free'])
+  return id
 }
 
 export async function dbQuery<T = any>(text: string, params: any[] = []): Promise<{ rows: T[] }> {
