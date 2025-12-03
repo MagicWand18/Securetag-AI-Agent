@@ -9,18 +9,18 @@ Para saber qué agente ejecutar, consulta esta tabla dinámica. El **Agente Supe
 | Agente | Estatus Actual | ¿Puede Ejecutarse? | Dependencia |
 | :--- | :--- | :--- | :--- |
 | **Supervisor** | 🟢 **Activo** | ✅ **SI** | N/A |
-| **Infra** | ⏸️ **Standby** | ✅ **SI** | Docker local implementado. Siguiente: CI/CD |
+| **Infra** | 🟢 **Activo** | ✅ **SI** | Deploy scripts listos. Siguiente: Integración DO+RunPod |
 | **Server** | ✅ **Completado** | ⏸️ **Standby** | Auth implementado. Todas las tareas completadas |
 | **Worker** | ✅ **Completado** | ⏸️ **Standby** | LLM integrado. Todas las tareas completadas |
 | **Fine-tuning** | ✅ **Completado** | ⏸️ **Standby** | Modelo `securetag-v1` entrenado |
 
-> **Estado Actual (Iteración 9 - 2025-11-28)**:
+> **Estado Actual (Iteración 10 - 2025-12-01)**:
+> - **Infra Agent**: ✅ CI/CD y Scripts de Despliegue (DO/RunPod) completados.
 > - **Fine-tuning Agent**: ✅ Modelo `securetag-v1` (Llama 3.1 8B) entrenado y validado
 > - **Worker Agent**: ✅ LLM Client integrado con análisis automático High/Critical
 > - **Server Agent**: ✅ Autenticación y Multi-tenancy implementados
-> - **Infra Agent**: ✅ Docker Compose + Ollama configurado
 
-> **Recomendación**: Priorizar **Infra Agent** para completar CI/CD y preparación para producción.
+> **Recomendación**: Priorizar **Infra Agent** para conectar entornos de producción (DigitalOcean + RunPod).
 
 ## 🎯 Objetivo General
 Transformar el agente de ciberseguridad (CLI) en una API SaaS multi-tenant, resiliente y escalable, con soporte para herramientas externas (Semgrep, etc.), ejecución en contenedores Docker, y generación de datasets para fine-tuning de LLMs.
@@ -146,13 +146,22 @@ Para maximizar la eficiencia, el trabajo se divide en "Tracks" independientes qu
     *   **Evidencia**: `EVIDENCE_Infra_2_2025-11-19.md`
     *   **Decisión**: Docker Local (desarrollo) + RunPod Serverless (producción)
 
-*   **Tarea 3.4: Preparación para Despliegue** [ ]
+*   **Tarea 3.4: Preparación para Despliegue** [x]
     *   **Acción**:
-        *   Configurar CI/CD (GitHub Actions).
-        *   Gestión de secretos para producción.
-        *   Scripts de despliegue para DigitalOcean/RunPod.
-    *   **Estado**: ⏸️ Pendiente
-    *   **Prioridad**: Media
+        *   ✅ Configurar CI/CD (GitHub Actions).
+        *   ✅ Gestión de secretos para producción.
+        *   ✅ Scripts de despliegue para DigitalOcean/RunPod.
+    *   **Estado**: ✅ Completado (Iteración 3-4)
+    *   **Evidencia**: `EVIDENCE_Infra_3_2025-11-28.md`, `EVIDENCE_Infra_4_2025-12-01.md`
+
+*   **Tarea 3.5: Integración de Entornos (DO + RunPod)** [ ]
+    *   **Contexto**: El Worker en DigitalOcean necesita consumir el LLM en RunPod.
+    *   **Acción**:
+        *   Actualizar scripts de despliegue para inyectar `OLLAMA_HOST` dinámico.
+        *   Documentar flujo de conexión.
+        *   Verificar conexión end-to-end.
+    *   **Estado**: 🔄 En Progreso
+    *   **Prioridad**: Alta
 
 ### 🟣 Track 4: Fine-tuning & Machine Learning (Agente "Fine-tuning")
 **Objetivo**: Generar datasets de alta calidad desde fuentes externas (PDFs, web) y entrenar el modelo LLM para mejorar su rendimiento.
@@ -205,8 +214,11 @@ Aunque los agentes trabajan en paralelo, hay hitos de sincronización:
 5.  **Fase 5: Autenticación y Multi-tenancy (Server)** [x]
     *   *Agente Server*: Implementa API Keys y aislamiento por tenant.
 
-6.  **Fase 6: Preparación para Producción (Infra)** [ ] 🔄 SIGUIENTE
+6.  **Fase 6: Preparación para Producción (Infra)** [x]
     *   *Agente Infra*: CI/CD, gestión de secretos, scripts de despliegue.
+
+7.  **Fase 7: Integración Final (Infra)** [ ] 🔄 SIGUIENTE
+    *   *Agente Infra*: Conectar DigitalOcean con RunPod.
 
 ## 📝 Notas para los Agentes
 *   **Documentación**: Leer siempre `docs/SECURETAG_SAAS_PLAN.md` antes de tocar código crítico.
@@ -240,9 +252,10 @@ Aunque los agentes trabajan en paralelo, hay hitos de sincronización:
 | **Fase 3: Robustez Worker** | 3/3 | 0/3 | 100% ✅ |
 | **Fase 4: LLM Integration** | 2/2 | 0/2 | 100% ✅ |
 | **Fase 5: Auth & Multi-tenancy** | 1/1 | 0/1 | 100% ✅ |
-| **Fase 6: Producción** | 0/1 | 1/1 | 0% 🔄 |
+| **Fase 6: Producción** | 1/1 | 0/1 | 100% ✅ |
+| **Fase 7: Integración Final** | 0/1 | 1/1 | 0% 🔄 |
 
-**Progreso Total**: 11/12 tareas completadas (92%)
+**Progreso Total**: 12/13 tareas completadas (92%)
 
 ---
 

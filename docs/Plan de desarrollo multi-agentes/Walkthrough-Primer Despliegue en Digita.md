@@ -11,6 +11,8 @@ Antes de comenzar, verifica que tienes:
  Repositorio en GitHub
  Tarjeta de crédito en DigitalOcean (para crear Droplet)
 🎯 Fase 1: Crear Droplet en DigitalOcean
+
+
 Paso 1.1: Crear Droplet
 Ve a DigitalOcean Dashboard
 Click en "Create" → "Droplets"
@@ -33,6 +35,11 @@ Autenticación:
 
 Selecciona: SSH keys
 Click en "New SSH Key"
+
+
+
+
+
 Paso 1.2: Generar SSH Key (si no tienes una)
 Abre tu terminal local y ejecuta:
 
@@ -52,6 +59,11 @@ SHA256:eYfk6yf2o3SVBfE72wVTnI4CtmGvQfIW/QqtDk19YLo master@MacBook-Pro-3.local
 # Copiar clave pública
 cat ~/.ssh/securetag_deploy.pub
 Copia todo el contenido que empieza con ssh-rsa...
+
+
+
+
+
 
 Paso 1.3: Agregar SSH Key a DigitalOcean
 En la ventana de crear Droplet, pega la clave pública
@@ -85,6 +97,7 @@ IP Address: 123.45.67.89 ← Copia esta IP
 
 
 🔑 Fase 2: Configurar Secretos en GitHub
+
 Paso 2.1: Obtener API Token de DigitalOcean
 En DigitalOcean, ve a API (menú izquierdo)
 Click en "Generate New Token"
@@ -95,6 +108,7 @@ Scopes: Selecciona Read y Write
 Click en "Generate Token"
 Copia el token inmediatamente (solo se muestra una vez)
 Ejemplo: dop_v1_abc123def456...
+
 Paso 2.2: Configurar Secretos en GitHub
 Ve a tu repositorio en GitHub
 Click en Settings → Secrets and variables → Actions
@@ -156,6 +170,7 @@ Paso 3.2: Actualizar Sistema
 # Actualizar paquetes
 apt update && apt upgrade -y
 ⏱️ Esto puede tomar 2-5 minutos.
+apt install -y jq
 
 Paso 3.3: Instalar Docker
 # Instalar Docker
@@ -233,7 +248,7 @@ RESULTS_DIR=/var/securetag/production/results
 SEMGREP_HAS_SHOWN_METRICS_NOTIFICATION=true
 # LOGGING
 LOG_LEVEL=info
-
+LOOP_MODE=true
 
 Presiona Ctrl + X
 Presiona Y
@@ -334,6 +349,7 @@ bash scripts/health-check.sh
 
 Paso 7.3: Probar API desde Internet
 curl http://TU_IP_DEL_DROPLET:8080/healthz
+Debe responder: {"ok":true}
 
 
 
@@ -347,6 +363,7 @@ docker compose logs -f
 docker compose logs -f securetag-app
 # Últimas 100 líneas
 docker compose logs --tail=100
+
 Paso 8.2: Ver Recursos
 # Uso de recursos
 docker stats
@@ -357,22 +374,37 @@ Tu aplicación está corriendo en:
 
 API: http://TU_IP:8080
 Health: http://TU_IP:8080/healthz
-Próximos Pasos
-Configurar Dominio (opcional):
 
+
+
+
+
+
+
+
+Próximos Pasos
+
+1. Configurar Dominio (opcional):
 Apuntar tu dominio a la IP del Droplet
 Configurar Nginx como reverse proxy
 Habilitar HTTPS con Let's Encrypt
-Configurar RunPod (para LLM en producción):
 
+2. Configurar RunPod (para LLM en producción):
 Seguir guía en 
 docs/LLM_Infrastructure_Research.md
 Ejecutar 
 scripts/deploy/runpod.sh
-Habilitar CI/CD Automático:
 
+3. Habilitar CI/CD Automático:
 Hacer push a main para trigger automático
 O usar workflow manual en GitHub Actions
+
+
+
+
+
+
+
 🐛 Troubleshooting
 Problema: No puedo conectarme por SSH
 # Verificar que la IP es correcta
@@ -397,6 +429,15 @@ cat .env.production
 grep DATABASE_URL .env.production
 # Reiniciar
 docker compose restart
+
+
+
+
+
+
+
+
+
 📞 Soporte
 Si tienes problemas:
 

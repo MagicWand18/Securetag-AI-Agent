@@ -51,3 +51,6 @@ __pycache__/
 test/docker/codeaudit/tests_basicos.zip
 scans/
 pcap/
+
+# RunPod secrets
+runpod-deploy/README.md

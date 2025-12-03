@@ -25,54 +25,42 @@ Eres el **Agente Infra**. Has completado exitosamente la formalización de la in
 *   **Tarea 3.1: Formalización de Infraestructura** (Completado)
 *   **Tarea 3.2: E2E Testing en Docker** (Completado)
 *   **Tarea 3.3: Infraestructura LLM** (Completado)
-    *   Investigación de opciones (Docker vs Cloud).
-    *   Implementación de Ollama en `docker-compose.yml`.
+*   **Tarea 3.4: Preparación para Despliegue** (Completado)
+    *   CI/CD con GitHub Actions.
+    *   Scripts de despliegue (DO/RunPod).
+    *   Gestión de secretos.
 
-### 🚀 Tarea Actual: Tarea 3.4 - Preparación para Despliegue
-**Objetivo**: Preparar el proyecto para despliegue en producción con CI/CD, gestión de secretos y scripts automatizados.
+### 🚀 Tarea Actual: Tarea 3.5 - Integración de Entornos (DO + RunPod)
+**Objetivo**: Conectar la infraestructura desplegada en DigitalOcean (App/Worker) con el servicio LLM en RunPod.
 
 **Contexto**: 
-- Todos los componentes core están completados (Server, Worker, Fine-tuning).
-- La infraestructura local con Docker Compose está funcionando.
-- Se requiere automatización para despliegue en producción.
+- El Worker necesita consultar al LLM para analizar hallazgos.
+- El LLM corre en RunPod (Serverless Endpoint).
+- El Worker corre en DigitalOcean.
+- Se requiere configurar `OLLAMA_HOST` de forma segura y dinámica.
 
 **Pasos**:
-1.  **CI/CD con GitHub Actions**:
-    *   Crear workflow `.github/workflows/ci.yml` para:
-        *   Build de imágenes Docker (app, worker)
-        *   Ejecución de tests
-        *   Push a registry (Docker Hub o GitHub Container Registry)
-    *   Crear workflow `.github/workflows/deploy.yml` para despliegue automático.
+1.  **Actualizar Script de Despliegue DO**:
+    *   Modificar `scripts/deploy/digitalocean.sh` para leer `runpod-config.json` (si existe) o aceptar argumento `--llm-url`.
+    *   Inyectar `OLLAMA_HOST` y `RUNPOD_API_KEY` en el contenedor del Worker.
 
-2.  **Gestión de Secretos**:
-    *   Documentar variables de entorno requeridas para producción:
-        *   `DATABASE_URL`, `POSTGRES_PASSWORD`
-        *   `OLLAMA_HOST`, `LLM_MODEL`
-        *   API keys de servicios externos (si aplica)
-    *   Crear guía para configurar secretos en GitHub Actions.
-    *   Documentar uso de `.env.production` para despliegue manual.
+2.  **Documentar Flujo de Conexión**:
+    *   Crear guía paso a paso en `docs/INTEGRATION_GUIDE.md`:
+        1. Deploy RunPod -> Obtener URL.
+        2. Configurar Secretos/Env.
+        3. Deploy DigitalOcean.
 
-3.  **Scripts de Despliegue**:
-    *   Crear `scripts/deploy/digitalocean.sh` para DigitalOcean Droplets.
-    *   Crear `scripts/deploy/runpod.sh` para RunPod (LLM service).
-    *   Incluir health checks post-despliegue.
-
-4.  **Monitoreo y Alertas** (Opcional para MVP):
-    *   Documentar estrategia de logging (stdout/stderr capturado por Docker).
-    *   Proponer solución de monitoreo (Prometheus + Grafana o similar).
+3.  **Verificación**:
+    *   Crear script de prueba `scripts/verify-integration.sh` que haga una petición desde el contenedor Worker hacia RunPod.
 
 **Entregables**:
-*   `.github/workflows/ci.yml`
-*   `.github/workflows/deploy.yml`
-*   `docs/DEPLOYMENT_GUIDE.md`
-*   `docs/SECRETS_MANAGEMENT.md`
-*   `scripts/deploy/digitalocean.sh`
-*   `scripts/deploy/runpod.sh`
+*   `scripts/deploy/digitalocean.sh` (actualizado)
+*   `docs/INTEGRATION_GUIDE.md`
+*   `scripts/verify-integration.sh`
 
 **Criterios de éxito**:
-*   CI ejecuta build y tests automáticamente en cada push.
-*   Documentación clara para despliegue manual y automático.
-*   Scripts de despliegue probados en entorno de staging.
+*   El Worker en DO puede analizar código usando el modelo en RunPod.
+*   Proceso documentado y reproducible.
 
 **Estado**: 🔄 **En Progreso**
 **Prioridad**: Alta

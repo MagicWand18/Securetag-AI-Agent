@@ -1,5 +1,5 @@
 import http from 'http'
-import { dbQuery } from './src/utils/db.js'
+import { dbQuery } from '../src/utils/db.js'
 
 const PORT = 8081
 

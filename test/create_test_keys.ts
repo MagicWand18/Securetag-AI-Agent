@@ -1,5 +1,5 @@
-import { dbQuery, ensureTenant } from './src/utils/db.js'
-import { generateApiKeyHash } from './src/middleware/auth.js'
+import { dbQuery, ensureTenant } from '../src/utils/db.js'
+import { generateApiKeyHash } from '../src/middleware/auth.js'
 
 async function createTestApiKeys() {
     console.log('Creating test API keys...\n')

@@ -1,0 +1,6 @@
+{
+    "input": {
+        "openai_route": "/v1/models",
+        "openai_input": {}
+    }
+}

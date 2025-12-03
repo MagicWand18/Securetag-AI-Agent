@@ -528,13 +528,13 @@ Convenciones de conexión y despliegue
 - ✅ **Autenticación y Multi-tenancy**: API Keys implementado y aislamiento por `tenant_id` garantizado.
 - [ ] Control de cuotas por tenant: límites de tareas, tamaño de subidas y uso de IA; rechazos auditados en `audit_log` (BACKLOG).
 
-# Fase 6 — Preparación para Producción 🔄 EN PROGRESO
-- [ ] **CI/CD**: Configurar GitHub Actions para build, test y deploy automático.
-- [ ] **Gestión de Secretos**: Documentar y configurar secretos para producción.
-- [ ] **Scripts de Despliegue**: Crear scripts para DigitalOcean/RunPod.
-- [ ] **Monitoreo**: Implementar alertas y métricas.
-- [ ] Migrar de archivos a un backend de cola persistente (Redis/RabbitMQ).
-- [ ] Integrar con el planificador y máquina de estados avanzada; pruebas de resiliencia y recuperación.
+# Fase 6 — Preparación para Producción ✅ COMPLETADA
+- ✅ **CI/CD**: Configurar GitHub Actions para build, test y deploy automático.
+- ✅ **Gestión de Secretos**: Documentar y configurar secretos para producción.
+- ✅ **Scripts de Despliegue**: Crear scripts para DigitalOcean/RunPod.
+- ✅ **Monitoreo**: Implementar alertas y métricas (Health checks implementados).
+- [ ] Migrar de archivos a un backend de cola persistente (Redis/RabbitMQ) (BACKLOG).
+- [ ] Integrar con el planificador y máquina de estados avanzada; pruebas de resiliencia y recuperación (BACKLOG).
 
 Dependencias entre fases
 - Orden estricto: 1 → 2 → 3 → 4 → 5 → 6. No se puede avanzar a una fase si la anterior no está completa.
@@ -545,7 +545,7 @@ Dependencias entre fases
 - [x] Fase 3: Worker persiste ejecuciones, findings y resultados en BD
 - [x] Fase 4: estados avanzados y reintentos operativos
 - [x] Fase 5: health de Workers operativo y auth implementado
-- [/] Fase 6: CI/CD y preparación para producción en progreso
+- [x] Fase 6: CI/CD y preparación para producción completada
 
 - ### 3.2) Siguientes pasos (Ejecución)
 
@@ -562,11 +562,12 @@ Dependencias entre fases
     - ✅ Middleware de autenticación y validación de `tenant_id`.
     - ⏸️ Standby: Todas las tareas completadas.
 
-  - **Orquestación**: ✅ PARCIALMENTE COMPLETADO
+  - **Orquestación**: ✅ COMPLETADO
     - ✅ Montar volúmenes por tenant y ajustar `HOME`/`XDG_*` en el runtime.
     - ✅ Configurar `LLM_ENDPOINT` y probar integración del LLM compartido.
     - ✅ Docker Compose con Ollama configurado.
-    - [ ] CI/CD y gestión de secretos para producción.
+    - ✅ CI/CD y gestión de secretos para producción.
+    - 🔄 **SIGUIENTE**: Conectar entorno DigitalOcean con RunPod.
 
   - **Fine-tuning**: ✅ COMPLETADO
     - ✅ Modelo `securetag-v1` (Llama 3.1 8B) entrenado en RunPod.
@@ -591,7 +592,9 @@ Dependencias entre fases
     - [x] Health del Worker: verificar `semgrep --version` y disponibilidad.
     - [x] Ejecutar pruebas con un `.zip` pequeño y verificar salida JSON.
     - [x] **Integrar LLM en Worker**: Cliente `LLMClient` con modelo `securetag-v1` para análisis de hallazgos.
-    - [ ] **SIGUIENTE**: Implementar autenticación y multi-tenancy en Server (Fase 5).
+    - [x] **Implementar autenticación**: API Keys y multi-tenancy en Server (Fase 5).
+    - [x] **Preparar Producción**: CI/CD y scripts de despliegue (Fase 6).
+    - [ ] **SIGUIENTE**: Integrar DigitalOcean con RunPod (Tarea 3.5).
     - [ ] Sustituir cola por archivos por un backend real (persistente/escalable).
     - [ ] Añadir control de cuotas por tenant (límites de tareas, storage, tokens LLM).
     - [ ] Orquestación: montar volúmenes por tenant en Kubernetes y declarar `HOME`/`XDG_*` en despliegues.
@@ -615,14 +618,21 @@ Dependencias entre fases
 - [ ] Asegurar aislamiento de datos por `tenant_id`
 - [ ] Tests de integración con múltiples tenants
 
-### Hito 2: Preparación para Producción (MEDIA PRIORIDAD)
+### Hito 2: Preparación para Producción (MEDIA PRIORIDAD) ✅ COMPLETADO
 **Agente**: Infra
 **Objetivo**: CI/CD y gestión de secretos.
 **Tareas**:
-- [ ] Configurar GitHub Actions
-- [ ] Documentar gestión de secretos
-- [ ] Scripts de despliegue para DigitalOcean/RunPod
-- [ ] Monitoreo y alertas
+- [x] Configurar GitHub Actions
+- [x] Documentar gestión de secretos
+- [x] Scripts de despliegue para DigitalOcean/RunPod
+- [x] Monitoreo y alertas (Health Checks)
+
+### Hito 3: Integración Final (ALTA PRIORIDAD)
+**Agente**: Infra
+**Objetivo**: Conectar componentes distribuidos.
+**Tareas**:
+- [ ] Configurar `OLLAMA_HOST` en DigitalOcean apuntando a RunPod
+- [ ] Verificar flujo end-to-end en producción
 
 ### Hito 3: Escalabilidad (BAJA PRIORIDAD)
 **Agente**: Infra + Server

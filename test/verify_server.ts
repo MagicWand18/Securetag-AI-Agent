@@ -1,5 +1,5 @@
 import http from 'http'
-import { dbQuery, ensureTenant } from './src/utils/db.js'
+import { dbQuery, ensureTenant } from '../src/utils/db.js'
 import { v4 as uuidv4 } from 'uuid'
 import assert from 'assert'
 
