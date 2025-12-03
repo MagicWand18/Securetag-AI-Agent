@@ -132,6 +132,8 @@ export class LLMClient {
             return null
         }
 
+        console.log('DEBUG: RunPod RAW content:', content) // Log raw content for debugging
+
         return this.parseResponse(content)
     }
 
