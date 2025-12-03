@@ -567,7 +567,12 @@ Dependencias entre fases
     - ✅ Configurar `LLM_ENDPOINT` y probar integración del LLM compartido.
     - ✅ Docker Compose con Ollama configurado.
     - ✅ CI/CD y gestión de secretos para producción.
-    - 🔄 **SIGUIENTE**: Conectar entorno DigitalOcean con RunPod.
+  - **Orquestación**: ✅ COMPLETADO
+    - ✅ Montar volúmenes por tenant y ajustar `HOME`/`XDG_*` en el runtime.
+    - ✅ Configurar `LLM_ENDPOINT` y probar integración del LLM compartido.
+    - ✅ Docker Compose con Ollama configurado.
+    - ✅ CI/CD y gestión de secretos para producción.
+    - ✅ Conectar entorno DigitalOcean con RunPod.
 
   - **Fine-tuning**: ✅ COMPLETADO
     - ✅ Modelo `securetag-v1` (Llama 3.1 8B) entrenado en RunPod.
@@ -594,7 +599,11 @@ Dependencias entre fases
     - [x] **Integrar LLM en Worker**: Cliente `LLMClient` con modelo `securetag-v1` para análisis de hallazgos.
     - [x] **Implementar autenticación**: API Keys y multi-tenancy en Server (Fase 5).
     - [x] **Preparar Producción**: CI/CD y scripts de despliegue (Fase 6).
-    - [ ] **SIGUIENTE**: Integrar DigitalOcean con RunPod (Tarea 3.5).
+    - [x] **Integrar LLM en Worker**: Cliente `LLMClient` con modelo `securetag-v1` para análisis de hallazgos.
+    - [x] **Implementar autenticación**: API Keys y multi-tenancy en Server (Fase 5).
+    - [x] **Preparar Producción**: CI/CD y scripts de despliegue (Fase 6).
+    - [x] **Integrar DigitalOcean con RunPod** (Tarea 3.5).
+    - [ ] Sustituir cola por archivos por un backend real (persistente/escalable).
     - [ ] Sustituir cola por archivos por un backend real (persistente/escalable).
     - [ ] Añadir control de cuotas por tenant (límites de tareas, storage, tokens LLM).
     - [ ] Orquestación: montar volúmenes por tenant en Kubernetes y declarar `HOME`/`XDG_*` en despliegues.
@@ -627,12 +636,12 @@ Dependencias entre fases
 - [x] Scripts de despliegue para DigitalOcean/RunPod
 - [x] Monitoreo y alertas (Health Checks)
 
-### Hito 3: Integración Final (ALTA PRIORIDAD)
+### Hito 3: Integración Final (ALTA PRIORIDAD) ✅ COMPLETADO
 **Agente**: Infra
 **Objetivo**: Conectar componentes distribuidos.
 **Tareas**:
-- [ ] Configurar `OLLAMA_HOST` en DigitalOcean apuntando a RunPod
-- [ ] Verificar flujo end-to-end en producción
+- [x] Configurar `OLLAMA_HOST` en DigitalOcean apuntando a RunPod
+- [x] Verificar flujo end-to-end en producción
 
 ### Hito 3: Escalabilidad (BAJA PRIORIDAD)
 **Agente**: Infra + Server
@@ -756,3 +765,35 @@ Credenciales por defecto:
 - POSTGRES_USER=securetag
 - POSTGRES_PASSWORD=securetagpwd
 - POSTGRES_DB=securetag
+
+## 6) Beta 2: Motor SAST Propio y Optimizaciones
+
+### 6.1) Motor SAST Propio (Independencia de Semgrep Cloud)
+**Problema**: La integración actual depende de Semgrep Cloud (Login/Token), lo cual implica usar reglas propietarias con restricciones de licencia para uso comercial en SaaS.
+**Solución**: Utilizar el motor Open Source de Semgrep (`semgrep-core` / CLI) gestionando las reglas localmente.
+
+**Arquitectura del Motor Propio**:
+1.  **Motor**: Binario `semgrep` OSS ejecutado en contenedores Worker.
+2.  **Reglas**:
+    *   **Open Source**: Sincronización periódica de reglas comunitarias (semgrep-rules) compatibles con licencia LGPL/Commons.
+    *   **Propias (Custom)**: Reglas desarrolladas internamente para patrones específicos de seguridad.
+3.  **Gestión**:
+    *   Directorio `/opt/securetag/rules` en la imagen del Worker.
+    *   Volumen o ConfigMap para actualizar reglas sin reconstruir imagen.
+4.  **Ejecución**:
+    *   Comando: `semgrep scan --config /opt/securetag/rules --json ...`
+    *   Sin flag `--config auto` (que suele llamar a la nube) ni login.
+
+### 6.2) Funcionalidades Pendientes de Beta 1 (Integración)
+Estas tareas se mueven de "Backlog" a "Beta 2 Core":
+
+1.  **Backend de Cola Escalable**:
+    *   Sustituir la cola basada en polling de DB/Archivos por **Redis** (BullMQ o similar).
+    *   Objetivo: Reducir latencia y carga en la base de datos.
+
+2.  **Control de Cuotas (Billing/Limiting)**:
+    *   Middleware para verificar límites antes de encolar tareas.
+    *   Límites: Scans/mes, Almacenamiento (GB), Tokens LLM.
+
+3.  **Automatización CI/CD**:
+    *   Activar pipelines de GitHub Actions para despliegue automático (CD) en DigitalOcean tras push a `main`.

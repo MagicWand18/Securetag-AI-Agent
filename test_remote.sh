@@ -24,7 +24,7 @@ ZIP_FILE="/Users/master/Downloads/Securetag Agent/test/docker/codeaudit/test.zip
 # entonces usó el .env que ya tenía o creó uno nuevo.
 # Asumiremos que usó el .env del repo o uno básico. Probemos con 'local-dev-key'.
 
-API_KEY="8dce067a5cb89fbb994c980dbd47c821dd290e907ce48fca135519582c382c3f"
+# Descomentar esta linea API_KEY="8dce067a5cb89fbb994c980dbd47c821dd290e907ce48fca135519582c382c3f"
 
 echo "Subiendo archivo a ${BASE_URL}..."
 

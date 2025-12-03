@@ -47,17 +47,24 @@ Eres el **Agente Server**. Tu misión es modernizar y robustecer el backend de S
     *   Middleware de autenticación implementado
     *   Aislamiento por `tenant_id` garantizado
 
-### 🚀 Tarea Actual: En espera / Mantenimiento
-**Objetivo**: El Server está completamente operativo con autenticación y multi-tenancy. Mantenerse a la espera de nuevos requerimientos.
+### 🔴 Track 5: Beta 2 - SAST Engine & Optimization
+*   **Tarea 8.2: Optimizaciones de Backend** [ ]
+    *   **Contexto**: Mejorar escalabilidad y control.
+    *   **Acción**:
+        *   **Cola Escalable**: Migrar de polling DB/Archivos a Redis (BullMQ).
+        *   **Cuotas**: Implementar rate limiting y control de almacenamiento por tenant.
 
-**Estado**: ⏸️ **Standby**
+### 🚀 Tarea Actual: Tarea 8.2 - Optimizaciones de Backend
+**Objetivo**: Preparar el backend para alta escalabilidad y control de uso.
 
-**Posibles Tareas Futuras**:
-*   Rotación automática de API keys
-*   Implementar JWT además de API keys
-*   Rate limiting por tenant
-*   Webhooks para notificaciones de tareas completadas
-*   Asegurar que TODAS las consultas a BD filtren por `tenant_id`.
+**Pasos**:
+1.  **Diseño**: Definir esquema de cuotas y elección de librería de colas.
+2.  **Implementación**:
+    *   Integrar Redis en `docker-compose`.
+    *   Implementar middleware de cuotas.
+    *   Refactorizar sistema de colas (Producer/Consumer).
+
+**Estado**: 🔄 **En Progreso**
 
 **Criterios de éxito**:
 *   Endpoints protegidos rechazan solicitudes sin credenciales (401).

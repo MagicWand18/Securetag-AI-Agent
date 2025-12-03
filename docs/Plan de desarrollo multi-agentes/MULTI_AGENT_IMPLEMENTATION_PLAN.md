@@ -9,18 +9,16 @@ Para saber qué agente ejecutar, consulta esta tabla dinámica. El **Agente Supe
 | Agente | Estatus Actual | ¿Puede Ejecutarse? | Dependencia |
 | :--- | :--- | :--- | :--- |
 | **Supervisor** | 🟢 **Activo** | ✅ **SI** | N/A |
-| **Infra** | 🟢 **Activo** | ✅ **SI** | Deploy scripts listos. Siguiente: Integración DO+RunPod |
+| **Infra** | ✅ **Completado** | ⏸️ **Standby** | Integración DO+RunPod completada. |
 | **Server** | ✅ **Completado** | ⏸️ **Standby** | Auth implementado. Todas las tareas completadas |
 | **Worker** | ✅ **Completado** | ⏸️ **Standby** | LLM integrado. Todas las tareas completadas |
 | **Fine-tuning** | ✅ **Completado** | ⏸️ **Standby** | Modelo `securetag-v1` entrenado |
 
-> **Estado Actual (Iteración 10 - 2025-12-01)**:
-> - **Infra Agent**: ✅ CI/CD y Scripts de Despliegue (DO/RunPod) completados.
-> - **Fine-tuning Agent**: ✅ Modelo `securetag-v1` (Llama 3.1 8B) entrenado y validado
-> - **Worker Agent**: ✅ LLM Client integrado con análisis automático High/Critical
-> - **Server Agent**: ✅ Autenticación y Multi-tenancy implementados
+> **Estado Actual (Iteración 11 - 2025-12-03)**:
+> - **Infra Agent**: ✅ Integración DigitalOcean + RunPod completada.
+> - **Proyecto**: ✅ **TODAS LAS FASES COMPLETADAS**. El sistema está listo para producción.
 
-> **Recomendación**: Priorizar **Infra Agent** para conectar entornos de producción (DigitalOcean + RunPod).
+> **Recomendación**: Proceder con pruebas de carga y monitoreo en producción.
 
 ## 🎯 Objetivo General
 Transformar el agente de ciberseguridad (CLI) en una API SaaS multi-tenant, resiliente y escalable, con soporte para herramientas externas (Semgrep, etc.), ejecución en contenedores Docker, y generación de datasets para fine-tuning de LLMs.
@@ -154,14 +152,14 @@ Para maximizar la eficiencia, el trabajo se divide en "Tracks" independientes qu
     *   **Estado**: ✅ Completado (Iteración 3-4)
     *   **Evidencia**: `EVIDENCE_Infra_3_2025-11-28.md`, `EVIDENCE_Infra_4_2025-12-01.md`
 
-*   **Tarea 3.5: Integración de Entornos (DO + RunPod)** [ ]
+*   **Tarea 3.5: Integración de Entornos (DO + RunPod)** [x]
     *   **Contexto**: El Worker en DigitalOcean necesita consumir el LLM en RunPod.
     *   **Acción**:
-        *   Actualizar scripts de despliegue para inyectar `OLLAMA_HOST` dinámico.
-        *   Documentar flujo de conexión.
-        *   Verificar conexión end-to-end.
-    *   **Estado**: 🔄 En Progreso
-    *   **Prioridad**: Alta
+        *   ✅ Actualizar scripts de despliegue para inyectar `OLLAMA_HOST` dinámico.
+        *   ✅ Documentar flujo de conexión.
+        *   ✅ Verificar conexión end-to-end.
+    *   **Estado**: ✅ Completado (Iteración 5)
+    *   **Evidencia**: `EVIDENCE_Infra_5_20251203.md`
 
 ### 🟣 Track 4: Fine-tuning & Machine Learning (Agente "Fine-tuning")
 **Objetivo**: Generar datasets de alta calidad desde fuentes externas (PDFs, web) y entrenar el modelo LLM para mejorar su rendimiento.
@@ -193,6 +191,29 @@ Para maximizar la eficiencia, el trabajo se divide en "Tracks" independientes qu
 *   **Tarea 4.4: Evaluación y Validación** [x]
     *   **Estado**: ✅ Validación manual "A/B testing" completada. Modelo aprobado para uso.
 
+### 🔴 Track 5: Beta 2 - SAST Engine & Optimization (Agentes Server, Worker, Infra)
+**Objetivo**: Eliminar dependencias externas de licencias (Semgrep Cloud) y completar optimizaciones de producción.
+
+*   **Tarea 8.1: Motor SAST Propio (Semgrep OSS)** [ ]
+    *   **Contexto**: El uso de Semgrep Cloud requiere token y reglas propietarias que no podemos usar comercialmente en SaaS sin licencia Enterprise.
+    *   **Acción**:
+        *   Eliminar dependencia de `SEMGREP_APP_TOKEN`.
+        *   Implementar gestión local de reglas (descarga de reglas OSS + reglas propias).
+        *   Configurar Worker para ejecutar `semgrep --config /opt/securetag/rules`.
+        *   Crear repositorio/directorio de reglas personalizadas.
+    *   **Estado**: 🔄 Pendiente
+
+*   **Tarea 8.2: Optimizaciones de Backend (Beta 1 Pending)** [ ]
+    *   **Acción**:
+        *   Migrar cola de tareas de Archivos/DB a Redis (o RabbitMQ) para escalabilidad real.
+        *   Implementar Control de Cuotas por Tenant (Rate Limiting, Storage Limits).
+    *   **Estado**: 🔄 Pendiente
+
+*   **Tarea 8.3: Automatización Total (CI/CD)** [ ]
+    *   **Acción**:
+        *   Habilitar y probar workflows de GitHub Actions para despliegue automático en DigitalOcean.
+    *   **Estado**: 🔄 Pendiente
+
 ## 📅 Plan de Ejecución Secuencial (Coordinación)
 
 Aunque los agentes trabajan en paralelo, hay hitos de sincronización:
@@ -217,8 +238,12 @@ Aunque los agentes trabajan en paralelo, hay hitos de sincronización:
 6.  **Fase 6: Preparación para Producción (Infra)** [x]
     *   *Agente Infra*: CI/CD, gestión de secretos, scripts de despliegue.
 
-7.  **Fase 7: Integración Final (Infra)** [ ] 🔄 SIGUIENTE
+7.  **Fase 7: Integración Final (Infra)** [x]
     *   *Agente Infra*: Conectar DigitalOcean con RunPod.
+
+8.  **Fase 8: Beta 2 - Motor SAST & Optimización (Server + Worker)** [ ]
+    *   *Agente Server/Worker*: Implementar motor SAST propio (Semgrep OSS) sin dependencia de nube.
+    *   *Agente Infra*: Habilitar CI/CD automático y migrar cola a Redis.
 
 ## 📝 Notas para los Agentes
 *   **Documentación**: Leer siempre `docs/SECURETAG_SAAS_PLAN.md` antes de tocar código crítico.
@@ -253,9 +278,10 @@ Aunque los agentes trabajan en paralelo, hay hitos de sincronización:
 | **Fase 4: LLM Integration** | 2/2 | 0/2 | 100% ✅ |
 | **Fase 5: Auth & Multi-tenancy** | 1/1 | 0/1 | 100% ✅ |
 | **Fase 6: Producción** | 1/1 | 0/1 | 100% ✅ |
-| **Fase 7: Integración Final** | 0/1 | 1/1 | 0% 🔄 |
+| **Fase 7: Integración Final** | 1/1 | 0/1 | 100% ✅ |
+| **Fase 8: Beta 2 (SAST & Opt)** | 0/3 | 3/3 | 0% 🔄 |
 
-**Progreso Total**: 12/13 tareas completadas (92%)
+**Progreso Total**: 13/16 tareas completadas (81%)
 
 ---
 

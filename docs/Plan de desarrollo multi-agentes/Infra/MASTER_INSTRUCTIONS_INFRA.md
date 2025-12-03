@@ -30,40 +30,34 @@ Eres el **Agente Infra**. Has completado exitosamente la formalización de la in
     *   Scripts de despliegue (DO/RunPod).
     *   Gestión de secretos.
 
-### 🚀 Tarea Actual: Tarea 3.5 - Integración de Entornos (DO + RunPod)
-**Objetivo**: Conectar la infraestructura desplegada en DigitalOcean (App/Worker) con el servicio LLM en RunPod.
+### ✅ Tareas Completadas
+*   **Tarea 3.1: Formalización de Infraestructura** (Completado)
+*   **Tarea 3.2: E2E Testing en Docker** (Completado)
+*   **Tarea 3.3: Infraestructura LLM** (Completado)
+*   **Tarea 3.4: Preparación para Despliegue** (Completado)
+*   **Tarea 3.5: Integración de Entornos (DO + RunPod)** (Completado)
+    *   Scripts actualizados para RunPod.
+    *   Guía de integración creada.
+    *   Verificación exitosa.
 
-**Contexto**: 
-- El Worker necesita consultar al LLM para analizar hallazgos.
-- El LLM corre en RunPod (Serverless Endpoint).
-- El Worker corre en DigitalOcean.
-- Se requiere configurar `OLLAMA_HOST` de forma segura y dinámica.
+### 🔴 Track 5: Beta 2 - SAST Engine & Optimization
+*   **Tarea 8.3: Automatización Total (CI/CD)** [ ]
+    *   **Contexto**: Automatizar despliegues a producción.
+    *   **Acción**: Habilitar workflows de GitHub Actions para CD.
+
+*   **Soporte a Tareas 8.1 y 8.2**:
+    *   Agregar servicio Redis a `docker-compose.yml`.
+    *   Gestionar volúmenes para reglas de Semgrep.
+
+### 🚀 Tarea Actual: Tarea 8.3 - Automatización Total (CI/CD)
+**Objetivo**: Habilitar el despliegue continuo en DigitalOcean.
 
 **Pasos**:
-1.  **Actualizar Script de Despliegue DO**:
-    *   Modificar `scripts/deploy/digitalocean.sh` para leer `runpod-config.json` (si existe) o aceptar argumento `--llm-url`.
-    *   Inyectar `OLLAMA_HOST` y `RUNPOD_API_KEY` en el contenedor del Worker.
-
-2.  **Documentar Flujo de Conexión**:
-    *   Crear guía paso a paso en `docs/INTEGRATION_GUIDE.md`:
-        1. Deploy RunPod -> Obtener URL.
-        2. Configurar Secretos/Env.
-        3. Deploy DigitalOcean.
-
-3.  **Verificación**:
-    *   Crear script de prueba `scripts/verify-integration.sh` que haga una petición desde el contenedor Worker hacia RunPod.
-
-**Entregables**:
-*   `scripts/deploy/digitalocean.sh` (actualizado)
-*   `docs/INTEGRATION_GUIDE.md`
-*   `scripts/verify-integration.sh`
-
-**Criterios de éxito**:
-*   El Worker en DO puede analizar código usando el modelo en RunPod.
-*   Proceso documentado y reproducible.
+1.  **Revisión**: Verificar secretos en GitHub (`DIGITALOCEAN_HOST`, `DIGITALOCEAN_SSH_KEY`, etc.).
+2.  **Activación**: Habilitar/Crear workflow `.github/workflows/deploy.yml`.
+3.  **Prueba**: Realizar un push y verificar el despliegue automático.
 
 **Estado**: 🔄 **En Progreso**
-**Prioridad**: Alta
 
 
 ## 🔗 Dependencias

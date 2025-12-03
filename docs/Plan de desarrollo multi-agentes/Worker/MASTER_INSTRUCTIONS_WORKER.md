@@ -34,14 +34,29 @@ Eres el **Agente Worker**. Has completado exitosamente la refactorización a una
     *   Cliente `securetag-v1` implementado.
     *   Análisis automático de hallazgos High/Critical.
 
-### 🚀 Tarea Actual: En espera / Mantenimiento
-**Objetivo**: El Worker está completamente operativo. Mantenerse a la espera de la implementación de autenticación en el Server para actualizar los headers si es necesario.
+### 🔴 Track 5: Beta 2 - SAST Engine & Optimization
+*   **Tarea 8.1: Motor SAST Propio (Semgrep OSS)** [ ]
+    *   **Contexto**: Eliminar dependencia de Semgrep Cloud.
+    *   **Acción**:
+        *   Implementar gestión local de reglas en `/opt/securetag/rules`.
+        *   Configurar ejecución de `semgrep` con reglas locales.
+        *   Sincronizar reglas OSS y propias.
 
-**Estado**: ⏸️ **Standby**
+*   **Tarea 8.2: Optimizaciones de Backend** [ ]
+    *   **Acción**:
+        *   Adaptar worker para consumir de Redis (si aplica).
 
-**Posibles Tareas Futuras**:
-*   Soportar autenticación JWT/API Key cuando el Server la implemente.
-*   Optimizar prompts del LLM basado en feedback real.
+### 🚀 Tarea Actual: Tarea 8.1 - Motor SAST Propio
+**Objetivo**: Implementar el motor de análisis estático usando Semgrep OSS y reglas locales, eliminando la necesidad de tokens de nube.
+
+**Pasos**:
+1.  **Investigación**: Determinar cómo descargar y estructurar las reglas OSS de Semgrep.
+2.  **Implementación**:
+    *   Crear script de sincronización de reglas.
+    *   Modificar `TaskExecutor` para usar `--config /opt/securetag/rules`.
+3.  **Verificación**: Ejecutar un escaneo sin internet/token y validar hallazgos.
+
+**Estado**: 🔄 **En Progreso**
 
 ## 🔗 Dependencias
 *   **Agente Server**: Necesitas que la API exponga los endpoints de cola (`/queue/next`, `/queue/result`).
