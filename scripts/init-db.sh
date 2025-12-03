@@ -67,18 +67,11 @@ info "Verificando estado de la base de datos..."
 TABLES_COUNT=$(docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'securetag';" 2>/dev/null | tr -d ' ' || echo "0")
 
 if [ "$TABLES_COUNT" -gt 0 ]; then
-    warn "Base de datos ya está inicializada ($TABLES_COUNT tablas encontradas)"
-    read -p "¿Deseas reinicializar? (esto BORRARÁ todos los datos) [y/N]: " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        info "Inicialización cancelada"
-        exit 0
-    fi
-    
-    # Backup antes de reinicializar
-    BACKUP_FILE="backup_$(date +%Y%m%d_%H%M%S).sql"
-    info "Creando backup en: $BACKUP_FILE"
-    docker compose exec -T "$DB_CONTAINER" pg_dump -U "$DB_USER" "$DB_NAME" > "$BACKUP_FILE"
+    info "Base de datos ya está inicializada ($TABLES_COUNT tablas encontradas). Continuando con migraciones incrementales..."
+    # No salimos, simplemente no reinicializamos de cero.
+    # Las migraciones deben ser idempotentes (IF NOT EXISTS).
+else
+    info "Base de datos vacía. Se procederá a inicializar desde cero si hay scripts base."
 fi
 
 # Ejecutar migraciones
