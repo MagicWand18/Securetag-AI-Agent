@@ -50,22 +50,26 @@ Eres el **Agente Server**. Tu misión es modernizar y robustecer el backend de S
 
 ### 🔴 Track 5: Beta 2 - SAST Engine & Optimization
 *   **Tarea 8.2: Optimizaciones de Backend** [ ]
-    *   **Contexto**: Mejorar escalabilidad y control.
-    *   **Acción**:
-        *   **Cola Escalable**: Migrar de polling DB/Archivos a Redis (BullMQ).
-        *   **Cuotas**: Implementar rate limiting y control de almacenamiento por tenant.
+    *   **Contexto**: Migración a Redis y Cuotas.
+    *   **Estado**: ⏸️ Standby (Prioridad media).
 
-### 🚀 Tarea Actual: Tarea 8.2 - Optimizaciones de Backend
-**Objetivo**: Preparar el backend para alta escalabilidad y control de uso.
+*   **Tarea 8.5: Documentación API (Swagger)** [x]
+    *   **Contexto**: Documentación interactiva para Frontend/Devs.
+    *   **Acción**:
+        *   Integrar `swagger-ui-express` (o `swagger-ui-dist`).
+        *   Definir especificación OpenAPI.
+        *   Desplegar en `securetag-app`.
+
+### 🚀 Tarea Actual: Tarea 8.5 - Documentación API (Swagger)
+**Objetivo**: Implementar Swagger UI alojado en el contenedor `securetag-app`.
 
 **Pasos**:
-1.  **Diseño**: Definir esquema de cuotas y elección de librería de colas.
-2.  **Implementación**:
-    *   Integrar Redis en `docker-compose`.
-    *   Implementar middleware de cuotas.
-    *   Refactorizar sistema de colas (Producer/Consumer).
+1.  **Dependencias**: `npm install swagger-ui-express yamljs @types/swagger-ui-express`.
+2.  **Spec**: Crear `src/server/docs/openapi.yaml` completo.
+3.  **Código**: En `src/server/index.ts`, montar `/docs` usando el middleware.
+4.  **Docker**: Asegurar que `openapi.yaml` se copia en la imagen Docker (`COPY src/server/docs ./src/server/docs`).
 
-**Estado**: 🔄 **En Progreso**
+**Estado**: ✅ **Completado**
 
 **Criterios de éxito**:
 *   Endpoints protegidos rechazan solicitudes sin credenciales (401).

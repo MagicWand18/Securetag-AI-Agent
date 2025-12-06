@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import fs from 'fs'
 import path from 'path'
 import { codeauditIndex, codeauditLatest, codeauditDetail } from './routes/codeaudit.js'
+import { serveDocs } from './routes/docs.js'
 import { dbQuery, ensureTenant } from '../utils/db.js'
 import validator from 'validator'
 import { authenticate, AuthenticatedRequest } from '../middleware/auth.js'
@@ -183,7 +184,7 @@ const server = http.createServer(async (req, res) => {
         }
 
         try {
-          await dbQuery('INSERT INTO securetag.task(id, tenant_id, type, status, payload_json, retries, priority, created_at, project_id, previous_task_id, is_retest) VALUES($1,$2,$3,$4,$5,$6,$7, now(), $8, $9, $10)', 
+          await dbQuery('INSERT INTO securetag.task(id, tenant_id, type, status, payload_json, retries, priority, created_at, project_id, previous_task_id, is_retest) VALUES($1,$2,$3,$4,$5,$6,$7, now(), $8, $9, $10)',
             [taskId, tenantId, 'codeaudit', 'queued', JSON.stringify({ zipPath, workDir: wkDir, profile, previousTaskId }), 0, 0, projectId, previousTaskId, isRetest])
           await dbQuery('INSERT INTO securetag.codeaudit_upload(tenant_id, project_id, task_id, file_name, storage_path, size_bytes, created_at) VALUES($1,$2,$3,$4,$5,$6, now())', [tenantId, projectId, taskId, fileName, zipPath, size])
         } catch {
@@ -297,7 +298,7 @@ const server = http.createServer(async (req, res) => {
     const isAuthenticated = await authenticate(authReq, res)
     if (!isAuthenticated) return
     const tenantId = authReq.tenantId!
-    
+
     const parts = url.split('/')
     // /projects/{id}/history
     if (parts.length >= 4 && parts[3] === 'history') {
@@ -311,7 +312,7 @@ const server = http.createServer(async (req, res) => {
           const pq = await dbQuery<any>('SELECT id FROM securetag.project WHERE tenant_id=$1 AND alias=$2', [tenantId, idOrAlias])
           if (pq.rows.length) projectId = pq.rows[0].id
         }
-        
+
         if (!projectId) return send(res, 404, { ok: false, error: 'Project not found' })
 
         const tq = await dbQuery<any>('SELECT id as "taskId", status, created_at, finished_at, is_retest, previous_task_id FROM securetag.task WHERE project_id=$1 ORDER BY created_at DESC', [projectId])
@@ -322,6 +323,7 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
+  if (serveDocs(req, res)) return
   if (codeauditIndex(req, res)) return
   if (codeauditLatest(req, res)) return
   if (await codeauditDetail(req, res)) return

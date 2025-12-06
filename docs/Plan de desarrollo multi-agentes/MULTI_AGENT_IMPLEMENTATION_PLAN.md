@@ -224,6 +224,14 @@ Para maximizar la eficiencia, el trabajo se divide en "Tracks" independientes qu
     *   **Estado**: ✅ Completado (Iteración Beta 2)
     *   **Evidencia**: `EVIDENCE_Server_4_20251205.md`
 
+*   **Tarea 8.5: Documentación API (Swagger)** [ ]
+    *   **Contexto**: Necesidad de exponer documentación interactiva para desarrolladores.
+    *   **Acción**:
+        *   Instalar `swagger-ui-express`.
+        *   Crear definición OpenAPI v3 `src/server/docs/openapi.yaml`.
+        *   Exponer en endpoint `GET /docs`.
+    *   **Estado**: 🔄 **En Progreso** (Asignado a Server)
+
 *   **Tarea 9.1: Pipeline de Reglas Sintéticas (AI-Generated Rules)** [ ]
     *   **Objetivo**: Generar reglas Semgrep masivas usando modelos SOTA (GPT-5.1) a partir de CVEs.
     *   **Estado**: 🔄 Pendiente

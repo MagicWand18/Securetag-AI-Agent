@@ -822,3 +822,10 @@ Basado en feedback de usuario (Jordan), se añaden las siguientes capacidades:
 **Solución**:
 *   `GET /projects`: Listar proyectos con filtros (alias, fecha).
 *   `GET /projects/{id|alias}/history`: Listar ejecuciones (tasks) asociadas a ese proyecto con resumen de resultados.
+
+#### D. Documentación API (Swagger/OpenAPI)
+**Problema**: Falta de documentación interactiva para facilitar la integración de clientes.
+**Solución**:
+*   **OpenAPI Spec**: Generar `openapi.yaml` describiendo todos los endpoints.
+*   **Swagger UI**: Servir la interfaz visual en `GET /docs` dentro del contenedor `securetag-app`.
+*   **Librerías**: Usar `swagger-ui-express` y `yamljs` en el Server.

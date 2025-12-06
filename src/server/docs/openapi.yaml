@@ -1,0 +1,250 @@
+openapi: 3.0.0
+info:
+  title: SecureTag AI API
+  description: API for SecureTag AI Agent - SAST and Vulnerability Management
+  version: 1.0.0
+servers:
+  - url: /
+    description: API Server
+
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  schemas:
+    Error:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: "Error message"
+    TaskResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        taskId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [queued, running, completed, failed]
+        projectId:
+          type: string
+          format: uuid
+        isRetest:
+          type: boolean
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        alias:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    TaskHistory:
+      type: object
+      properties:
+        taskId:
+          type: string
+          format: uuid
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        finished_at:
+          type: string
+          format: date-time
+        is_retest:
+          type: boolean
+        previous_task_id:
+          type: string
+          format: uuid
+
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /healthz:
+    get:
+      summary: System Health Check
+      security: []
+      responses:
+        200:
+          description: System is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+
+  /healthz/db:
+    get:
+      summary: Database Health Check
+      security: []
+      responses:
+        200:
+          description: Database is connected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  db:
+                    type: string
+                    example: "connected"
+        503:
+          description: Database is disconnected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /codeaudit/upload:
+    post:
+      summary: Upload code for SAST analysis
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: ZIP file containing source code
+                project_alias:
+                  type: string
+                  description: Alias for the project (e.g., "backend-core")
+                profile:
+                  type: string
+                  description: Scan profile (e.g., "auto", "security")
+      responses:
+        202:
+          description: Task accepted and queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        503:
+          description: Service Unavailable (DB Issue)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /codeaudit/{taskId}:
+    get:
+      summary: Get scan status and results
+      parameters:
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Scan completed or status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  status:
+                    type: string
+                  taskId:
+                    type: string
+                  result:
+                    type: object
+                    description: Full scan result (findings, summary, diff)
+        202:
+          description: Scan in progress
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        404:
+          description: Task not found
+        503:
+          description: Service Unavailable
+
+  /projects:
+    get:
+      summary: List all projects
+      responses:
+        200:
+          description: List of projects
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  projects:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Project'
+        503:
+          description: Service Unavailable
+
+  /projects/{alias}/history:
+    get:
+      summary: Get scan history for a project
+      parameters:
+        - in: path
+          name: alias
+          required: true
+          schema:
+            type: string
+            description: Project alias or UUID
+      responses:
+        200:
+          description: Project history
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  projectId:
+                    type: string
+                  history:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TaskHistory'
+        404:
+          description: Project not found
+        503:
+          description: Service Unavailable
