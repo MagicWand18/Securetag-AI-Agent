@@ -4,6 +4,7 @@ import { HeartbeatManager } from './HeartbeatManager.js'
 import { LLMClient } from './LLMClient.js'
 import fs from 'fs'
 import path from 'path'
+import crypto from 'crypto'
 import { execFile } from 'child_process'
 import { logger } from '../utils/logger.js'
 
@@ -166,12 +167,26 @@ export class TaskExecutor {
 
                 const ruleId = it.check_id || ''
                 const ruleName = (it.extra && it.extra.message) || ruleId
-                const filePath = it.path || ''
+                
+                // Normalize path to be relative to workDir
+                let rawPath = it.path || ''
+                // If rawPath starts with workDir, strip it to make it relative
+                if (rawPath.startsWith(workDir)) {
+                    rawPath = rawPath.slice(workDir.length)
+                    if (rawPath.startsWith('/')) rawPath = rawPath.slice(1)
+                }
+                const filePath = rawPath
+
                 const line = (it.start && it.start.line) || null
-                const fingerprint = (it.extra && it.extra.fingerprint) || `${ruleId}:${filePath}:${line}`
+                const codeSnippet = (it.extra && it.extra.lines) || null
+                
+                // Generate stable fingerprint using relative path and content
+                // We ignore semgrep's fingerprint as it may depend on absolute paths
+                const fpInput = `${ruleId}|${filePath}|${line}|${codeSnippet || ''}`
+                const fingerprint = crypto.createHash('sha256').update(fpInput).digest('hex')
+                
                 const cwe = it.extra && it.extra.metadata && it.extra.metadata.cwe ? String(it.extra.metadata.cwe) : null
                 const cve = it.extra && it.extra.metadata && it.extra.metadata.cve ? String(it.extra.metadata.cve) : null
-                const codeSnippet = (it.extra && it.extra.lines) || null
                 const autofix = it.fix || (it.extra && it.extra.fix) || null
 
                 // LLM Analysis

@@ -124,6 +124,7 @@ const server = http.createServer(async (req, res) => {
         let fileName = ''
         let fileData: Buffer | null = null
         let profile = ''
+        let projectAlias = ''
         for (const p of parts) {
           const idx = p.indexOf('\r\n\r\n')
           if (idx === -1) continue
@@ -138,6 +139,9 @@ const server = http.createServer(async (req, res) => {
           } else if (header.includes('name="profile"')) {
             const endIdx = content.lastIndexOf('\r\n')
             profile = content.slice(0, endIdx >= 0 ? endIdx : undefined)
+          } else if (header.includes('name="project_alias"')) {
+            const endIdx = content.lastIndexOf('\r\n')
+            projectAlias = content.slice(0, endIdx >= 0 ? endIdx : undefined).trim()
           }
         }
         if (!fileData) return send(res, 400, { ok: false })
@@ -148,13 +152,44 @@ const server = http.createServer(async (req, res) => {
         fs.mkdirSync(wkDir, { recursive: true })
         const zipPath = path.join(upDir, `${taskId}.zip`)
         fs.writeFileSync(zipPath, fileData)
+
+        let projectId: string | null = null
+        let previousTaskId: string | null = null
+        let isRetest = false
+
+        if (projectAlias) {
+          try {
+            // Upsert project
+            let pq = await dbQuery<any>('SELECT id FROM securetag.project WHERE tenant_id=$1 AND alias=$2', [tenantId, projectAlias])
+            if (pq.rows.length > 0) {
+              projectId = pq.rows[0].id
+            } else {
+              const newId = uuidv4()
+              await dbQuery('INSERT INTO securetag.project(id, tenant_id, alias, name) VALUES($1, $2, $3, $4) ON CONFLICT (tenant_id, alias) WHERE alias IS NOT NULL DO NOTHING', [newId, tenantId, projectAlias, projectAlias])
+              pq = await dbQuery<any>('SELECT id FROM securetag.project WHERE tenant_id=$1 AND alias=$2', [tenantId, projectAlias])
+              if (pq.rows.length > 0) projectId = pq.rows[0].id
+            }
+
+            if (projectId) {
+              const prevQ = await dbQuery<any>('SELECT id FROM securetag.task WHERE project_id=$1 AND status=$2 AND type=$3 ORDER BY created_at DESC LIMIT 1', [projectId, 'completed', 'codeaudit'])
+              if (prevQ.rows.length > 0) {
+                previousTaskId = prevQ.rows[0].id
+                isRetest = true
+              }
+            }
+          } catch (err) {
+            console.error('Error handling project alias:', err)
+          }
+        }
+
         try {
-          await dbQuery('INSERT INTO securetag.task(id, tenant_id, type, status, payload_json, retries, priority, created_at) VALUES($1,$2,$3,$4,$5,$6,$7, now())', [taskId, tenantId, 'codeaudit', 'queued', JSON.stringify({ zipPath, workDir: wkDir, profile }), 0, 0])
-          await dbQuery('INSERT INTO securetag.codeaudit_upload(tenant_id, project_id, task_id, file_name, storage_path, size_bytes, created_at) VALUES($1,NULL,$2,$3,$4,$5, now())', [tenantId, taskId, fileName, zipPath, size])
+          await dbQuery('INSERT INTO securetag.task(id, tenant_id, type, status, payload_json, retries, priority, created_at, project_id, previous_task_id, is_retest) VALUES($1,$2,$3,$4,$5,$6,$7, now(), $8, $9, $10)', 
+            [taskId, tenantId, 'codeaudit', 'queued', JSON.stringify({ zipPath, workDir: wkDir, profile, previousTaskId }), 0, 0, projectId, previousTaskId, isRetest])
+          await dbQuery('INSERT INTO securetag.codeaudit_upload(tenant_id, project_id, task_id, file_name, storage_path, size_bytes, created_at) VALUES($1,$2,$3,$4,$5,$6, now())', [tenantId, projectId, taskId, fileName, zipPath, size])
         } catch {
           return send(res, 503, { ok: false })
         }
-        return send(res, 202, { ok: true, taskId, status: 'queued' })
+        return send(res, 202, { ok: true, taskId, status: 'queued', projectId, isRetest })
       } catch (e: any) {
         return send(res, 400, { ok: false })
       }
@@ -242,6 +277,51 @@ const server = http.createServer(async (req, res) => {
       return send(res, 503, { ok: false })
     }
   }
+
+  if (method === 'GET' && url === '/projects') {
+    const authReq = req as AuthenticatedRequest
+    const isAuthenticated = await authenticate(authReq, res)
+    if (!isAuthenticated) return
+
+    const tenantId = authReq.tenantId!
+    try {
+      const q = await dbQuery<any>('SELECT id, alias, name, description, created_at FROM securetag.project WHERE tenant_id=$1 ORDER BY created_at DESC', [tenantId])
+      return send(res, 200, { ok: true, projects: q.rows })
+    } catch {
+      return send(res, 503, { ok: false })
+    }
+  }
+
+  if (method === 'GET' && url.startsWith('/projects/')) {
+    const authReq = req as AuthenticatedRequest
+    const isAuthenticated = await authenticate(authReq, res)
+    if (!isAuthenticated) return
+    const tenantId = authReq.tenantId!
+    
+    const parts = url.split('/')
+    // /projects/{id}/history
+    if (parts.length >= 4 && parts[3] === 'history') {
+      const idOrAlias = parts[2]
+      try {
+        let projectId = ''
+        // Simple UUID validation regex
+        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrAlias)) {
+          projectId = idOrAlias
+        } else {
+          const pq = await dbQuery<any>('SELECT id FROM securetag.project WHERE tenant_id=$1 AND alias=$2', [tenantId, idOrAlias])
+          if (pq.rows.length) projectId = pq.rows[0].id
+        }
+        
+        if (!projectId) return send(res, 404, { ok: false, error: 'Project not found' })
+
+        const tq = await dbQuery<any>('SELECT id as "taskId", status, created_at, finished_at, is_retest, previous_task_id FROM securetag.task WHERE project_id=$1 ORDER BY created_at DESC', [projectId])
+        return send(res, 200, { ok: true, projectId, history: tq.rows })
+      } catch {
+        return send(res, 503, { ok: false })
+      }
+    }
+  }
+
   if (codeauditIndex(req, res)) return
   if (codeauditLatest(req, res)) return
   if (await codeauditDetail(req, res)) return

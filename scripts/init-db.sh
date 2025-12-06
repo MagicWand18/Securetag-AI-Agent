@@ -92,22 +92,35 @@ fi
 if [ -n "${WORKER_API_KEY:-}" ]; then
     info "Detectada WORKER_API_KEY en entorno. Configurando..."
     
-    # UPSERT: Actualizar si existe, insertar si no existe
-    # NOTA: La aplicación usa SHA256 para validar las llaves (ver src/middleware/auth.ts)
-    docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -c "
-        INSERT INTO securetag.api_key (key_hash, tenant_id, name, scopes) 
-        VALUES (encode(digest('$WORKER_API_KEY', 'sha256'), 'hex'), 'production', 'Worker Key', '[\"worker\"]')
-        ON CONFLICT (key_hash) 
-        DO UPDATE SET key_hash = encode(digest('$WORKER_API_KEY', 'sha256'), 'hex');
-    " 2>/dev/null || {
-        # Si falla el UPSERT (por ejemplo, si el constraint es diferente), forzar UPDATE
+    # Obtener UUID del tenant production de forma dinámica
+    TENANT_ID=$(docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT id FROM securetag.tenant WHERE name = 'production' LIMIT 1;" | tr -d '[:space:]')
+    
+    # Si no existe, intentar con 'default' o el primer tenant disponible
+    if [ -z "$TENANT_ID" ]; then
+        TENANT_ID=$(docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT id FROM securetag.tenant LIMIT 1;" | tr -d '[:space:]')
+    fi
+    
+    if [ -n "$TENANT_ID" ]; then
+        info "Configurando WORKER_API_KEY para tenant ID: $TENANT_ID"
+        # UPSERT: Actualizar si existe, insertar si no existe
+        # NOTA: La aplicación usa SHA256 para validar las llaves (ver src/middleware/auth.ts)
         docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -c "
-            DELETE FROM securetag.api_key WHERE name = 'Worker Key';
             INSERT INTO securetag.api_key (key_hash, tenant_id, name, scopes) 
-            VALUES (encode(digest('$WORKER_API_KEY', 'sha256'), 'hex'), 'production', 'Worker Key', '[\"worker\"]');
-        "
-    }
-    info "✅ Worker API Key configurada exitosamente"
+            VALUES (encode(digest('$WORKER_API_KEY', 'sha256'), 'hex'), '$TENANT_ID', 'Worker Key', '[\"worker\"]')
+            ON CONFLICT (key_hash) 
+            DO UPDATE SET key_hash = encode(digest('$WORKER_API_KEY', 'sha256'), 'hex');
+        " 2>/dev/null || {
+            # Si falla el UPSERT (por ejemplo, si el constraint es diferente), forzar UPDATE
+            docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -c "
+                DELETE FROM securetag.api_key WHERE name = 'Worker Key';
+                INSERT INTO securetag.api_key (key_hash, tenant_id, name, scopes) 
+                VALUES (encode(digest('$WORKER_API_KEY', 'sha256'), 'hex'), '$TENANT_ID', 'Worker Key', '[\"worker\"]');
+            "
+        }
+        info "✅ Worker API Key configurada exitosamente"
+    else
+        warn "No se encontró ningún tenant válido. No se pudo configurar WORKER_API_KEY."
+    fi
 else
     warn "WORKER_API_KEY no definida en el entorno. El worker podría fallar al conectar."
 fi

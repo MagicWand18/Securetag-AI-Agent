@@ -230,6 +230,7 @@ export async function codeauditDetail(req: http.IncomingMessage, res: http.Serve
       if (dbTask.status === 'completed') {
         let summary: any = {}
         let findings: any[] = []
+        let diff: any = null
         try {
           const sr = await dbQuery<any>('SELECT summary_json FROM securetag.scan_result WHERE task_id=$1 LIMIT 1', [id])
           summary = sr.rows.length ? (sr.rows[0].summary_json || {}) : {}
@@ -238,7 +239,77 @@ export async function codeauditDetail(req: http.IncomingMessage, res: http.Serve
           const f = await dbQuery<any>('SELECT rule_id, rule_name, severity, cwe, cve, file_path, line, fingerprint, analysis_json FROM securetag.finding WHERE task_id=$1 ORDER BY created_at DESC', [id])
           findings = f.rows
         } catch { }
-        send(res, 200, { ok: true, status: dbTask.status, taskId: id, result: { summary, findings } })
+
+        // Logic for Retest Diffing
+        try {
+          // Check if this task is a retest
+          const tq = await dbQuery<any>('SELECT is_retest, previous_task_id FROM securetag.task WHERE id=$1', [id])
+          const taskInfo = tq.rows[0]
+          if (taskInfo && taskInfo.is_retest && taskInfo.previous_task_id) {
+            // Fetch findings from previous task
+            const pf = await dbQuery<any>('SELECT fingerprint FROM securetag.finding WHERE task_id=$1', [taskInfo.previous_task_id])
+            const prevFingerprints = new Set(pf.rows.map((r: any) => r.fingerprint).filter(Boolean))
+            const currentFingerprints = new Set(findings.map((f: any) => f.fingerprint).filter(Boolean))
+
+            let fixedCount = 0
+            let newCount = 0
+            let residualCount = 0
+
+            // Determine status for current findings
+            for (const finding of findings) {
+               if (finding.fingerprint) {
+                 if (prevFingerprints.has(finding.fingerprint)) {
+                   finding.retest_status = 'residual'
+                   residualCount++
+                 } else {
+                   finding.retest_status = 'new'
+                   newCount++
+                 }
+               }
+            }
+
+            // Count fixed (in previous but not in current)
+            for (const fp of prevFingerprints) {
+              if (!currentFingerprints.has(fp)) {
+                fixedCount++
+              }
+            }
+            
+            diff = {
+              fixed: fixedCount,
+              new: newCount,
+              residual: residualCount,
+              previousTaskId: taskInfo.previous_task_id
+            }
+          }
+        } catch (e) {
+          console.error('Error calculating diff:', e)
+        }
+
+        // Sanitize response for client (remove internal fields)
+        const sanitizedFindings = findings.map((f: any) => {
+            // Clean file path (just in case DB has absolute path)
+            let cleanPath = f.file_path || ''
+            const workIdx = cleanPath.indexOf('/work/')
+            if (workIdx >= 0) {
+                const afterWork = cleanPath.slice(workIdx + 6)
+                const slashIdx = afterWork.indexOf('/')
+                if (slashIdx >= 0) cleanPath = afterWork.slice(slashIdx + 1)
+            }
+
+            return {
+                rule_name: f.rule_name,
+                severity: f.severity,
+                cwe: f.cwe,
+                cve: f.cve,
+                file_path: cleanPath,
+                line: f.line,
+                analysis_json: f.analysis_json,
+                retest_status: f.retest_status
+            }
+        })
+
+        send(res, 200, { ok: true, status: dbTask.status, taskId: id, result: { summary, findings: sanitizedFindings, diff } })
         return true
       }
       send(res, 202, { ok: true, status: dbTask.status, taskId: id })
@@ -269,21 +340,35 @@ export async function codeauditDetail(req: http.IncomingMessage, res: http.Serve
         const sev = String(row.severity || '').toLowerCase()
         const sevMap = sev === 'high' || sev === 'critical' ? 'ERROR' : (sev === 'medium' ? 'WARNING' : 'INFO')
         const impact = sev === 'critical' ? 'CRITICAL' : ''
+        
+        // Clean path to be relative (remove internal work/taskId structure)
+        let cleanPath = row.file_path || ''
+        const workIdx = cleanPath.indexOf('/work/')
+        if (workIdx >= 0) {
+          const afterWork = cleanPath.slice(workIdx + 6) // skip '/work/'
+          const slashIdx = afterWork.indexOf('/')
+          if (slashIdx >= 0) {
+            cleanPath = afterWork.slice(slashIdx + 1) // skip taskId
+          }
+        }
+
         return {
-          path: row.file_path || '',
+          path: cleanPath,
           start: { line: row.line || null },
-          check_id: row.rule_id || '',
+          // Hiding internal rule_id as requested
+          // check_id: row.rule_id || '', 
           extra: {
             message: row.rule_name || row.rule_id || '',
             severity: sevMap,
             metadata: { cwe: row.cwe || '', cve: row.cve || '', impact, likelihood: '', references: [] },
-            fingerprint: row.fingerprint || '',
+            // Hiding internal fingerprint as requested
+            // fingerprint: row.fingerprint || '',
             validation_state: ''
           }
         }
       })
       const scanned = Array.from(new Set(items.map((it: any) => String(it.path || '').trim()).filter(Boolean)))
-      rulesCount = Array.from(new Set(items.map((it: any) => String(it.check_id || '')).filter(Boolean))).length
+      rulesCount = Array.from(new Set(items.map((it: any) => String(it.extra?.message || '')).filter(Boolean))).length
     } else if (summaryJson) {
       // Fallback to summary_json if findings table is empty
       sg = summaryJson

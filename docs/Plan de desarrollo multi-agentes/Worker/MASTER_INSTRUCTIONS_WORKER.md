@@ -22,8 +22,13 @@ Eres el **Agente Worker**. Has completado exitosamente la refactorización a una
 *   [x] **Tarea 2.3: Logging para Fine-Tuning (Data Gen)**
     *   Implementación de `TaskExecutor` que persiste logs en `tool_execution`.
     *   Registro de stdout, stderr, exit code y métricas en PostgreSQL.
+*   [x] **Tarea 2.4: Integración con LLM Remoto**
+    *   Cliente `securetag-v1` implementado.
+    *   Análisis automático de hallazgos High/Critical.
 
-## 📋 Tareas Asignadas
+*   [x] **Tarea 8.1: Motor SAST Propio (Semgrep OSS)**
+    *   Implementación completada externamente y verificada.
+    *   El worker ya opera con reglas locales y sin dependencia de nube.
 
 ## 📋 Tareas Asignadas
 
@@ -31,32 +36,21 @@ Eres el **Agente Worker**. Has completado exitosamente la refactorización a una
 *   **Tarea 2.1: Refactorización y Robustez** (Completado)
 *   **Tarea 2.2: Estados Avanzados y Heartbeats** (Completado)
 *   **Tarea 2.4: Integración con LLM Remoto** (Completado)
-    *   Cliente `securetag-v1` implementado.
-    *   Análisis automático de hallazgos High/Critical.
+*   **Tarea 8.1: Motor SAST Propio** (Completado Externamente)
 
 ### 🔴 Track 5: Beta 2 - SAST Engine & Optimization
-*   **Tarea 8.1: Motor SAST Propio (Semgrep OSS)** [ ]
-    *   **Contexto**: Eliminar dependencia de Semgrep Cloud.
-    *   **Acción**:
-        *   Implementar gestión local de reglas en `/opt/securetag/rules`.
-        *   Configurar ejecución de `semgrep` con reglas locales.
-        *   Sincronizar reglas OSS y propias.
-
 *   **Tarea 8.2: Optimizaciones de Backend** [ ]
     *   **Acción**:
         *   Adaptar worker para consumir de Redis (si aplica).
 
-### 🚀 Tarea Actual: Tarea 8.1 - Motor SAST Propio
-**Objetivo**: Implementar el motor de análisis estático usando Semgrep OSS y reglas locales, eliminando la necesidad de tokens de nube.
+### 🚀 Tarea Actual: En espera / Mantenimiento
+**Objetivo**: El Worker está completamente operativo, incluyendo la capacidad SAST local. Mantenerse a la espera de nuevas instrucciones para optimizaciones (Redis) cuando la infraestructura esté lista.
 
-**Pasos**:
-1.  **Investigación**: Determinar cómo descargar y estructurar las reglas OSS de Semgrep.
-2.  **Implementación**:
-    *   Crear script de sincronización de reglas.
-    *   Modificar `TaskExecutor` para usar `--config /opt/securetag/rules`.
-3.  **Verificación**: Ejecutar un escaneo sin internet/token y validar hallazgos.
+**Estado**: ⏸️ **Standby**
 
-**Estado**: 🔄 **En Progreso**
+**Posibles Tareas Futuras**:
+*   Adaptación para consumir de Redis (Tarea 8.2).
+*   Soportar autenticación JWT/API Key.
 
 ## 🔗 Dependencias
 *   **Agente Server**: Necesitas que la API exponga los endpoints de cola (`/queue/next`, `/queue/result`).

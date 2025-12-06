@@ -1,4 +1,4 @@
-# 🛡️ SecureTag AI Agent - Guía de Integración para Spartane
+# 🛡️ SecureTag AI Agent - Guía de Integración para Spartane (Beta 2)
 
 ¡Bienvenido a Securetag AI! Estamos emocionados de colaborar con **Spartane** para elevar la seguridad de su código al siguiente nivel.
 
@@ -13,6 +13,7 @@ A diferencia de los escáneres tradicionales que inundan a los desarrolladores c
 2.  **Analiza** cada hallazgo utilizando un "Ciber-Analista Virtual" (IA).
 3.  **Valida** si el hallazgo es real o un falso positivo.
 4.  **Recomienda** correcciones de código específicas y accionables.
+5.  **Organiza** sus auditorías por proyectos y mantiene un historial de evolución de seguridad.
 
 ### 🏗️ Componentes de Alto Nivel
 
@@ -38,26 +39,31 @@ Esta sección está dirigida a su equipo de ingeniería/DevOps para integrar Sec
 
 ### 📡 Endpoints del Sistema
 
-El flujo de análisis consta de dos pasos simples: **Subir** y **Consultar**.
+El flujo de análisis consta de tres pasos principales: **Organizar (Proyectos)**, **Subir** y **Consultar**.
 
 #### 1. Subir Código para Análisis (`POST /codeaudit/upload`)
 
-Envía un archivo ZIP con el código fuente que deseas auditar.
+Envía un archivo ZIP con el código fuente que deseas auditar. Puedes (y recomendamos) asociar el escaneo a un **alias de proyecto** para mantener un historial unificado.
 
 **Request:**
 ```bash
-curl -X POST http://143.198.61.64:8080/codeaudit/upload \
+curl -X POST "http://143.198.61.64:8080/codeaudit/upload" \
   -H "X-API-Key: SU_API_KEY_AQUI" \
   -F "file=@./mi-proyecto.zip" \
+  -F "project_alias=backend-core" \
   -F "profile=auto"
 ```
+
+*   **`project_alias`** (Opcional pero recomendado): Un nombre legible para su proyecto (ej: `backend-core`, `frontend-app`). Si no existe, se crea automáticamente. Si existe, el nuevo escaneo se vincula al historial y se compara con versiones anteriores (**Retest automático**).
 
 **Response (Éxito):**
 ```json
 {
   "ok": true,
   "taskId": "550e8400-e29b-41d4-a716-446655440000",
-  "status": "queued"
+  "status": "queued",
+  "projectId": "3b4926f1-a15a-4b33-9f2d-4ae88427e583",
+  "isRetest": true
 }
 ```
 *Guarde el `taskId` para consultar el progreso.*
@@ -70,7 +76,7 @@ Consulte el estado del análisis. Si está completo, recibirá el reporte detall
 
 **Request:**
 ```bash
-curl -X GET http://143.198.61.64:8080/codeaudit/550e8400-e29b-41d4-a716-446655440000 \
+curl -X GET "http://143.198.61.64:8080/codeaudit/550e8400-e29b-41d4-a716-446655440000" \
   -H "X-API-Key: SU_API_KEY_AQUI"
 ```
 
@@ -93,18 +99,69 @@ curl -X GET http://143.198.61.64:8080/codeaudit/550e8400-e29b-41d4-a716-44665544
     },
     "findings": [
       {
-        "rule_id": "php.lang.security.injection.tainted-sql-string",
+        "rule_name": "Detected user input used to manually construct a SQL string",
         "severity": "high",
-        "file_path": "/src/login.php",
+        "cwe": "CWE-89",
+        "cve": null,
+        "file_path": "src/login.php",
         "line": 45,
+        "retest_status": "new",
         "analysis_json": {
           "triage": "Verdadero Positivo",
           "reasoning": "La variable $username se concatena directamente en la consulta SQL sin sanitización...",
           "recommendation": "Utilice sentencias preparadas (PDO) en lugar de concatenación de cadenas."
         }
       }
-    ]
+    ],
+    "diff": {
+      "fixed": 0,
+      "new": 8,
+      "residual": 0,
+      "previousTaskId": null
+    }
   }
+}
+```
+
+---
+
+#### 3. Gestión de Proyectos e Historial (NUEVO en Beta 2)
+
+Ahora puedes consultar el estado de tus proyectos y su historial de escaneos.
+
+**Listar Proyectos:**
+```bash
+curl -X GET "http://143.198.61.64:8080/projects" \
+  -H "X-API-Key: SU_API_KEY_AQUI"
+```
+
+**Ver Historial de un Proyecto:**
+Consulta todos los escaneos realizados sobre un alias específico.
+
+```bash
+curl -X GET "http://143.198.61.64:8080/projects/backend-core/history" \
+  -H "X-API-Key: SU_API_KEY_AQUI"
+```
+
+**Response:**
+```json
+{
+  "ok": true,
+  "projectId": "3b4926f1-a15a-4b33-9f2d-4ae88427e583",
+  "history": [
+    {
+      "taskId": "550e8400-...",
+      "status": "completed",
+      "created_at": "2025-12-06T10:00:00Z",
+      "is_retest": true
+    },
+    {
+      "taskId": "123f5678-...",
+      "status": "completed",
+      "created_at": "2025-12-01T09:30:00Z",
+      "is_retest": false
+    }
+  ]
 }
 ```
 

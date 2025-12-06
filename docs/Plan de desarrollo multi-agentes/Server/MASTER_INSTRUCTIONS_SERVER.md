@@ -43,9 +43,10 @@ Eres el **Agente Server**. Tu misión es modernizar y robustecer el backend de S
 *   **Tarea 1.1: Migración a Database-Only** (Completado)
 *   **Tarea 1.2: Health Checks y Gating** (Completado)
 *   **Tarea 1.3: Autenticación y Multi-tenancy** (Completado)
-    *   Tabla `api_key` creada
-    *   Middleware de autenticación implementado
-    *   Aislamiento por `tenant_id` garantizado
+*   **Tarea 8.4: Funcionalidades de Negocio (Alias, Retest, Historial)** (Completado)
+    *   Proyectos con alias implementados.
+    *   Endpoints de historial y listado.
+    *   Lógica de retest (diffing) activa.
 
 ### 🔴 Track 5: Beta 2 - SAST Engine & Optimization
 *   **Tarea 8.2: Optimizaciones de Backend** [ ]

@@ -768,7 +768,7 @@ Credenciales por defecto:
 
 ## 6) Beta 2: Motor SAST Propio y Optimizaciones
 
-### 6.1) Motor SAST Propio (Independencia de Semgrep Cloud)
+### 6.1) Motor SAST Propio (Independencia de Semgrep Cloud) ✅ COMPLETADO
 **Problema**: La integración actual depende de Semgrep Cloud (Login/Token), lo cual implica usar reglas propietarias con restricciones de licencia para uso comercial en SaaS.
 **Solución**: Utilizar el motor Open Source de Semgrep (`semgrep-core` / CLI) gestionando las reglas localmente.
 
@@ -797,3 +797,28 @@ Estas tareas se mueven de "Backlog" a "Beta 2 Core":
 
 3.  **Automatización CI/CD**:
     *   Activar pipelines de GitHub Actions para despliegue automático (CD) en DigitalOcean tras push a `main`.
+
+### 6.3) Nuevas Funcionalidades (Beta 2 Extended) ✅ COMPLETADO
+Basado en feedback de usuario (Jordan), se añaden las siguientes capacidades:
+
+#### A. Gestión de Proyectos y Alias
+**Problema**: Los UUIDs de proyectos son difíciles de recordar/compartir.
+**Solución**:
+*   Añadir columna `alias` (unique per tenant) a la tabla `project`.
+*   Endpoint para crear/actualizar proyectos soportando `alias`.
+*   Permitir buscar proyectos por `id` o `alias`.
+
+#### B. Retest y Trazabilidad (Vulnerabilidades Residuales)
+**Problema**: Los clientes necesitan verificar si los hallazgos previos fueron corregidos y ver la evolución temporal.
+**Solución**:
+*   **Concepto de "Scan Run"**: Cada ejecución (`codeaudit`) pertenece a un `project`.
+*   **Lógica de "Retest"**:
+    *   Al subir un nuevo zip para un proyecto existente, el sistema compara (diff) los hallazgos nuevos con los anteriores.
+    *   **Estados de Hallazgo**: `New`, `Fixed`, `Residual` (Persistente).
+    *   Histórico de tendencias: Gráfica de # hallazgos por severidad a lo largo del tiempo.
+*   **Nuevo Endpoint**: `POST /projects/{id|alias}/retest` (o `scan` con contexto de proyecto).
+
+#### C. Historial y endpoints de consulta
+**Solución**:
+*   `GET /projects`: Listar proyectos con filtros (alias, fecha).
+*   `GET /projects/{id|alias}/history`: Listar ejecuciones (tasks) asociadas a ese proyecto con resumen de resultados.

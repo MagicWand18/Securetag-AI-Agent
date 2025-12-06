@@ -215,6 +215,15 @@ Para maximizar la eficiencia, el trabajo se divide en "Tracks" independientes qu
         *   Habilitar y probar workflows de GitHub Actions para despliegue automático en DigitalOcean.
     *   **Estado**: 🔄 Pendiente
 
+*   **Tarea 8.4: Funcionalidades de Negocio (Alias, Retest, Historial)** [x]
+    *   **Contexto**: Requerimientos funcionales para mejorar la experiencia de usuario y trazabilidad.
+    *   **Acción**:
+        *   **Alias de Proyecto**: Modificar esquema DB y API para soportar nombres amigables.
+        *   **Historial**: Endpoint para listar scans pasados de un proyecto.
+        *   **Retest/Residuales**: Lógica de comparación (Diff) entre scans del mismo proyecto para detectar fijos vs residuales.
+    *   **Estado**: ✅ Completado (Iteración Beta 2)
+    *   **Evidencia**: `EVIDENCE_Server_4_20251205.md`
+
 *   **Tarea 9.1: Pipeline de Reglas Sintéticas (AI-Generated Rules)** [ ]
     *   **Objetivo**: Generar reglas Semgrep masivas usando modelos SOTA (GPT-5.1) a partir de CVEs.
     *   **Estado**: 🔄 Pendiente
@@ -288,9 +297,9 @@ Aunque los agentes trabajan en paralelo, hay hitos de sincronización:
 | **Fase 5: Auth & Multi-tenancy** | 1/1 | 0/1 | 100% ✅ |
 | **Fase 6: Producción** | 1/1 | 0/1 | 100% ✅ |
 | **Fase 7: Integración Final** | 1/1 | 0/1 | 100% ✅ |
-| **Fase 8: Beta 2 (SAST & Opt)** | 0/3 | 3/3 | 0% 🔄 |
+| **Fase 8: Beta 2 (SAST & Opt)** | 2/3 | 1/3 | 66% 🔄 |
 
-**Progreso Total**: 13/16 tareas completadas (81%)
+**Progreso Total**: 15/16 tareas completadas (93%)
 
 ---
 
