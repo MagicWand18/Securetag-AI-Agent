@@ -68,17 +68,41 @@ export class LLMClient {
 
     private async analyzeWithRunPod(finding: any): Promise<AnalysisResult | null> {
         const prompt = this.buildPrompt(finding)
-        const systemPrompt = 'Eres un ingeniero de seguridad senior. Analiza el siguiente hallazgo de análisis estático. Determina si es un hallazgo verdadero o falso. Proporciona una razón y una recomendación de remedio. Responde en formato JSON con los campos: triage, reasoning, recommendation, severity_adjustment.'
+        const systemPrompt = `Eres un ingeniero de seguridad senior. Analiza el siguiente hallazgo de análisis estático.
+            Determina si es un hallazgo verdadero o falso. Proporciona una razón y una recomendación de remedio.
+
+            Tu respuesta debe ser EXCLUSIVAMENTE un objeto JSON válido con el siguiente formato exacto:
+            {
+            "triage": "True Positive",
+            "reasoning": "Explicación detallada de por qué es vulnerable...",
+            "recommendation": "Pasos específicos para corregir...",
+            "severity_adjustment": "high"
+            }
+
+            Valores permitidos para "triage": "True Positive", "False Positive", "Needs Review".
+            Valores permitidos para "severity_adjustment": "low", "medium", "high", "critical", null.
+
+            IMPORTANTE: NO uses bloques de código markdown (\`\`\`json). NO incluyas texto introductorio. Responde SOLO con el JSON crudo.`
 
         const payload = { input: { prompt: `${systemPrompt}\n\n${prompt}` } }
 
         try {
+            console.log('DEBUG: Sending request to RunPod')
             const res = await this.client.post('/runsync', payload)
+            console.log('DEBUG: RunPod runsync response status:', res.status)
             const output = res.data && res.data.output ? res.data.output : null
+            
+            if (output) {
+                console.log('DEBUG: RunPod sync output received')
+                return this.extractAndParse(output)
+            }
 
             if (!output) {
+                console.log('DEBUG: RunPod sync output empty, trying async /run')
                 const submit = await this.client.post('/run', payload)
                 const jobId = submit.data && submit.data.id ? submit.data.id : null
+                console.log('DEBUG: RunPod job submitted, ID:', jobId)
+                
                 if (!jobId) {
                     logger.warn('RunPod did not return a job ID')
                     return null
@@ -90,8 +114,11 @@ export class LLMClient {
                     await new Promise(resolve => setTimeout(resolve, pollInterval))
                     const statusResponse = await this.client.get(`/status/${jobId}`)
                     const status = statusResponse.data && statusResponse.data.status
+                    console.log(`DEBUG: RunPod job ${jobId} status: ${status}`)
+                    
                     if (status === 'COMPLETED') {
                         const o = statusResponse.data.output
+                        console.log('DEBUG: RunPod job completed, output:', JSON.stringify(o))
                         return this.extractAndParse(o)
                     } else if (status === 'FAILED') {
                         logger.warn(`RunPod job ${jobId} failed`)
@@ -105,6 +132,7 @@ export class LLMClient {
             return this.extractAndParse(output)
         } catch (err: any) {
             logger.error('RunPod runsync call failed', err)
+            console.error('DEBUG: RunPod error details:', err.response ? err.response.data : err.message)
             return null
         }
     }
@@ -143,40 +171,65 @@ export class LLMClient {
             rule_message: finding.rule_name,
             file_path: finding.file_path,
             line: finding.line,
-            code_snippet: finding.code_snippet || 'Not available', // Assuming we might pass code snippet later
-            severity: finding.severity
+            code_snippet: finding.code_snippet || 'Not available',
+            severity: finding.severity,
+            autofix_suggestion: finding.autofix_suggestion || 'None'
         }, null, 2)
     }
 
     private parseResponse(content: string): AnalysisResult | null {
-        try {
-            // Clean up content to handle Markdown code blocks
-            let jsonStr = content.trim()
-            
-            // Extract JSON from markdown code blocks if present
-            const codeBlockRegex = /```(?:json)?\s*([\s\S]*?)\s*```/
-            const match = jsonStr.match(codeBlockRegex)
-            if (match && match[1]) {
-                jsonStr = match[1].trim()
-            } else {
-                // If no code blocks, try to find the first '{' and last '}'
-                const firstOpen = jsonStr.indexOf('{')
-                const lastClose = jsonStr.lastIndexOf('}')
-                if (firstOpen !== -1 && lastClose !== -1 && lastClose > firstOpen) {
-                    jsonStr = jsonStr.substring(firstOpen, lastClose + 1)
-                }
-            }
-
-            const parsed = JSON.parse(jsonStr)
+        // Helper to validate and normalize the parsed object
+        const normalize = (parsed: any): AnalysisResult => {
             return {
                 triage: parsed.triage || 'Needs Review',
                 reasoning: typeof parsed.reasoning === 'string' ? parsed.reasoning : JSON.stringify(parsed.reasoning),
                 recommendation: typeof parsed.recommendation === 'string' ? parsed.recommendation : JSON.stringify(parsed.recommendation),
                 severity_adjustment: parsed.severity_adjustment?.score ? (parsed.severity_adjustment.score >= 8 ? 'critical' : 'high') : (typeof parsed.severity_adjustment === 'string' ? parsed.severity_adjustment : undefined)
             }
+        }
+
+        // Strategy 1: Try to find JSON code blocks and parse them
+        // We iterate over ALL code blocks because the model might output the code snippet first in a block
+        const codeBlockRegex = /```(?:json)?\s*([\s\S]*?)\s*```/g
+        let match
+        while ((match = codeBlockRegex.exec(content)) !== null) {
+            try {
+                const candidate = match[1].trim()
+                // Basic check if it looks like an object
+                if (candidate.startsWith('{') && candidate.endsWith('}')) {
+                    const parsed = JSON.parse(candidate)
+                    return normalize(parsed)
+                }
+            } catch (e) {
+                // Continue to next block
+            }
+        }
+
+        // Strategy 2: If no valid JSON block found (or parsing failed), try to find the first '{' and last '}' in the WHOLE string
+        try {
+            let jsonStr = content.trim()
+            // Remove markdown code block markers if present at start/end but regex missed them
+            jsonStr = jsonStr.replace(/^```json\s*/, '').replace(/^```\s*/, '').replace(/\s*```$/, '')
+            
+            const firstOpen = jsonStr.indexOf('{')
+            const lastClose = jsonStr.lastIndexOf('}')
+            if (firstOpen !== -1 && lastClose !== -1 && lastClose > firstOpen) {
+                const candidate = jsonStr.substring(firstOpen, lastClose + 1)
+                const parsed = JSON.parse(candidate)
+                return normalize(parsed)
+            }
         } catch (err) {
-            logger.warn(`Failed to parse LLM response: ${content}`)
-            return null
+            // Fall through to failure
+        }
+
+        logger.warn(`Failed to parse LLM response: ${content}`)
+        
+        // Fallback: Return a structured result indicating parsing failure but preserving the content
+        return {
+            triage: 'Needs Review',
+            reasoning: `Raw LLM Response (Parsing Failed): ${content}`,
+            recommendation: 'Review the finding manually. The AI response could not be parsed as JSON.',
+            severity_adjustment: undefined
         }
     }
 }

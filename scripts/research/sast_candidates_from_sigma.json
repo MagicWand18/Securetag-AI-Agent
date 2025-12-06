@@ -1,0 +1,466 @@
+[
+  {
+    "id": "65f77b1e-8e79-45bf-bb67-5988a8ce45a5",
+    "title": "SharpHound Recon Account Discovery",
+    "description": "Detects remote RPC calls useb by SharpHound to map remote connections and local group membership.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/rpc_firewall/rpc_firewall_sharphound_recon_account.yml",
+    "ai_context": "\n    Threat Detection Rule: SharpHound Recon Account Discovery\n    Description: Detects remote RPC calls useb by SharpHound to map remote connections and local group membership.\n    Attack Tags: attack.t1087, attack.discovery\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "2053961f-44c7-4a64-b62d-f6e72800af0d",
+    "title": "Remote Event Log Recon",
+    "description": "Detects remote RPC calls to get event log information via EVEN or EVEN6",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/rpc_firewall/rpc_firewall_eventlog_recon.yml",
+    "ai_context": "\n    Threat Detection Rule: Remote Event Log Recon\n    Description: Detects remote RPC calls to get event log information via EVEN or EVEN6\n    Attack Tags: attack.discovery\n    Suspicious Keywords/Patterns (Runtime): 82273fdc-e32a-18c3-3f78-827929dc23ea, f6beaff7-1e19-4fbb-9f8f-b89e2018337c\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "bc3a4b0c-e167-48e1-aa88-b3020950e560",
+    "title": "Remote Printing Abuse for Lateral Movement",
+    "description": "Detects remote RPC calls to possibly abuse remote printing service via MS-RPRN / MS-PAR",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/rpc_firewall/rpc_firewall_printing_lateral_movement.yml",
+    "ai_context": "\n    Threat Detection Rule: Remote Printing Abuse for Lateral Movement\n    Description: Detects remote RPC calls to possibly abuse remote printing service via MS-RPRN / MS-PAR\n    Attack Tags: attack.lateral-movement\n    Suspicious Keywords/Patterns (Runtime): 12345678-1234-abcd-ef00-0123456789ab, 76f03f96-cdfd-44fc-a22c-64950a001209, 0b6edbfa-4a24-4fc6-8a23-942b1eca65d1, ae33069b-a2a8-46ee-a235-ddfd339be281\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "5f92fff9-82e2-48eb-8fc1-8b133556a551",
+    "title": "Remote Encrypting File System Abuse",
+    "description": "Detects remote RPC calls to possibly abuse remote encryption service via MS-EFSR",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/rpc_firewall/rpc_firewall_efs_abuse.yml",
+    "ai_context": "\n    Threat Detection Rule: Remote Encrypting File System Abuse\n    Description: Detects remote RPC calls to possibly abuse remote encryption service via MS-EFSR\n    Attack Tags: attack.lateral-movement\n    Suspicious Keywords/Patterns (Runtime): df1941c5-fe89-4e79-bf10-463657acf44d, c681d488-d850-11d0-8c52-00c04fd90f7e\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "7f7c49eb-2977-4ac8-8ab0-ab1bae14730e",
+    "title": "Remote Schedule Task Recon via ITaskSchedulerService",
+    "description": "Detects remote RPC calls to read information about scheduled tasks",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/rpc_firewall/rpc_firewall_itaskschedulerservice_recon.yml",
+    "ai_context": "\n    Threat Detection Rule: Remote Schedule Task Recon via ITaskSchedulerService\n    Description: Detects remote RPC calls to read information about scheduled tasks\n    Attack Tags: attack.discovery\n    Suspicious Keywords/Patterns (Runtime): 1, 3, 4, 10, 11, 12, 13, 14, 15\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "f177f2bc-5f3e-4453-b599-57eefce9a59c",
+    "title": "Remote Schedule Task Recon via AtScv",
+    "description": "Detects remote RPC calls to read information about scheduled tasks via AtScv",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/rpc_firewall/rpc_firewall_atsvc_recon.yml",
+    "ai_context": "\n    Threat Detection Rule: Remote Schedule Task Recon via AtScv\n    Description: Detects remote RPC calls to read information about scheduled tasks via AtScv\n    Attack Tags: attack.discovery\n    Suspicious Keywords/Patterns (Runtime): 0, 1\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "d8ffe17e-04be-4886-beb9-c1dd1944b9a8",
+    "title": "Remote Registry Recon",
+    "description": "Detects remote RPC calls to collect information",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/rpc_firewall/rpc_firewall_remote_registry_recon.yml",
+    "ai_context": "\n    Threat Detection Rule: Remote Registry Recon\n    Description: Detects remote RPC calls to collect information\n    Attack Tags: attack.discovery\n    Suspicious Keywords/Patterns (Runtime): 6, 7, 8, 13, 18, 19, 21, 22, 23, 35\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "10018e73-06ec-46ec-8107-9172f1e04ff2",
+    "title": "Remote Server Service Abuse for Lateral Movement",
+    "description": "Detects remote RPC calls to possibly abuse remote encryption service via MS-EFSR",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/rpc_firewall/rpc_firewall_remote_service_lateral_movement.yml",
+    "ai_context": "\n    Threat Detection Rule: Remote Server Service Abuse for Lateral Movement\n    Description: Detects remote RPC calls to possibly abuse remote encryption service via MS-EFSR\n    Attack Tags: attack.lateral-movement, attack.execution, attack.t1569.002\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "35c55673-84ca-4e99-8d09-e334f3c29539",
+    "title": "Remote Registry Lateral Movement",
+    "description": "Detects remote RPC calls to modify the registry and possible execute code",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/rpc_firewall/rpc_firewall_remote_registry_lateral_movement.yml",
+    "ai_context": "\n    Threat Detection Rule: Remote Registry Lateral Movement\n    Description: Detects remote RPC calls to modify the registry and possible execute code\n    Attack Tags: attack.defense-evasion, attack.lateral-movement, attack.t1112, attack.persistence\n    Suspicious Keywords/Patterns (Runtime): 6, 7, 8, 13, 18, 19, 21, 22, 23, 35\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "0fcd1c79-4eeb-4746-aba9-1b458f7a79cb",
+    "title": "Remote Schedule Task Lateral Movement via ATSvc",
+    "description": "Detects remote RPC calls to create or execute a scheduled task via ATSvc",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/rpc_firewall/rpc_firewall_atsvc_lateral_movement.yml",
+    "ai_context": "\n    Threat Detection Rule: Remote Schedule Task Lateral Movement via ATSvc\n    Description: Detects remote RPC calls to create or execute a scheduled task via ATSvc\n    Attack Tags: attack.privilege-escalation, attack.lateral-movement, attack.execution, attack.persistence, attack.t1053, attack.t1053.002\n    Suspicious Keywords/Patterns (Runtime): 0, 1\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "ace3ff54-e7fd-46bd-8ea0-74b49a0aca1d",
+    "title": "Remote Schedule Task Lateral Movement via ITaskSchedulerService",
+    "description": "Detects remote RPC calls to create or execute a scheduled task",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/rpc_firewall/rpc_firewall_itaskschedulerservice_lateral_movement.yml",
+    "ai_context": "\n    Threat Detection Rule: Remote Schedule Task Lateral Movement via ITaskSchedulerService\n    Description: Detects remote RPC calls to create or execute a scheduled task\n    Attack Tags: attack.privilege-escalation, attack.persistence, attack.execution, attack.lateral-movement, attack.t1053, attack.t1053.002\n    Suspicious Keywords/Patterns (Runtime): 1, 3, 4, 10, 11, 12, 13, 14, 15\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "56fda488-113e-4ce9-8076-afc2457922c3",
+    "title": "Possible DCSync Attack",
+    "description": "Detects remote RPC calls to MS-DRSR from non DC hosts, which could indicate DCSync / DCShadow attacks.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/rpc_firewall/rpc_firewall_dcsync_attack.yml",
+    "ai_context": "\n    Threat Detection Rule: Possible DCSync Attack\n    Description: Detects remote RPC calls to MS-DRSR from non DC hosts, which could indicate DCSync / DCShadow attacks.\n    Attack Tags: attack.t1033, attack.discovery\n    Suspicious Keywords/Patterns (Runtime): 0, 1, 12\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "b6ea3cc7-542f-43ef-bbe4-980fbed444c7",
+    "title": "Remote Server Service Abuse",
+    "description": "Detects remote RPC calls to possibly abuse remote encryption service via MS-SRVS",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/rpc_firewall/rpc_firewall_remote_server_service_abuse.yml",
+    "ai_context": "\n    Threat Detection Rule: Remote Server Service Abuse\n    Description: Detects remote RPC calls to possibly abuse remote encryption service via MS-SRVS\n    Attack Tags: attack.lateral-movement\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "6d580420-ff3f-4e0e-b6b0-41b90c787e28",
+    "title": "SharpHound Recon Sessions",
+    "description": "Detects remote RPC calls useb by SharpHound to map remote connections and local group membership.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/rpc_firewall/rpc_firewall_sharphound_recon_sessions.yml",
+    "ai_context": "\n    Threat Detection Rule: SharpHound Recon Sessions\n    Description: Detects remote RPC calls useb by SharpHound to map remote connections and local group membership.\n    Attack Tags: attack.discovery, attack.t1033\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "0a3ff354-93fc-4273-8a03-1078782de5b7",
+    "title": "Recon Activity via SASec",
+    "description": "Detects remote RPC calls to read information about scheduled tasks via SASec",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/rpc_firewall/rpc_firewall_sasec_recon.yml",
+    "ai_context": "\n    Threat Detection Rule: Recon Activity via SASec\n    Description: Detects remote RPC calls to read information about scheduled tasks via SASec\n    Attack Tags: attack.discovery\n    Suspicious Keywords/Patterns (Runtime): 0, 1\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "aff229ab-f8cd-447b-b215-084d11e79eb0",
+    "title": "Remote Schedule Task Lateral Movement via SASec",
+    "description": "Detects remote RPC calls to create or execute a scheduled task via SASec",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/rpc_firewall/rpc_firewall_sasec_lateral_movement.yml",
+    "ai_context": "\n    Threat Detection Rule: Remote Schedule Task Lateral Movement via SASec\n    Description: Detects remote RPC calls to create or execute a scheduled task via SASec\n    Attack Tags: attack.privilege-escalation, attack.lateral-movement, attack.execution, attack.persistence, attack.t1053, attack.t1053.002\n    Suspicious Keywords/Patterns (Runtime): 0, 1\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "68050b10-e477-4377-a99b-3721b422d6ef",
+    "title": "Remote DCOM/WMI Lateral Movement",
+    "description": "Detects remote RPC calls that performs remote DCOM operations. These could be abused for lateral movement via DCOM or WMI.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/rpc_firewall/rpc_firewall_remote_dcom_or_wmi.yml",
+    "ai_context": "\n    Threat Detection Rule: Remote DCOM/WMI Lateral Movement\n    Description: Detects remote RPC calls that performs remote DCOM operations. These could be abused for lateral movement via DCOM or WMI.\n    Attack Tags: attack.lateral-movement, attack.execution, attack.t1021.003, attack.t1047\n    Suspicious Keywords/Patterns (Runtime): 4d9f4ab8-7d1c-11cf-861e-0020af6e7c57, 99fcfec4-5260-101b-bbcb-00aa0021347a, 000001a0-0000-0000-c000-000000000046, 00000131-0000-0000-c000-000000000046, 00000143-0000-0000-c000-000000000046, 00000000-0000-0000-c000-000000000046\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "97661d9d-2beb-4630-b423-68985291a8af",
+    "title": "Potential RCE Exploitation Attempt In NodeJS",
+    "description": "Detects process execution related errors in NodeJS. If the exceptions are caused due to user input then they may suggest an RCE vulnerability.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/nodejs/nodejs_rce_exploitation_attempt.yml",
+    "ai_context": "\n    Threat Detection Rule: Potential RCE Exploitation Attempt In NodeJS\n    Description: Detects process execution related errors in NodeJS. If the exceptions are caused due to user input then they may suggest an RCE vulnerability.\n    Attack Tags: attack.initial-access, attack.t1190\n    Suspicious Keywords/Patterns (Runtime): node:child_process\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "19aefed0-ffd4-47dc-a7fc-f8b1425e84f9",
+    "title": "Python SQL Exceptions",
+    "description": "Generic rule for SQL exceptions in Python according to PEP 249",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/python/app_python_sql_exceptions.yml",
+    "ai_context": "\n    Threat Detection Rule: Python SQL Exceptions\n    Description: Generic rule for SQL exceptions in Python according to PEP 249\n    Attack Tags: attack.initial-access, attack.t1190\n    Suspicious Keywords/Patterns (Runtime): DataError, IntegrityError, ProgrammingError, OperationalError\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "c4e06896-e27c-4583-95ac-91ce2279345d",
+    "title": "Potential XXE Exploitation Attempt In JVM Based Application",
+    "description": "Detects XML parsing issues, if the application expects to work with XML make sure that the parser is initialized safely.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/jvm/java_xxe_exploitation_attempt.yml",
+    "ai_context": "\n    Threat Detection Rule: Potential XXE Exploitation Attempt In JVM Based Application\n    Description: Detects XML parsing issues, if the application expects to work with XML make sure that the parser is initialized safely.\n    Attack Tags: attack.initial-access, attack.t1190\n    Suspicious Keywords/Patterns (Runtime): SAXParseException, DOMException\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "d65f37da-a26a-48f8-8159-3dde96680ad2",
+    "title": "Process Execution Error In JVM Based Application",
+    "description": "Detects process execution related exceptions in JVM based apps, often relates to RCE",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/jvm/java_rce_exploitation_attempt.yml",
+    "ai_context": "\n    Threat Detection Rule: Process Execution Error In JVM Based Application\n    Description: Detects process execution related exceptions in JVM based apps, often relates to RCE\n    Attack Tags: attack.initial-access, attack.t1190\n    Suspicious Keywords/Patterns (Runtime): Cannot run program, java.lang.ProcessImpl, java.lang.ProcessBuilder\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "e032f5bc-4563-4096-ae3b-064bab588685",
+    "title": "Potential Local File Read Vulnerability In JVM Based Application",
+    "description": "Detects potential local file read vulnerability in JVM based apps.\nIf the exceptions are caused due to user input and contain path traversal payloads then it's a red flag.\n",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/jvm/java_local_file_read.yml",
+    "ai_context": "\n    Threat Detection Rule: Potential Local File Read Vulnerability In JVM Based Application\n    Description: Detects potential local file read vulnerability in JVM based apps.\nIf the exceptions are caused due to user input and contain path traversal payloads then it's a red flag.\n\n    Attack Tags: attack.initial-access, attack.t1190\n    Suspicious Keywords/Patterns (Runtime): FileNotFoundException, /../../..\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "bb0e9cec-d4da-46f5-997f-22efc59f3dca",
+    "title": "Potential JNDI Injection Exploitation In JVM Based Application",
+    "description": "Detects potential JNDI Injection exploitation. Often coupled with Log4Shell exploitation.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/jvm/java_jndi_injection_exploitation_attempt.yml",
+    "ai_context": "\n    Threat Detection Rule: Potential JNDI Injection Exploitation In JVM Based Application\n    Description: Detects potential JNDI Injection exploitation. Often coupled with Log4Shell exploitation.\n    Attack Tags: attack.initial-access, attack.t1190\n    Suspicious Keywords/Patterns (Runtime): com.sun.jndi.ldap., org.apache.logging.log4j.core.net.JndiManager\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "4d0af518-828e-4a04-a751-a7d03f3046ad",
+    "title": "Potential OGNL Injection Exploitation In JVM Based Application",
+    "description": "Detects potential OGNL Injection exploitation, which may lead to RCE.\nOGNL is an expression language that is supported in many JVM based systems.\nOGNL Injection is the reason for some high profile RCE's such as Apache Struts (CVE-2017-5638) and Confluence (CVE-2022-26134)\n",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/jvm/java_ognl_injection_exploitation_attempt.yml",
+    "ai_context": "\n    Threat Detection Rule: Potential OGNL Injection Exploitation In JVM Based Application\n    Description: Detects potential OGNL Injection exploitation, which may lead to RCE.\nOGNL is an expression language that is supported in many JVM based systems.\nOGNL Injection is the reason for some high profile RCE's such as Apache Struts (CVE-2017-5638) and Confluence (CVE-2022-26134)\n\n    Attack Tags: attack.initial-access, attack.t1190, cve.2017-5638, cve.2022-26134\n    Suspicious Keywords/Patterns (Runtime): org.apache.commons.ognl.OgnlException, ExpressionSyntaxException\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "16c86189-b556-4ee8-b4c7-7e350a195a4f",
+    "title": "Potential Server Side Template Injection In Velocity",
+    "description": "Detects exceptions in velocity template renderer, this most likely happens due to dynamic rendering of user input and may lead to RCE.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/velocity/velocity_ssti_injection.yml",
+    "ai_context": "\n    Threat Detection Rule: Potential Server Side Template Injection In Velocity\n    Description: Detects exceptions in velocity template renderer, this most likely happens due to dynamic rendering of user input and may lead to RCE.\n    Attack Tags: attack.initial-access, attack.t1190\n    Suspicious Keywords/Patterns (Runtime): ParseErrorException, VelocityException, TemplateInitException\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "fd435618-981e-4a7c-81f8-f78ce480d616",
+    "title": "Django Framework Exceptions",
+    "description": "Detects suspicious Django web application framework exceptions that could indicate exploitation attempts",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/django/appframework_django_exceptions.yml",
+    "ai_context": "\n    Threat Detection Rule: Django Framework Exceptions\n    Description: Detects suspicious Django web application framework exceptions that could indicate exploitation attempts\n    Attack Tags: attack.initial-access, attack.t1190\n    Suspicious Keywords/Patterns (Runtime): SuspiciousOperation, DisallowedHost, DisallowedModelAdminLookup, DisallowedModelAdminToField, DisallowedRedirect, InvalidSessionKey, RequestDataTooBig, SuspiciousFileOperation, SuspiciousMultipartForm, SuspiciousSession, TooManyFieldsSent, PermissionDenied\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "0d2c3d4c-4b48-4ac3-8f23-ea845746bb1a",
+    "title": "Ruby on Rails Framework Exceptions",
+    "description": "Detects suspicious Ruby on Rails exceptions that could indicate exploitation attempts",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/ruby/appframework_ruby_on_rails_exceptions.yml",
+    "ai_context": "\n    Threat Detection Rule: Ruby on Rails Framework Exceptions\n    Description: Detects suspicious Ruby on Rails exceptions that could indicate exploitation attempts\n    Attack Tags: attack.initial-access, attack.t1190\n    Suspicious Keywords/Patterns (Runtime): ActionController::InvalidAuthenticityToken, ActionController::InvalidCrossOriginRequest, ActionController::MethodNotAllowed, ActionController::BadRequest, ActionController::ParameterMissing\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "e9edd087-89d8-48c9-b0b4-5b9bb10896b8",
+    "title": "Potential SpEL Injection In Spring Framework",
+    "description": "Detects potential SpEL Injection exploitation, which may lead to RCE.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/spring/spring_spel_injection.yml",
+    "ai_context": "\n    Threat Detection Rule: Potential SpEL Injection In Spring Framework\n    Description: Detects potential SpEL Injection exploitation, which may lead to RCE.\n    Attack Tags: attack.initial-access, attack.t1190\n    Suspicious Keywords/Patterns (Runtime): org.springframework.expression.ExpressionException\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "ae48ab93-45f7-4051-9dfe-5d30a3f78e33",
+    "title": "Spring Framework Exceptions",
+    "description": "Detects suspicious Spring framework exceptions that could indicate exploitation attempts",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/spring/spring_application_exceptions.yml",
+    "ai_context": "\n    Threat Detection Rule: Spring Framework Exceptions\n    Description: Detects suspicious Spring framework exceptions that could indicate exploitation attempts\n    Attack Tags: attack.initial-access, attack.t1190\n    Suspicious Keywords/Patterns (Runtime): AccessDeniedException, CsrfException, InvalidCsrfTokenException, MissingCsrfTokenException, CookieTheftException, InvalidCookieException, RequestRejectedException\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "22777c9e-873a-4b49-855f-6072ab861a52",
+    "title": "OpenCanary - SMB File Open Request",
+    "description": "Detects instances where an SMB service on an OpenCanary node has had a file open request.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/opencanary/opencanary_smb_file_open.yml",
+    "ai_context": "\n    Threat Detection Rule: OpenCanary - SMB File Open Request\n    Description: Detects instances where an SMB service on an OpenCanary node has had a file open request.\n    Attack Tags: attack.lateral-movement, attack.collection, attack.t1021, attack.t1005\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "547dfc53-ebf6-4afe-8d2e-793d9574975d",
+    "title": "OpenCanary - REDIS Action Command Attempt",
+    "description": "Detects instances where a REDIS service on an OpenCanary node has had an action command attempted.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/opencanary/opencanary_redis_command.yml",
+    "ai_context": "\n    Threat Detection Rule: OpenCanary - REDIS Action Command Attempt\n    Description: Detects instances where a REDIS service on an OpenCanary node has had an action command attempted.\n    Attack Tags: attack.credential-access, attack.collection, attack.t1003, attack.t1213\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "4fe17521-aef3-4e6a-9d6b-4a7c8de155a8",
+    "title": "OpenCanary - GIT Clone Request",
+    "description": "Detects instances where a GIT service on an OpenCanary node has had Git Clone request.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/opencanary/opencanary_git_clone_request.yml",
+    "ai_context": "\n    Threat Detection Rule: OpenCanary - GIT Clone Request\n    Description: Detects instances where a GIT service on an OpenCanary node has had Git Clone request.\n    Attack Tags: attack.collection, attack.t1213\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "ff7139bc-fdb1-4437-92f2-6afefe8884cb",
+    "title": "OpenCanary - SSH Login Attempt",
+    "description": "Detects instances where an SSH service on an OpenCanary node has had a login attempt.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/opencanary/opencanary_ssh_login_attempt.yml",
+    "ai_context": "\n    Threat Detection Rule: OpenCanary - SSH Login Attempt\n    Description: Detects instances where an SSH service on an OpenCanary node has had a login attempt.\n    Attack Tags: attack.privilege-escalation, attack.defense-evasion, attack.initial-access, attack.lateral-movement, attack.persistence, attack.t1133, attack.t1021, attack.t1078\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "af6c3078-84cd-4c68-8842-08b76bd81b13",
+    "title": "OpenCanary - HTTP GET Request",
+    "description": "Detects instances where an HTTP service on an OpenCanary node has received a GET request.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/opencanary/opencanary_http_get.yml",
+    "ai_context": "\n    Threat Detection Rule: OpenCanary - HTTP GET Request\n    Description: Detects instances where an HTTP service on an OpenCanary node has received a GET request.\n    Attack Tags: attack.initial-access, attack.t1190\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "e30de276-68ec-435c-ab99-ef3befec6c61",
+    "title": "OpenCanary - SIP Request",
+    "description": "Detects instances where an SIP service on an OpenCanary node has had a SIP request.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/opencanary/opencanary_sip_request.yml",
+    "ai_context": "\n    Threat Detection Rule: OpenCanary - SIP Request\n    Description: Detects instances where an SIP service on an OpenCanary node has had a SIP request.\n    Attack Tags: attack.collection, attack.t1123\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "7cded4b3-f09e-405a-b96f-24248433ba44",
+    "title": "OpenCanary - NTP Monlist Request",
+    "description": "Detects instances where an NTP service on an OpenCanary node has had a NTP monlist request.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/opencanary/opencanary_ntp_monlist.yml",
+    "ai_context": "\n    Threat Detection Rule: OpenCanary - NTP Monlist Request\n    Description: Detects instances where an NTP service on an OpenCanary node has had a NTP monlist request.\n    Attack Tags: attack.impact, attack.t1498\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "e9856028-fd4e-46e6-b3d1-10f7ceb95078",
+    "title": "OpenCanary - SNMP OID Request",
+    "description": "Detects instances where an SNMP service on an OpenCanary node has had an OID request.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/opencanary/opencanary_snmp_cmd.yml",
+    "ai_context": "\n    Threat Detection Rule: OpenCanary - SNMP OID Request\n    Description: Detects instances where an SNMP service on an OpenCanary node has had an OID request.\n    Attack Tags: attack.discovery, attack.lateral-movement, attack.t1016, attack.t1021\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "5498fc09-adc6-4804-b9d9-5cca1f0b8760",
+    "title": "OpenCanary - HTTPPROXY Login Attempt",
+    "description": "Detects instances where an HTTPPROXY service on an OpenCanary node has had an attempt to proxy another page.\n",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/opencanary/opencanary_httpproxy_login_attempt.yml",
+    "ai_context": "\n    Threat Detection Rule: OpenCanary - HTTPPROXY Login Attempt\n    Description: Detects instances where an HTTPPROXY service on an OpenCanary node has had an attempt to proxy another page.\n\n    Attack Tags: attack.initial-access, attack.defense-evasion, attack.command-and-control, attack.t1090\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "6e78f90f-0043-4a01-ac41-f97681613a66",
+    "title": "OpenCanary - MSSQL Login Attempt Via Windows Authentication",
+    "description": "Detects instances where an MSSQL service on an OpenCanary node has had a login attempt using Windows Authentication.\n",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/opencanary/opencanary_mssql_login_winauth.yml",
+    "ai_context": "\n    Threat Detection Rule: OpenCanary - MSSQL Login Attempt Via Windows Authentication\n    Description: Detects instances where an MSSQL service on an OpenCanary node has had a login attempt using Windows Authentication.\n\n    Attack Tags: attack.credential-access, attack.collection, attack.t1003, attack.t1213\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "9db5446c-b44a-4291-8b89-fcab5609c3b3",
+    "title": "OpenCanary - VNC Connection Attempt",
+    "description": "Detects instances where a VNC service on an OpenCanary node has had a connection attempt.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/opencanary/opencanary_vnc_connection_attempt.yml",
+    "ai_context": "\n    Threat Detection Rule: OpenCanary - VNC Connection Attempt\n    Description: Detects instances where a VNC service on an OpenCanary node has had a connection attempt.\n    Attack Tags: attack.lateral-movement, attack.t1021\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "af1ac430-df6b-4b38-b976-0b52f07a0252",
+    "title": "OpenCanary - HTTP POST Login Attempt",
+    "description": "Detects instances where an HTTP service on an OpenCanary node has had login attempt via Form POST.\n",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/opencanary/opencanary_http_post_login_attempt.yml",
+    "ai_context": "\n    Threat Detection Rule: OpenCanary - HTTP POST Login Attempt\n    Description: Detects instances where an HTTP service on an OpenCanary node has had login attempt via Form POST.\n\n    Attack Tags: attack.initial-access, attack.t1190\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "512cff7a-683a-43ad-afe0-dd398e872f36",
+    "title": "OpenCanary - Telnet Login Attempt",
+    "description": "Detects instances where a Telnet service on an OpenCanary node has had a login attempt.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/opencanary/opencanary_telnet_login_attempt.yml",
+    "ai_context": "\n    Threat Detection Rule: OpenCanary - Telnet Login Attempt\n    Description: Detects instances where a Telnet service on an OpenCanary node has had a login attempt.\n    Attack Tags: attack.privilege-escalation, attack.persistence, attack.defense-evasion, attack.initial-access, attack.command-and-control, attack.t1133, attack.t1078\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "6991bc2b-ae2e-447f-bc55-3a1ba04c14e5",
+    "title": "OpenCanary - FTP Login Attempt",
+    "description": "Detects instances where an FTP service on an OpenCanary node has had a login attempt.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/opencanary/opencanary_ftp_login_attempt.yml",
+    "ai_context": "\n    Threat Detection Rule: OpenCanary - FTP Login Attempt\n    Description: Detects instances where an FTP service on an OpenCanary node has had a login attempt.\n    Attack Tags: attack.initial-access, attack.exfiltration, attack.lateral-movement, attack.t1190, attack.t1021\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "e7d79a1b-25ed-4956-bd56-bd344fa8fd06",
+    "title": "OpenCanary - MySQL Login Attempt",
+    "description": "Detects instances where a MySQL service on an OpenCanary node has had a login attempt.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/opencanary/opencanary_mysql_login_attempt.yml",
+    "ai_context": "\n    Threat Detection Rule: OpenCanary - MySQL Login Attempt\n    Description: Detects instances where a MySQL service on an OpenCanary node has had a login attempt.\n    Attack Tags: attack.credential-access, attack.collection, attack.t1003, attack.t1213\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "cd55f721-5623-4663-bd9b-5229cab5237d",
+    "title": "OpenCanary - SSH New Connection Attempt",
+    "description": "Detects instances where an SSH service on an OpenCanary node has had a connection attempt.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/opencanary/opencanary_ssh_new_connection.yml",
+    "ai_context": "\n    Threat Detection Rule: OpenCanary - SSH New Connection Attempt\n    Description: Detects instances where an SSH service on an OpenCanary node has had a connection attempt.\n    Attack Tags: attack.privilege-escalation, attack.defense-evasion, attack.initial-access, attack.lateral-movement, attack.persistence, attack.t1133, attack.t1021, attack.t1078\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "b4e6b016-a2ac-4759-ad85-8000b300d61e",
+    "title": "OpenCanary - TFTP Request",
+    "description": "Detects instances where a TFTP service on an OpenCanary node has had a request.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/opencanary/opencanary_tftp_request.yml",
+    "ai_context": "\n    Threat Detection Rule: OpenCanary - TFTP Request\n    Description: Detects instances where a TFTP service on an OpenCanary node has had a request.\n    Attack Tags: attack.exfiltration, attack.t1041\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "3ec9a16d-0b4f-4967-9542-ebf38ceac7dd",
+    "title": "OpenCanary - MSSQL Login Attempt Via SQLAuth",
+    "description": "Detects instances where an MSSQL service on an OpenCanary node has had a login attempt using SQLAuth.\n",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/opencanary/opencanary_mssql_login_sqlauth.yml",
+    "ai_context": "\n    Threat Detection Rule: OpenCanary - MSSQL Login Attempt Via SQLAuth\n    Description: Detects instances where an MSSQL service on an OpenCanary node has had a login attempt using SQLAuth.\n\n    Attack Tags: attack.credential-access, attack.collection, attack.t1003, attack.t1213\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "8a670c6d-7189-4b1c-8017-a417ca84a086",
+    "title": "Suspicious SQL Error Messages",
+    "description": "Detects SQL error messages that indicate probing for an injection attack",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/sql/app_sqlinjection_errors.yml",
+    "ai_context": "\n    Threat Detection Rule: Suspicious SQL Error Messages\n    Description: Detects SQL error messages that indicate probing for an injection attack\n    Attack Tags: attack.initial-access, attack.t1190\n    Suspicious Keywords/Patterns (Runtime): quoted string not properly terminated, You have an error in your SQL syntax, Unclosed quotation mark, near \"*\": syntax error, SELECTs to the left and right of UNION do not have the same number of result columns\n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "ad9012a6-e518-4432-9890-f3b82b8fc71f",
+    "title": "Potential Sidecar Injection Into Running Deployment",
+    "description": "Detects attempts to inject a sidecar container into a running deployment.\nA sidecar container is an additional container within a pod, that resides alongside the main container.\nOne way to add containers to running resources like Deployments/DeamonSets/StatefulSets, is via a \"kubectl patch\" operation.\nBy injecting a new container within a legitimate pod, an attacker can run their code and hide their activity, instead of running their own separated pod in the cluster.\n",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/kubernetes/audit/kubernetes_audit_sidecar_injection.yml",
+    "ai_context": "\n    Threat Detection Rule: Potential Sidecar Injection Into Running Deployment\n    Description: Detects attempts to inject a sidecar container into a running deployment.\nA sidecar container is an additional container within a pod, that resides alongside the main container.\nOne way to add containers to running resources like Deployments/DeamonSets/StatefulSets, is via a \"kubectl patch\" operation.\nBy injecting a new container within a legitimate pod, an attacker can run their code and hide their activity, instead of running their own separated pod in the cluster.\n\n    Attack Tags: attack.t1609, attack.execution\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "eeb3e9e1-b685-44e4-9232-6bb701f925b5",
+    "title": "Kubernetes Secrets Enumeration",
+    "description": "Detects enumeration of Kubernetes secrets.",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/kubernetes/audit/kubernetes_audit_secrets_enumeration.yml",
+    "ai_context": "\n    Threat Detection Rule: Kubernetes Secrets Enumeration\n    Description: Detects enumeration of Kubernetes secrets.\n    Attack Tags: attack.t1552.007, attack.credential-access\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "402b955c-8fe0-4a8c-b635-622b4ac5f902",
+    "title": "Container With A hostPath Mount Created",
+    "description": "Detects creation of a container with a hostPath mount.\nA hostPath volume mounts a directory or a file from the node to the container.\nAttackers who have permissions to create a new pod in the cluster may create one with a writable hostPath volume and chroot to escape to the underlying node.\n",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/kubernetes/audit/kubernetes_audit_hostpath_mount.yml",
+    "ai_context": "\n    Threat Detection Rule: Container With A hostPath Mount Created\n    Description: Detects creation of a container with a hostPath mount.\nA hostPath volume mounts a directory or a file from the node to the container.\nAttackers who have permissions to create a new pod in the cluster may create one with a writable hostPath volume and chroot to escape to the underlying node.\n\n    Attack Tags: attack.t1611, attack.privilege-escalation\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "c5cd1b20-36bb-488d-8c05-486be3d0cb97",
+    "title": "Privileged Container Deployed",
+    "description": "Detects the creation of a \"privileged\" container, an action which could be indicative of a threat actor mounting a container breakout attacks.\nA privileged container is a container that can access the host with all of the root capabilities of the host machine. This allows it to view, interact and modify processes, network operations, IPC calls, the file system, mount points, SELinux configurations etc. as the root user on the host.\nVarious versions of \"privileged\" containers can be specified, e.g. by setting the securityContext.privileged flag in the resource specification, setting non-standard Linux capabilities, or configuring the hostNetwork/hostPID fields\n",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/kubernetes/audit/kubernetes_audit_privileged_pod_creation.yml",
+    "ai_context": "\n    Threat Detection Rule: Privileged Container Deployed\n    Description: Detects the creation of a \"privileged\" container, an action which could be indicative of a threat actor mounting a container breakout attacks.\nA privileged container is a container that can access the host with all of the root capabilities of the host machine. This allows it to view, interact and modify processes, network operations, IPC calls, the file system, mount points, SELinux configurations etc. as the root user on the host.\nVarious versions of \"privileged\" containers can be specified, e.g. by setting the securityContext.privileged flag in the resource specification, setting non-standard Linux capabilities, or configuring the hostNetwork/hostPID fields\n\n    Attack Tags: attack.t1611, attack.privilege-escalation\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "a1b0ca4e-7835-413e-8471-3ff2b8a66be6",
+    "title": "Potential Remote Command Execution In Pod Container",
+    "description": "Detects attempts to execute remote commands, within a Pod's container using e.g. the \"kubectl exec\" command.\n",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/kubernetes/audit/kubernetes_audit_exec_into_container.yml",
+    "ai_context": "\n    Threat Detection Rule: Potential Remote Command Execution In Pod Container\n    Description: Detects attempts to execute remote commands, within a Pod's container using e.g. the \"kubectl exec\" command.\n\n    Attack Tags: attack.t1609, attack.execution\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "3132570d-cab2-4561-9ea6-1743644b2290",
+    "title": "Kubernetes Events Deleted",
+    "description": "Detects when events are deleted in Kubernetes.\nAn adversary may delete Kubernetes events in an attempt to evade detection.\n",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/kubernetes/audit/kubernetes_audit_events_deleted.yml",
+    "ai_context": "\n    Threat Detection Rule: Kubernetes Events Deleted\n    Description: Detects when events are deleted in Kubernetes.\nAn adversary may delete Kubernetes events in an attempt to evade detection.\n\n    Attack Tags: attack.defense-evasion, attack.t1070\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "a80d927d-ac6e-443f-a867-e8d6e3897318",
+    "title": "Creation Of Pod In System Namespace",
+    "description": "Detects deployments of pods within the kube-system namespace, which could be intended to imitate system pods.\nSystem pods, created by controllers such as Deployments or DaemonSets have random suffixes in their names.\nAttackers can use this fact and name their backdoor pods as if they were created by these controllers to avoid detection.\nDeployment of such a backdoor container e.g. named kube-proxy-bv61v, could be attempted in the kube-system namespace alongside the other administrative containers.\n",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/kubernetes/audit/kubernetes_audit_pod_in_system_namespace.yml",
+    "ai_context": "\n    Threat Detection Rule: Creation Of Pod In System Namespace\n    Description: Detects deployments of pods within the kube-system namespace, which could be intended to imitate system pods.\nSystem pods, created by controllers such as Deployments or DaemonSets have random suffixes in their names.\nAttackers can use this fact and name their backdoor pods as if they were created by these controllers to avoid detection.\nDeployment of such a backdoor container e.g. named kube-proxy-bv61v, could be attempted in the kube-system namespace alongside the other administrative containers.\n\n    Attack Tags: attack.defense-evasion, attack.t1036.005\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "84b777bd-c946-4d17-aa2e-c39f5a454325",
+    "title": "RBAC Permission Enumeration Attempt",
+    "description": "Detects identities attempting to enumerate their Kubernetes RBAC permissions.\nIn the early stages of a breach, attackers will aim to list the permissions they have within the compromised environment.\nIn a Kubernetes cluster, this can be achieved by interacting with the API server, and querying the SelfSubjectAccessReview API via e.g. a \"kubectl auth can-i --list\" command.\nThis will enumerate the Role-Based Access Controls (RBAC) rules defining the compromised user's authorization.\n",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/kubernetes/audit/kubernetes_audit_rbac_permisions_listing.yml",
+    "ai_context": "\n    Threat Detection Rule: RBAC Permission Enumeration Attempt\n    Description: Detects identities attempting to enumerate their Kubernetes RBAC permissions.\nIn the early stages of a breach, attackers will aim to list the permissions they have within the compromised environment.\nIn a Kubernetes cluster, this can be achieved by interacting with the API server, and querying the SelfSubjectAccessReview API via e.g. a \"kubectl auth can-i --list\" command.\nThis will enumerate the Role-Based Access Controls (RBAC) rules defining the compromised user's authorization.\n\n    Attack Tags: attack.t1069.003, attack.t1087.004, attack.discovery\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "e31bae15-83ed-473e-bf31-faf4f8a17d36",
+    "title": "New Kubernetes Service Account Created",
+    "description": "Detects creation of new Kubernetes service account, which could indicate an attacker's attempt to persist within a cluster.\n",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/kubernetes/audit/kubernetes_audit_serviceaccount_creation.yml",
+    "ai_context": "\n    Threat Detection Rule: New Kubernetes Service Account Created\n    Description: Detects creation of new Kubernetes service account, which could indicate an attacker's attempt to persist within a cluster.\n\n    Attack Tags: attack.persistence, attack.t1136\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  },
+  {
+    "id": "40967487-139b-4811-81d9-c9767a92aa5a",
+    "title": "Deployment Deleted From Kubernetes Cluster",
+    "description": "Detects the removal of a deployment from a Kubernetes cluster.\nThis could indicate disruptive activity aiming to impact business operations.\n",
+    "source_file": "../../datasets/sources/yml/sigma_rules/rules/application/kubernetes/audit/kubernetes_audit_deployment_deleted.yml",
+    "ai_context": "\n    Threat Detection Rule: Deployment Deleted From Kubernetes Cluster\n    Description: Detects the removal of a deployment from a Kubernetes cluster.\nThis could indicate disruptive activity aiming to impact business operations.\n\n    Attack Tags: attack.t1498, attack.impact\n    Suspicious Keywords/Patterns (Runtime): \n    ",
+    "source": "sigma_threat_intel"
+  }
+]

@@ -123,8 +123,9 @@ export class TaskExecutor {
             p.on('error', reject)
         })
 
-        const prof = (job.profile && job.profile.trim().toLowerCase() === 'auto') ? 'auto' : 'auto'
-        const args = ['scan', '--json', '--quiet', '--config', prof, '--exclude', '__MACOSX/**', '--exclude', '**/._*', '--exclude', '**/.DS_Store', workDir]
+        // Use local rules
+        const rulesPath = '/opt/securetag/rules'
+        const args = ['scan', '--json', '--quiet', '--config', rulesPath, '--exclude', '__MACOSX/**', '--exclude', '**/._*', '--exclude', '**/.DS_Store', '--exclude', '.pre-commit-config.yaml', '--exclude', '.git', workDir]
 
         const result = await ExternalToolManager.execute('semgrep', args, { timeout: 300000 })
         const finished = Date.now()
@@ -171,21 +172,26 @@ export class TaskExecutor {
                 const cwe = it.extra && it.extra.metadata && it.extra.metadata.cwe ? String(it.extra.metadata.cwe) : null
                 const cve = it.extra && it.extra.metadata && it.extra.metadata.cve ? String(it.extra.metadata.cve) : null
                 const codeSnippet = (it.extra && it.extra.lines) || null
+                const autofix = it.fix || (it.extra && it.extra.fix) || null
 
                 // LLM Analysis
                 let analysis = null
                 // Analyze ALL findings regardless of severity
                 try {
+                    console.log(`DEBUG: Starting analysis for finding ${ruleId}`)
                     analysis = await this.llmClient.analyzeFinding({
                         rule_id: ruleId,
                         rule_name: ruleName,
                         file_path: filePath,
                         line: line,
                         code_snippet: codeSnippet,
-                        severity: sev
+                        severity: sev,
+                        autofix_suggestion: autofix
                     })
+                    console.log(`DEBUG: Analysis result for ${ruleId}:`, analysis ? 'SUCCESS' : 'NULL')
                 } catch (err: any) {
                     logger.error(`Failed to analyze finding ${fingerprint}`, err)
+                    console.error(`DEBUG: Analysis Exception for ${ruleId}:`, err)
                     // Optionally log to a DB table for errors if needed, 
                     // for now we rely on the worker logs and the fact that analysis is null.
                 }

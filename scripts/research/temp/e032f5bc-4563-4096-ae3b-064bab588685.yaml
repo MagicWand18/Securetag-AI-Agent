@@ -1,0 +1,77 @@
+rules:
+  - id: synthetic-e032f5bc45634096ae3b064bab588685
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: >
+      Posible vulnerabilidad de lectura de archivos locales (LFI / path traversal)
+      en una aplicación basada en JVM/Node: se concatena directamente input
+      controlado por el usuario a una ruta de archivo sin validación ni
+      normalización segura. Un atacante puede usar payloads como `../../../../etc/passwd`
+      para leer archivos arbitrarios. Este patrón está asociado a vulnerabilidades
+      de tipo directory traversal / local file read (por ejemplo, CVE similares
+      a e032f5bc-4563-4096-ae3b-064bab588685) y se explota típicamente durante
+      la fase de initial access (ATT&CK T1190).
+    metadata:
+      cve: "e032f5bc-4563-4096-ae3b-064bab588685"
+      source: "CISA_KEV"
+      attack:
+        - "attack.initial-access"
+        - "attack.t1190"
+      category: "security"
+      technology:
+        - "nodejs"
+        - "express"
+      vulnerability: "local-file-read"
+    patterns:
+      - pattern-either:
+          # Caso 1: path.join(__dirname, <input_usuario>)
+          - pattern: |
+              $PATH = require('path');
+              ...
+              app.$METHOD($ROUTE, ($REQ, $RES) => {
+                ...
+                $USER_INPUT = $REQ.$PROP.$FIELD;
+                ...
+                $FILE_PATH = $PATH.join(__dirname, $USER_INPUT);
+                ...
+                require('fs').readFile($FILE_PATH, ...);
+              });
+          # Caso 2: path.join(__dirname, <input_usuario>) con fs separado
+          - pattern: |
+              const $FS = require('fs');
+              const $PATH = require('path');
+              ...
+              app.$METHOD($ROUTE, ($REQ, $RES) => {
+                ...
+                $USER_INPUT = $REQ.$PROP.$FIELD;
+                ...
+                $FILE_PATH = $PATH.join(__dirname, $USER_INPUT);
+                ...
+                $FS.readFile($FILE_PATH, ...);
+              });
+          # Caso 3: uso directo de input de req.* en fs.readFile/path.join
+          - pattern: |
+              const $FS = require('fs');
+              const $PATH = require('path');
+              ...
+              app.$METHOD($ROUTE, ($REQ, $RES) => {
+                ...
+                $FS.readFile($PATH.join(__dirname, $REQ.$PROP.$FIELD), ...);
+              });
+      - pattern-not: |
+          $FILE_PATH = $PATH.join(__dirname, $SAFE);
+          ...
+          $FS.readFile($FILE_PATH, ...);
+      - pattern-not: |
+          $FILE_PATH = $PATH.join(__dirname, $USER_INPUT);
+          ...
+          if ($FILE_PATH.includes('..')) {
+            ...
+          }
+          ...
+          $FS.readFile($FILE_PATH, ...);
+    fix: >
+      No concatenar directamente input del usuario a rutas de archivo. Usar una
+      lista blanca de nombres de archivo permitidos, normalizar la ruta y
+      rechazar cualquier valor que contenga `..`, rutas absolutas o separadores
+      inesperados.

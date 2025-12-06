@@ -194,14 +194,15 @@ Para maximizar la eficiencia, el trabajo se divide en "Tracks" independientes qu
 ### 🔴 Track 5: Beta 2 - SAST Engine & Optimization (Agentes Server, Worker, Infra)
 **Objetivo**: Eliminar dependencias externas de licencias (Semgrep Cloud) y completar optimizaciones de producción.
 
-*   **Tarea 8.1: Motor SAST Propio (Semgrep OSS)** [ ]
+*   **Tarea 8.1: Motor SAST Propio (Semgrep OSS)** [x]
     *   **Contexto**: El uso de Semgrep Cloud requiere token y reglas propietarias que no podemos usar comercialmente en SaaS sin licencia Enterprise.
     *   **Acción**:
         *   Eliminar dependencia de `SEMGREP_APP_TOKEN`.
         *   Implementar gestión local de reglas (descarga de reglas OSS + reglas propias).
         *   Configurar Worker para ejecutar `semgrep --config /opt/securetag/rules`.
         *   Crear repositorio/directorio de reglas personalizadas.
-    *   **Estado**: 🔄 Pendiente
+    *   **Estado**: ✅ Completado (Iteración 3-4)
+    *   **Evidencia**: `EVIDENCE_Worker_4_20251203.md`
 
 *   **Tarea 8.2: Optimizaciones de Backend (Beta 1 Pending)** [ ]
     *   **Acción**:
@@ -212,6 +213,14 @@ Para maximizar la eficiencia, el trabajo se divide en "Tracks" independientes qu
 *   **Tarea 8.3: Automatización Total (CI/CD)** [ ]
     *   **Acción**:
         *   Habilitar y probar workflows de GitHub Actions para despliegue automático en DigitalOcean.
+    *   **Estado**: 🔄 Pendiente
+
+*   **Tarea 9.1: Pipeline de Reglas Sintéticas (AI-Generated Rules)** [ ]
+    *   **Objetivo**: Generar reglas Semgrep masivas usando modelos SOTA (GPT-5.1) a partir de CVEs.
+    *   **Estado**: 🔄 Pendiente
+
+*   **Tarea 9.2: Análisis de Flujo Avanzado (Cross-file Taint Analysis)** [ ]
+    *   **Objetivo**: Superar limitaciones de Semgrep OSS mediante estrategias híbridas (SAST + LLM) o herramientas de grafos.
     *   **Estado**: 🔄 Pendiente
 
 ## 📅 Plan de Ejecución Secuencial (Coordinación)

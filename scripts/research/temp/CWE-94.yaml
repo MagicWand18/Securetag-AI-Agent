@@ -1,0 +1,43 @@
+rules:
+  - id: synthetic-cwe94
+    languages: [javascript, typescript]
+    message: >
+      Posible CWE-94 (Code Injection): se está ejecutando código construido dinámicamente
+      a partir de datos potencialmente controlados por el usuario. Funciones como `eval`,
+      `Function`, `setTimeout`/`setInterval` con primer argumento string, o `vm.runInThisContext`
+      permiten la ejecución arbitraria de código si reciben entradas no validadas o no
+      saneadas. Evita ejecutar código proveniente de la entrada del usuario; en su lugar,
+      utiliza APIs específicas, validación estricta o listas blancas de operaciones permitidas.
+    severity: ERROR
+    patterns:
+      - pattern-either:
+          # eval(...)
+          - pattern: eval($CODE)
+          # new Function(...)
+          - pattern: new Function($ARGS, $CODE)
+          - pattern: new Function($CODE)
+          # setTimeout / setInterval con primer argumento string
+          - pattern: setTimeout($CODE, ...)
+          - pattern: setInterval($CODE, ...)
+          # vm.runInThisContext / vm.runInNewContext
+          - pattern: $VM.runInThisContext($CODE, ...)
+          - pattern: $VM.runInNewContext($CODE, ...)
+      - pattern-inside: |
+          const $URL = new URL($REQ.url, ...);
+          ...
+          $CODE = $URL.searchParams.get(...);
+          ...
+          $SOMETHING($CODE, ...);
+    metadata:
+      cwe:
+        - "CWE-94: Improper Control of Generation of Code ('Code Injection')"
+      category: security
+      technology:
+        - nodejs
+        - javascript
+        - typescript
+      references:
+        - https://cwe.mitre.org/data/definitions/94.html
+      likelihood: HIGH
+      impact: HIGH
+      confidence: MEDIUM

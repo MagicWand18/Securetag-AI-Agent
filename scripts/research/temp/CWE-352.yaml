@@ -1,0 +1,73 @@
+rules:
+  - id: synthetic-cwe352
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: >
+      Esta ruta HTTP modifica el estado del servidor (operación sensible) y
+      depende únicamente de cookies implícitas para la autenticación, sin
+      verificar ningún token CSRF (por ejemplo, cabecera personalizada,
+      token en cuerpo o en cookie con validación explícita). Esto permite
+      que un atacante fuerce al navegador de la víctima a enviar la
+      petición autenticada desde otro sitio (CSRF, CWE-352), cambiando
+      datos del usuario sin su consentimiento.
+    metadata:
+      cwe: "CWE-352"
+      owasp:
+        - "A01:2021 - Broken Access Control"
+      category: "security"
+      technology:
+        - express
+      references:
+        - "https://cwe.mitre.org/data/definitions/352.html"
+    patterns:
+      - pattern-either:
+          # app.post('/user/email', (req, res) => { ... })
+          - pattern: |
+              $APP.$METHOD($ROUTE, ($REQ, $RES) => {
+                ...
+              })
+          - pattern: |
+              $APP.$METHOD($ROUTE, function ($REQ, $RES) {
+                ...
+              })
+      - pattern-inside: |
+          const $APP = require('express')();
+          ...
+      - pattern-inside: |
+          $APP.$METHOD($ROUTE, $HANDLER);
+      - pattern-either:
+          # Acceso a datos de sesión/cookie para identificar usuario
+          - pattern: |
+              $USER_ID = $REQ.cookies.$COOKIE_NAME;
+          - pattern: |
+              $USER_ID = $REQ.session.$SESSION_KEY;
+          - pattern: |
+              const $USER_ID = $REQ.cookies.$COOKIE_NAME;
+          - pattern: |
+              const $USER_ID = $REQ.session.$SESSION_KEY;
+      - pattern-either:
+          # Operación de cambio de estado sobre un recurso de usuario
+          - pattern: |
+              $USERS[$USER_ID].$FIELD = $VALUE;
+          - pattern: |
+              $USER.$FIELD = $VALUE;
+          - pattern: |
+              $MODEL.update(...);
+          - pattern: |
+              $MODEL.save(...);
+      - pattern-not:
+          # No hay verificación explícita de token CSRF en cabecera
+          pattern: |
+            if ($REQ.headers['x-csrf-token'] || $REQ.get('x-csrf-token')) {
+              ...
+            }
+      - pattern-not:
+          # No hay verificación explícita de token CSRF en cuerpo
+          pattern: |
+            if ($REQ.body.$CSRF_FIELD) {
+              ...
+            }
+      - pattern-not:
+          # No hay uso de middleware típico de CSRF de Express
+          pattern: |
+            $APP.use(require('csurf')(...));

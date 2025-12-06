@@ -43,6 +43,7 @@ async function run() {
   logger.info(`Worker starting. ID: ${workerId}, Tenant: ${tenant}, LoopMode: ${loopMode}`)
   console.log('DEBUG: process.env.LOOP_MODE =', process.env.LOOP_MODE)
   console.log('DEBUG: loopMode variable =', loopMode)
+  console.log('DEBUG: *** DOCKER WORKER IS ALIVE AND LOGGING ***')
 
 
   do {

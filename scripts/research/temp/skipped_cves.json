@@ -1,0 +1,1442 @@
+[
+  {
+    "id": "CVE-2025-6558",
+    "reason": "No. Es un bug de memoria en componentes nativos de Chromium (ANGLE/GPU) explotable v\u00eda HTML, no un patr\u00f3n inseguro en c\u00f3digo JS/TS/Node propio. La detecci\u00f3n pasa por identificar la versi\u00f3n vulnerable del navegador/engine, no por analizar el c\u00f3digo fuente de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2019-5418",
+    "reason": "La vulnerabilidad CVE-2019-5418 se origina en el framework Ruby on Rails (Action View) y su manejo interno de `render file:` y cabeceras Accept, es decir, en una librer\u00eda de terceros. En una app JavaScript/TypeScript/Node.js no se puede detectar de forma confiable esta CVE concreta solo analizando el c\u00f3digo fuente propio, porque la ra\u00edz del problema est\u00e1 en la implementaci\u00f3n del framework Rails y se mitiga actualizando la dependencia afectada, no cambiando la l\u00f3gica de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2016-10033",
+    "reason": "La vulnerabilidad CVE-2016-10033 se origina en la implementaci\u00f3n interna de PHPMailer (librer\u00eda de terceros en PHP) y se mitiga actualizando la versi\u00f3n de la librer\u00eda, no modificando el c\u00f3digo propio en JavaScript/TypeScript/Node.js. Desde el c\u00f3digo fuente JS/TS/Node solo podr\u00edas inferir que se usa PHPMailer, pero no detectar de forma confiable si la versi\u00f3n concreta es vulnerable ni el patr\u00f3n exacto de inyecci\u00f3n, por lo que entra en la categor\u00eda de SCA y no de SAST sobre el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2025-48927",
+    "reason": "La exposici\u00f3n del endpoint /heapdump de Spring Boot Actuator es esencialmente un problema de configuraci\u00f3n de la plataforma/framework y de despliegue (endpoints de administraci\u00f3n expuestos), no de l\u00f3gica de negocio en c\u00f3digo JavaScript/TypeScript/Node.js. Detectarlo de forma confiable requiere conocer la configuraci\u00f3n efectiva del entorno (puertos, rutas, seguridad, perfiles de Spring, reverse proxies, etc.), lo que no puede inferirse \u00fanicamente del c\u00f3digo fuente JS/TS/Node.",
+    "approach": "DAST"
+  },
+  {
+    "id": "CVE-2025-5419",
+    "reason": "No, es un bug de memoria en el motor V8 (C/C++) de Chromium, explotable v\u00eda HTML/JS pero localizado en el componente compilado del navegador. No se puede detectar de forma confiable solo analizando el c\u00f3digo fuente JS/TS/Node.js de la aplicaci\u00f3n; la mitigaci\u00f3n pasa por actualizar el navegador/engine afectado.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2025-21479",
+    "reason": "No. Es un bug de memoria en chipsets Qualcomm (c\u00f3digo nativo/driver GPU). No puede detectarse de forma confiable analizando solo el c\u00f3digo fuente JavaScript/TypeScript/Node.js, ya que depende de la implementaci\u00f3n interna del hardware/firmware y drivers, no de patrones de uso en el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2025-21480",
+    "reason": "No. Es un bug de memoria en chipsets Qualcomm (driver/firmware GPU, c\u00f3digo nativo C/C++). No se manifiesta como patr\u00f3n inseguro en el c\u00f3digo fuente de una app JS/TS/Node.js, sino en el componente compilado subyacente, por lo que no es detectable de forma confiable solo con SAST sobre el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2024-56145",
+    "reason": "La vulnerabilidad est\u00e1 en Craft CMS (PHP) y depende de la configuraci\u00f3n de php.ini (`register_argc_argv`). No se trata de l\u00f3gica insegura en c\u00f3digo JavaScript/TypeScript/Node.js propio, sino de un fallo en un componente externo (CMS) y su configuraci\u00f3n de entorno, por lo que no puede detectarse de forma confiable analizando solo el c\u00f3digo fuente JS/TS/Node.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2025-10035",
+    "reason": "La vulnerabilidad se encuentra en el producto Fortra GoAnywhere MFT (componente tercero) y se mitiga actualizando dicho software, no modificando el c\u00f3digo fuente de una app Node.js propia. Adem\u00e1s, implica validaci\u00f3n criptogr\u00e1fica de licencias y deserializaci\u00f3n interna del producto, lo que no es observable ni verificable analizando solo el c\u00f3digo JS/TS de la aplicaci\u00f3n que lo consume.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2024-12987",
+    "reason": "La vulnerabilidad es una inyecci\u00f3n de comandos OS en el firmware de routers DrayTek, concretamente en /cgi-bin/mainfunction.cgi/apmcfgupload de la interfaz web. Es un fallo en un componente espec\u00edfico del dispositivo (muy probablemente C/C++/CGI embebido) y/o en su configuraci\u00f3n, no en una aplicaci\u00f3n Node.js/TS/JS gen\u00e9rica. No puede detectarse de forma confiable analizando solo el c\u00f3digo fuente de una app JavaScript/TypeScript/Node.js, ya que depende del comportamiento del firmware y del endpoint del router, no de patrones de uso de APIs en tu c\u00f3digo.",
+    "approach": "DAST"
+  },
+  {
+    "id": "CVE-2025-10585",
+    "reason": "No, es un bug de memoria en el motor V8 (C++) de Chromium. Afecta al runtime del navegador, no al c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. No se puede detectar de forma confiable solo analizando el c\u00f3digo de la app; la mitigaci\u00f3n pasa por actualizar el navegador/engine afectado.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2025-4427",
+    "reason": "La vulnerabilidad se origina en una implementaci\u00f3n insegura del framework Spring (librer\u00eda de terceros Java) y en c\u00f3mo su API maneja la autenticaci\u00f3n; en un contexto JavaScript/TypeScript/Node.js solo con an\u00e1lisis de c\u00f3digo propio no es posible detectarla de forma confiable, ya que depende de la versi\u00f3n/comportamiento de la librer\u00eda y de su configuraci\u00f3n, lo que encaja mejor con SCA y pruebas din\u00e1micas.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2024-38475",
+    "reason": "La vulnerabilidad CVE-2024-38475 est\u00e1 en Apache HTTP Server (m\u00f3dulo mod_rewrite), es decir, en un componente de infraestructura/servidor web escrito en C y su configuraci\u00f3n (reglas de reescritura). No se manifiesta en el c\u00f3digo fuente de la aplicaci\u00f3n Node.js/TS/JS, sino en c\u00f3mo Apache mapea URLs al sistema de archivos. Por tanto, no puede detectarse de forma confiable analizando \u00fanicamente el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2025-24813",
+    "reason": "CVE-2025-24813 es una vulnerabilidad en Apache Tomcat (componente servidor/tercero) relacionada con el manejo de rutas y peticiones HTTP (p.ej. partial PUT). No se origina en el c\u00f3digo fuente de la aplicaci\u00f3n Node.js/TS/JS, sino en la implementaci\u00f3n del servidor Tomcat y/o su configuraci\u00f3n. Por tanto, no es detectable de forma confiable solo analizando el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2025-2783",
+    "reason": "No, es un fallo de l\u00f3gica/gesti\u00f3n de handles en el sandbox de Chromium (componente nativo C++ del navegador). Afecta al motor subyacente, no al c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. La detecci\u00f3n pasa por identificar y actualizar la versi\u00f3n vulnerable del navegador/Chromium (SCA) o por an\u00e1lisis del binario, no por patrones en el c\u00f3digo fuente de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2019-9874",
+    "reason": "La vulnerabilidad se encuentra en el m\u00f3dulo Sitecore.Security.AntiCSRF del propio Sitecore (.NET) y se explota mediante deserializaci\u00f3n insegura interna al framework, no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Detectarla requiere conocer la versi\u00f3n vulnerable del producto y su comportamiento en tiempo de ejecuci\u00f3n, por lo que encaja mejor como un problema de componente de terceros que se mitiga actualizando Sitecore, no analizando el c\u00f3digo fuente JS/TS/Node.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2025-30066",
+    "reason": "La vulnerabilidad reside en una GitHub Action de terceros (tj-actions/changed-files) que contiene c\u00f3digo malicioso embebido y se mitiga actualizando/retirando dicha acci\u00f3n, no modificando el c\u00f3digo fuente de la aplicaci\u00f3n Node.js. Por tanto, entra en la categor\u00eda de vulnerabilidad en librer\u00eda/acci\u00f3n de terceros (SCA) y no puede detectarse de forma confiable analizando \u00fanicamente el c\u00f3digo de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2019-9875",
+    "reason": "La vulnerabilidad CVE-2019-9875 es un fallo de deserializaci\u00f3n insegura espec\u00edfico de Sitecore (.NET) en el m\u00f3dulo Sitecore.Security.AntiCSRF y se mitiga actualizando el producto. Es esencialmente un problema en una librer\u00eda/producto de terceros y en su implementaci\u00f3n interna, no en c\u00f3digo JavaScript/TypeScript/Node.js propio. Por tanto, no es razonable ni confiable detectarla \u00fanicamente analizando el c\u00f3digo fuente JS/TS/Node de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2024-4885",
+    "reason": "CVE-2024-4885 es una vulnerabilidad espec\u00edfica de Progress WhatsUp Gold (producto cerrado/tercero). La detecci\u00f3n fiable pasa por identificar la versi\u00f3n vulnerable del producto y su configuraci\u00f3n, no por patrones gen\u00e9ricos en c\u00f3digo fuente JavaScript/TypeScript/Node.js propio. Por tanto, entra en la categor\u00eda de vulnerabilidad en un componente de terceros que se mitiga actualizando o parcheando, no modificando el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2017-3066",
+    "reason": "CVE-2017-3066 es una vulnerabilidad de deserializaci\u00f3n en la librer\u00eda de terceros Apache BlazeDS incluida en Adobe ColdFusion. La correcci\u00f3n pasa por actualizar/ parchear la librer\u00eda vulnerable (SCA), no por cambiar el c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Por tanto, no es detectable de forma confiable solo analizando el c\u00f3digo propio en busca de patrones de uso inseguro.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2022-43769",
+    "reason": "La vulnerabilidad CVE-2022-43769 es un fallo espec\u00edfico del producto Hitachi Vantara Pentaho BA Server (inyecci\u00f3n de plantillas Spring en ficheros de propiedades) y se mitiga actualizando el componente afectado. No se trata de un patr\u00f3n gen\u00e9rico de uso inseguro en c\u00f3digo JavaScript/TypeScript/Node.js propio, sino de una vulnerabilidad en una librer\u00eda/servidor de terceros, por lo que entra en el criterio de exclusi\u00f3n de SCA.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2024-29059",
+    "reason": "CVE-2024-29059 es una vulnerabilidad en Microsoft .NET Framework (componente de plataforma), explotada a trav\u00e9s de c\u00f3mo el framework maneja ObjRef URI. No se origina en el c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n, sino en la implementaci\u00f3n interna del framework, y se mitiga actualizando el componente afectado. Por tanto, no es detectable de forma confiable solo con SAST sobre el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2025-0108",
+    "reason": "La vulnerabilidad CVE-2025-0108 es un fallo espec\u00edfico de un producto (PAN-OS de Palo Alto) en su interfaz de gesti\u00f3n y su l\u00f3gica interna de autenticaci\u00f3n/PHP. No se trata de c\u00f3digo JavaScript/TypeScript/Node.js de una aplicaci\u00f3n gen\u00e9rica, sino de un problema en el propio sistema/appliance y/o su configuraci\u00f3n. Por tanto, no es detectable de forma confiable analizando solo el c\u00f3digo fuente de una aplicaci\u00f3n JS/TS/Node.",
+    "approach": "DAST"
+  },
+  {
+    "id": "CVE-2024-45195",
+    "reason": "CVE-2024-45195 es una vulnerabilidad espec\u00edfica de Apache OFBiz (producto Java) y se trata de un problema de control de acceso/forced browsing en ese framework. En un proyecto JavaScript/TypeScript/Node.js, esta CVE se manifestar\u00eda \u00fanicamente como dependencia vulnerable de terceros, no como patr\u00f3n gen\u00e9rico de c\u00f3digo propio detectable por SAST. La detecci\u00f3n confiable pasa por identificar la versi\u00f3n vulnerable de OFBiz (u otro componente equivalente) y no por buscar patrones de uso de APIs en el c\u00f3digo fuente JS/TS/Node.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2024-55591",
+    "reason": "La vulnerabilidad se encuentra en el producto Fortinet (FortiOS/FortiProxy) y su implementaci\u00f3n interna del m\u00f3dulo Node.js/websocket, no en el c\u00f3digo fuente de una aplicaci\u00f3n Node.js est\u00e1ndar. Es esencialmente un fallo en un componente de terceros que se mitiga actualizando el producto, no modificando el c\u00f3digo propio. Por tanto, no es detectable de forma confiable solo analizando el c\u00f3digo fuente de una app JS/TS/Node.js.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2024-27348",
+    "reason": "CVE-2024-27348 es una vulnerabilidad espec\u00edfica de Apache HugeGraph-Server (producto/librer\u00eda de terceros). Su mitigaci\u00f3n pasa por actualizar la versi\u00f3n afectada o cambiar la configuraci\u00f3n del servidor, no por modificar el c\u00f3digo fuente de una app Node.js/TS/JS. Por tanto, no es detectable de forma confiable solo con SAST sobre el c\u00f3digo propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-15415",
+    "reason": "La vulnerabilidad es una inyecci\u00f3n de comandos OS en un endpoint CGI espec\u00edfico de firmware de dispositivos DrayTek, explotable v\u00eda un tipo de contenido y nombre de archivo concretos. Es un fallo en el backend/firmware (C/CGI u otro lenguaje del dispositivo), no en c\u00f3digo JavaScript/TypeScript/Node.js de una aplicaci\u00f3n gen\u00e9rica. Detectarla requiere analizar el componente concreto del dispositivo o probar el endpoint en ejecuci\u00f3n, no basta con revisar solo c\u00f3digo fuente JS/TS/Node.",
+    "approach": "DAST"
+  },
+  {
+    "id": "CVE-2024-32113",
+    "reason": "CVE-2024-32113 es una vulnerabilidad espec\u00edfica de Apache OFBiz (Java) y se mitiga actualizando el componente afectado; en un proyecto JavaScript/TypeScript/Node.js solo ser\u00eda detectable como dependencia vulnerable mediante SCA, no analizando el c\u00f3digo fuente propio en busca de patrones inseguros.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2024-7965",
+    "reason": "No: es un bug de memoria en el motor V8 (C/C++) del navegador/Chromium. Afecta al runtime subyacente, no a patrones de c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. La mitigaci\u00f3n pasa por actualizar el navegador/Chromium, no por cambiar el c\u00f3digo fuente propio, y no es detectable de forma confiable solo con SAST sobre el c\u00f3digo de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2024-38856",
+    "reason": "CVE-2024-38856 es una vulnerabilidad espec\u00edfica de Apache OFBiz (Java/Groovy) y se mitiga actualizando el componente afectado; en un proyecto JavaScript/TypeScript/Node.js solo ser\u00eda relevante como dependencia de terceros, por lo que la detecci\u00f3n correcta pasa por identificar la versi\u00f3n vulnerable del producto (SCA) y no por patrones de c\u00f3digo propio analizable v\u00eda SAST.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2024-7971",
+    "reason": "CVE-2024-7971 es un bug de memoria (type confusion / heap corruption) en el motor V8 de Chromium, implementado en C++. Afecta al navegador/engine subyacente, no al c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. No es detectable de forma confiable analizando solo el c\u00f3digo fuente de la app, sino actualizando el motor afectado y/o el navegador.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2024-4577",
+    "reason": "La vulnerabilidad CVE-2024-4577 reside en la implementaci\u00f3n de PHP en modo CGI sobre Windows (bug en el binario/int\u00e9rprete y su parsing de par\u00e1metros), no en el c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Se mitiga actualizando/ajustando el runtime/configuraci\u00f3n del servidor, no modificando la l\u00f3gica de la app. Por tanto, no es detectable de forma confiable solo con SAST sobre el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2017-1000353",
+    "reason": "La vulnerabilidad se debe a c\u00f3mo Jenkins (Java) deserializa objetos SignedObject en su canal de remoting/CLI, y se mitiga principalmente actualizando la versi\u00f3n afectada. Es un problema espec\u00edfico de un producto/tercera parte (Jenkins, en Java) y no de c\u00f3digo fuente propio en JavaScript/TypeScript/Node.js; por tanto, no es detectable de forma confiable solo analizando ese c\u00f3digo, sino gestionando dependencias y versiones.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2025-53690",
+    "reason": "La vulnerabilidad se basa en el uso de machine keys ASP.NET por defecto y su exposici\u00f3n, lo que es esencialmente un problema de configuraci\u00f3n/entorno de la plataforma Sitecore/ASP.NET y no de l\u00f3gica en c\u00f3digo JavaScript/TypeScript/Node.js. No puede detectarse de forma confiable solo analizando el c\u00f3digo fuente de la aplicaci\u00f3n, ya que depende de c\u00f3mo est\u00e9 configurado el servidor y las claves de m\u00e1quina en el entorno .NET/Sitecore.",
+    "approach": "DAST"
+  },
+  {
+    "id": "CVE-2020-17519",
+    "reason": "La CVE-2020-17519 es una vulnerabilidad en el propio Apache Flink (componente de terceros) debida a controles de acceso insuficientes en su REST API, que permite leer archivos arbitrarios en el JobManager. Se mitiga actualizando la versi\u00f3n de Flink o su configuraci\u00f3n, no modificando el c\u00f3digo fuente de una app JavaScript/TypeScript/Node.js. Por tanto, entra en la categor\u00eda de vulnerabilidad en librer\u00eda de terceros (SCA), no detectable de forma confiable solo analizando el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2024-5274",
+    "reason": "No. CVE-2024-5274 es un bug de type confusion en el motor V8 (C++) de Chromium. Es un fallo de memoria en un componente compilado del navegador, explotable mediante HTML/JS malicioso, pero la vulnerabilidad reside en el motor, no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. No se puede detectar de forma confiable solo analizando el c\u00f3digo fuente de la app; la mitigaci\u00f3n pasa por actualizar el navegador/engine (SCA/gesti\u00f3n de dependencias de plataforma), no por cambiar el c\u00f3digo propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2022-48503",
+    "reason": "La vulnerabilidad est\u00e1 en JavaScriptCore (motor nativo C/C++ de Apple) y se debe a un bug interno de memoria al procesar contenido web, no a patrones inseguros en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. No es detectable de forma confiable solo analizando el c\u00f3digo fuente de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2024-4947",
+    "reason": "No. CVE-2024-4947 es un bug de type confusion en el motor V8 (C++ compilado) de Chromium. Es un fallo de memoria en el runtime del navegador, no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. No puede detectarse de forma confiable analizando solo el c\u00f3digo fuente de la app; se mitiga actualizando el navegador/engine afectado.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2024-4671",
+    "reason": "No es posible: CVE-2024-4671 es un use-after-free en el motor nativo de Chromium (C++). Es un bug de memoria en un componente compilado del navegador, explotado v\u00eda HTML/JS, pero la vulnerabilidad reside en el c\u00f3digo del navegador, no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. No se puede detectar de forma confiable solo analizando el c\u00f3digo fuente de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2024-4761",
+    "reason": "No. Es un bug de memoria en el motor V8 (componente compilado C/C++ del navegador/Chromium). No depende de patrones inseguros en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n, sino de c\u00f3mo el motor procesa HTML/JS internamente. La mitigaci\u00f3n pasa por actualizar el navegador/Chromium, no por cambiar el c\u00f3digo fuente de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-40655",
+    "reason": "La vulnerabilidad se debe a un endpoint /getcfg.php en un router D-Link que expone credenciales por un fallo de control de acceso y l\u00f3gica en el firmware/webserver embebido (PHP/C u otro), no a patrones de uso de APIs en c\u00f3digo JavaScript/TypeScript/Node.js. Adem\u00e1s, su detecci\u00f3n fiable requiere verificar el comportamiento real del endpoint (respuesta ante peticiones forjadas), lo que implica ejecuci\u00f3n din\u00e1mica sobre el dispositivo/servicio, no solo an\u00e1lisis est\u00e1tico de c\u00f3digo JS/TS/Node.",
+    "approach": "DAST"
+  },
+  {
+    "id": "CVE-2023-4762",
+    "reason": "No, es un bug de memoria (type confusion) en el motor V8 de Chromium, implementado en C++, explotado a trav\u00e9s de HTML/JS pero localizado en el navegador, no en el c\u00f3digo fuente JS/TS/Node.js de la aplicaci\u00f3n. La detecci\u00f3n pasa por identificar y actualizar la versi\u00f3n vulnerable del navegador/motor, no por patrones inseguros en el c\u00f3digo propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2022-38028",
+    "reason": "La vulnerabilidad CVE-2022-38028 es un fallo de escalada de privilegios en el servicio Windows Print Spooler (componente del sistema operativo, c\u00f3digo nativo de Microsoft). No depende de patrones inseguros en el c\u00f3digo fuente de una aplicaci\u00f3n JavaScript/TypeScript/Node.js, sino de c\u00f3mo el spooler trata y ejecuta un fichero de constraints JavaScript con privilegios SYSTEM. Por tanto, no es detectable de forma confiable solo analizando el c\u00f3digo fuente de la aplicaci\u00f3n.",
+    "approach": "Manual"
+  },
+  {
+    "id": "CVE-2018-15133",
+    "reason": "La vulnerabilidad CVE-2018-15133 es espec\u00edfica del framework Laravel (PHP) y se materializa cuando un atacante obtiene la APP_KEY y puede enviar payloads cifrados/serializados maliciosos. En un proyecto JavaScript/TypeScript/Node.js, el an\u00e1lisis est\u00e1tico del c\u00f3digo propio no puede detectar de forma confiable esta CVE concreta, ya que depende de un framework distinto, de la versi\u00f3n de la librer\u00eda y de la exposici\u00f3n/compromiso de la clave de cifrado (condici\u00f3n de entorno y configuraci\u00f3n), no de un patr\u00f3n de c\u00f3digo JS/TS/Node. Esto encaja mejor con an\u00e1lisis de dependencias y configuraci\u00f3n, no con SAST sobre el c\u00f3digo fuente JS.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2024-0519",
+    "reason": "No, es un bug de memoria en el motor V8 (C/C++) del navegador/Chromium. No se manifiesta como un patr\u00f3n inseguro en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n, sino en la implementaci\u00f3n interna del engine, y se mitiga actualizando el navegador/Runtime, no cambiando el c\u00f3digo fuente propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2023-7024",
+    "reason": "No es posible: CVE-2023-7024 es un desbordamiento de buffer en memoria dentro del motor WebRTC de Chromium (C++). Es un bug de memoria en un componente compilado del navegador, ajeno al c\u00f3digo JS/TS/Node.js de la aplicaci\u00f3n. No se puede detectar de forma confiable analizando solo el c\u00f3digo fuente de la app; la mitigaci\u00f3n pasa por actualizar el navegador/engine afectado.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2023-6345",
+    "reason": "No es posible: CVE-2023-6345 es un bug de memoria (integer overflow) en Skia/Chromium, un componente compilado en C/C++. No se manifiesta como un patr\u00f3n de uso inseguro en c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n, sino en la implementaci\u00f3n interna del navegador/engine, y se mitiga actualizando el runtime/navegador (SCA/gesti\u00f3n de dependencias), no cambiando el c\u00f3digo fuente propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2023-36845",
+    "reason": "La vulnerabilidad se origina en la implementaci\u00f3n interna de Junos OS (PHP embebido y manejo de la variable de entorno PHPRC) y en su configuraci\u00f3n, no en el c\u00f3digo fuente de una aplicaci\u00f3n JavaScript/TypeScript/Node.js. Es un problema espec\u00edfico del componente de red/OS de Juniper y se mitiga actualizando el software afectado o cambiando su configuraci\u00f3n, no modificando el c\u00f3digo de la app. Por tanto, no es detectable de forma confiable solo con SAST sobre el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2023-36844",
+    "reason": "La CVE-2023-36844 es una vulnerabilidad espec\u00edfica de Juniper Junos OS (PHP external variable modification) ligada a la implementaci\u00f3n y configuraci\u00f3n del sistema/appliance, no a c\u00f3digo fuente JavaScript/TypeScript/Node.js propio. Su detecci\u00f3n pasa por revisar versi\u00f3n/configuraci\u00f3n del producto afectado y comportamiento en tiempo de ejecuci\u00f3n, no por patrones en el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "DAST"
+  },
+  {
+    "id": "CVE-2023-49103",
+    "reason": "La vulnerabilidad se debe al uso de un endpoint PHP (GetPhpInfo.php) en ownCloud graphapi que expone la salida de phpinfo(), revelando credenciales y otros datos sensibles. Es un problema espec\u00edfico de ese componente/versi\u00f3n de ownCloud (PHP) y se mitiga actualizando o deshabilitando dicho endpoint. No es un patr\u00f3n gen\u00e9rico en c\u00f3digo JavaScript/TypeScript/Node.js propio, sino una vulnerabilidad en un software de terceros que se gestiona v\u00eda SCA o configuraci\u00f3n, no mediante an\u00e1lisis est\u00e1tico del c\u00f3digo fuente JS/TS/Node.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2023-36851",
+    "reason": "La vulnerabilidad se debe a una falta de autenticaci\u00f3n en un endpoint espec\u00edfico de un producto cerrado (Junos OS / J-Web en dispositivos SRX), no a patrones gen\u00e9ricos de uso inseguro de APIs en c\u00f3digo JavaScript/TypeScript/Node.js. Adem\u00e1s, es esencialmente un problema de configuraci\u00f3n/implementaci\u00f3n de control de acceso en un sistema propietario, no detectable de forma confiable solo analizando c\u00f3digo fuente de una app Node.js.",
+    "approach": "DAST"
+  },
+  {
+    "id": "CVE-2023-46604",
+    "reason": "La vulnerabilidad CVE-2023-46604 afecta a Apache ActiveMQ (deserializaci\u00f3n insegura en el broker) y se mitiga actualizando la librer\u00eda/servidor. Es un problema en un componente de terceros, no en el c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n, por lo que no es detectable de forma confiable solo con SAST sobre el c\u00f3digo propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2023-28434",
+    "reason": "La vulnerabilidad reside en la implementaci\u00f3n interna de MinIO (componente tercero) y en c\u00f3mo procesa PostPolicyBucket y valida nombres de buckets. Se mitiga actualizando MinIO y/o ajustando su configuraci\u00f3n de permisos, no modificando el c\u00f3digo fuente t\u00edpico de una app Node.js que solo consume su API. Por tanto, no es detectable de forma confiable solo revisando el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2023-5217",
+    "reason": "No, es un desbordamiento de memoria en libvpx (C/C++) dentro del navegador/codec, explotado v\u00eda una p\u00e1gina HTML, no un patr\u00f3n inseguro en c\u00f3digo JavaScript/TypeScript/Node.js. Se corrige actualizando la librer\u00eda/ navegador (SCA), no modificando el c\u00f3digo fuente de la app, y no es detectable de forma confiable solo con SAST sobre JS/TS.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2018-14667",
+    "reason": "La vulnerabilidad CVE-2018-14667 reside en el framework de terceros Red Hat JBoss RichFaces (Java) y se mitiga actualizando dicho componente. No es un problema en c\u00f3digo fuente propio JavaScript/TypeScript/Node.js ni un patr\u00f3n de uso de API en ese c\u00f3digo, por lo que no puede detectarse de forma confiable solo con SAST sobre el c\u00f3digo de la aplicaci\u00f3n; corresponde a an\u00e1lisis de dependencias/versi\u00f3n del framework afectado.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-3129",
+    "reason": "CVE-2021-3129 es una vulnerabilidad espec\u00edfica de Laravel Ignition (PHP) y su implementaci\u00f3n interna, explotable v\u00eda configuraci\u00f3n/entorno del framework y la librer\u00eda de terceros. En un proyecto JavaScript/TypeScript/Node.js, no es posible detectarla de forma confiable solo analizando el c\u00f3digo propio: depende de la versi\u00f3n y configuraci\u00f3n del componente Laravel (SCA/infra), no de patrones de uso inseguros en el c\u00f3digo JS/TS/Node.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2023-4863",
+    "reason": "No, es un desbordamiento de b\u00fafer en la implementaci\u00f3n nativa del c\u00f3dec WebP (C/C++) usada por navegadores y runtimes, no un patr\u00f3n l\u00f3gico en el c\u00f3digo JS/TS/Node.js. Se mitiga actualizando las dependencias/entorno que incluyen el c\u00f3dec (Chrome, Electron, librer\u00edas nativas), por lo que encaja en vulnerabilidad de tercero/SCA y no es detectable de forma confiable solo revisando el c\u00f3digo fuente de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2023-38035",
+    "reason": "La vulnerabilidad se debe a una configuraci\u00f3n insuficientemente restrictiva de Apache HTTPD en el producto Ivanti Sentry (componente de infraestructura), no a patrones inseguros en c\u00f3digo fuente JavaScript/TypeScript/Node.js. Es esencialmente un problema de configuraci\u00f3n del servidor web y del producto espec\u00edfico, por lo que no puede detectarse de forma confiable analizando solo el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "DAST"
+  },
+  {
+    "id": "CVE-2023-33246",
+    "reason": "CVE-2023-33246 es una vulnerabilidad en la configuraci\u00f3n/exposici\u00f3n de componentes de Apache RocketMQ (NameServer, Broker, Controller) y en la falta de control de permisos en sus endpoints/protocolo. Es esencialmente un problema de configuraci\u00f3n y de seguridad del propio producto RocketMQ, que se mitiga actualizando y configurando correctamente el servicio. No puede detectarse de forma confiable solo analizando el c\u00f3digo fuente de una app Node.js/TS/JS, ya que no depende de patrones de uso de APIs en el c\u00f3digo, sino de c\u00f3mo est\u00e1 desplegado y configurado RocketMQ.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2023-3079",
+    "reason": "CVE-2023-3079 es un bug de memoria (type confusion) en el motor V8 escrito en C++ dentro de Chromium/Chrome/Edge/Opera. No se origina en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n, sino en el motor que lo ejecuta. Por tanto, no es detectable de forma confiable analizando solo el c\u00f3digo fuente de la aplicaci\u00f3n; se mitiga actualizando el navegador/motor (SCA) y no cambiando el c\u00f3digo propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2023-38180",
+    "reason": "CVE-2023-38180 es una vulnerabilidad interna de la plataforma .NET/Visual Studio (DoS en el runtime/framework), no un patr\u00f3n de uso inseguro en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Se mitiga actualizando el componente afectado, por lo que encaja en la categor\u00eda de SCA y no es detectable de forma confiable solo analizando el c\u00f3digo fuente propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2016-6415",
+    "reason": "La vulnerabilidad CVE-2016-6415 es un bug de memoria en implementaciones de IKEv1 de Cisco IOS/IOS XR/IOS XE (C/C++ en firmware/red), no en c\u00f3digo JavaScript/TypeScript/Node.js. Es un problema de bajo nivel en el manejo de paquetes y memoria del dispositivo de red, no un patr\u00f3n de uso de APIs en aplicaciones. Por tanto, no es detectable de forma confiable analizando solo el c\u00f3digo fuente de una app JS/TS/Node.",
+    "approach": "DAST"
+  },
+  {
+    "id": "CVE-2016-3427",
+    "reason": "La vulnerabilidad reside en la implementaci\u00f3n interna de Oracle Java SE/JRockit (componente JMX) y se mitiga actualizando la plataforma Java, no modificando el c\u00f3digo fuente JavaScript/TypeScript/Node.js. No es un patr\u00f3n de uso inseguro detectable en el c\u00f3digo de la aplicaci\u00f3n, sino un fallo en la librer\u00eda/plataforma subyacente.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2016-8735",
+    "reason": "La vulnerabilidad se origina en Apache Tomcat (componente de terceros) y en c\u00f3mo implementa JmxRemoteLifecycleListener frente a cambios de Oracle (CVE-2016-3427). No puede detectarse de forma confiable solo analizando el c\u00f3digo fuente de la aplicaci\u00f3n Node.js/JS/TS, ya que depende de la versi\u00f3n y configuraci\u00f3n del servidor Tomcat y del acceso a puertos JMX, no de patrones de uso en el c\u00f3digo propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2023-2136",
+    "reason": "No, es un bug de memoria (integer overflow) en el motor nativo de Skia/Chromium, un componente compilado en C/C++. No se puede detectar de forma confiable analizando solo el c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n, ya que la vulnerabilidad reside en la implementaci\u00f3n interna del navegador/engine, no en el uso de APIs desde el c\u00f3digo de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2023-2033",
+    "reason": "No. CVE-2023-2033 es un bug de memoria (type confusion) en el motor V8 de Chromium, implementado en C++. Afecta al runtime del navegador, no al c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. No puede detectarse de forma confiable analizando solo el c\u00f3digo fuente de la app; se mitiga actualizando el navegador/engine (SCA) y no cambiando la l\u00f3gica JS.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-45046",
+    "reason": "CVE-2021-45046 es una vulnerabilidad en la propia librer\u00eda Apache Log4j2 y su mecanismo interno de lookups/JNDI; se mitiga actualizando la dependencia o cambiando su configuraci\u00f3n, no modificando el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Por tanto, se detecta de forma fiable mediante an\u00e1lisis de dependencias (SCA), no solo revisando el c\u00f3digo fuente de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2022-42948",
+    "reason": "La vulnerabilidad afecta al producto Fortra Cobalt Strike (Java/Swing) y se mitiga actualizando el componente afectado; no es un patr\u00f3n gen\u00e9rico de uso inseguro en tu c\u00f3digo JavaScript/TypeScript/Node.js, sino un fallo espec\u00edfico de un tercero, por lo que no es detectable de forma confiable solo con SAST sobre tu c\u00f3digo fuente.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2022-3038",
+    "reason": "No. Es un use-after-free en el Network Service de Chromium (C++ del navegador), no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Se trata de un bug de memoria en un componente compilado de terceros que se mitiga actualizando el navegador/engine, no cambiando el c\u00f3digo fuente de la app, y no es detectable de forma confiable solo con SAST sobre el c\u00f3digo JS/TS.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2022-33891",
+    "reason": "CVE-2022-33891 es una vulnerabilidad de inyecci\u00f3n de comandos en Apache Spark UI debida a c\u00f3mo Spark procesa par\u00e1metros cuando las ACLs est\u00e1n habilitadas. Es un problema en el propio producto/servidor Spark (librer\u00eda/servicio de terceros) y se mitiga actualizando la versi\u00f3n o cambiando su configuraci\u00f3n, no modificando el c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n cliente. Por tanto, no es detectable de forma confiable solo analizando el c\u00f3digo fuente de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2022-36537",
+    "reason": "La vulnerabilidad reside en el framework ZK (Java) y su servlet AuUploader, es decir, en una librer\u00eda/tercero y no en el c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Se mitiga actualizando la dependencia afectada (SCA), no analizando patrones de uso en el c\u00f3digo propio. Adem\u00e1s, el problema concreto es una implementaci\u00f3n interna del framework, no una API de uso directo en JS/TS/Node que pueda detectarse de forma fiable solo con SAST.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2023-0669",
+    "reason": "CVE-2023-0669 afecta al producto GoAnywhere MFT de Fortra y se debe a la deserializaci\u00f3n insegura en un componente Java del propio producto. En el contexto dado (aplicaci\u00f3n JavaScript/TypeScript/Node.js), esta vulnerabilidad se manifiesta como un fallo en una librer\u00eda/servicio de terceros que se mitiga actualizando o parcheando GoAnywhere MFT, no modificando el c\u00f3digo fuente de la aplicaci\u00f3n. Por tanto, no es detectable de forma confiable solo con SAST sobre el c\u00f3digo JS/TS/Node.js.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2023-22952",
+    "reason": "La vulnerabilidad est\u00e1 en productos SugarCRM concretos y se debe a c\u00f3mo el core del producto procesa plantillas de correo permitiendo inyecci\u00f3n de PHP. En un proyecto JavaScript/TypeScript/Node.js que solo consume o integra SugarCRM, el riesgo principal se mitiga actualizando la versi\u00f3n afectada del producto/librer\u00eda, no cambiando el c\u00f3digo propio. Adem\u00e1s, la explotaci\u00f3n depende del comportamiento en tiempo de ejecuci\u00f3n del motor de plantillas de SugarCRM, por lo que no es detectable de forma confiable solo revisando el c\u00f3digo fuente JS/TS/Node.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2022-47966",
+    "reason": "La vulnerabilidad se debe al uso de una versi\u00f3n vulnerable de la librer\u00eda de terceros Apache Santuario en productos Zoho ManageEngine. Se mitiga actualizando la dependencia, no modificando el c\u00f3digo propio. Por tanto, no es fiable detectarla solo analizando patrones de uso de APIs o l\u00f3gica en el c\u00f3digo fuente JavaScript/TypeScript/Node.js.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2017-11357",
+    "reason": "La vulnerabilidad CVE-2017-11357 afecta a Telerik UI for ASP.NET AJAX (componente de terceros) y se mitiga actualizando el componente o su configuraci\u00f3n, no modificando c\u00f3digo JavaScript/TypeScript/Node.js propio. Su detecci\u00f3n fiable se basa en identificar la versi\u00f3n vulnerable del framework y la configuraci\u00f3n del control RadAsyncUpload, no en patrones de uso de APIs en el c\u00f3digo fuente de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2022-3723",
+    "reason": "No. Es un bug de memoria (type confusion / heap corruption) en el motor V8 escrito en C++ dentro de Chromium/Chrome/Edge/Opera. No se origina en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n ni se corrige cambiando ese c\u00f3digo, sino actualizando el navegador/motor. Por definici\u00f3n entra en los criterios de exclusi\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2022-4262",
+    "reason": "Es un bug de memoria (type confusion) en el motor V8 de Chromium, implementado en C++, explotable a trav\u00e9s de HTML/JS pero localizado en el componente compilado del navegador. No se puede detectar de forma confiable analizando solo el c\u00f3digo fuente JS/TS/Node.js de la aplicaci\u00f3n; la mitigaci\u00f3n pasa por actualizar el navegador/engine (SCA/gesti\u00f3n de dependencias), no por cambiar la l\u00f3gica de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2025-13223",
+    "reason": "No. Es un bug de memoria (type confusion / heap corruption) en el motor V8 de Chromium, implementado en C++, no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. La detecci\u00f3n pasa por identificar la versi\u00f3n vulnerable del componente, no por patrones en el c\u00f3digo fuente de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2022-3075",
+    "reason": "No, es un bug de validaci\u00f3n de datos en Mojo dentro del motor Chromium (C++ nativo) que se manifiesta como escape de sandbox del navegador. Afecta al runtime/navegador, no al c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. La mitigaci\u00f3n es actualizar el navegador/Chromium (SCA/gesti\u00f3n de dependencias de plataforma), no cambiar el c\u00f3digo fuente de la app, por lo que no es detectable de forma confiable solo con SAST sobre el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2022-22963",
+    "reason": "La vulnerabilidad CVE-2022-22963 se origina en la implementaci\u00f3n interna de Spring Cloud Function (librer\u00eda de terceros Java) y en c\u00f3mo procesa expresiones SpEL en el enrutamiento. En un proyecto JavaScript/TypeScript/Node.js solo podr\u00edas ver llamadas HTTP hacia un servicio vulnerable, pero no el c\u00f3digo de la librer\u00eda ni su configuraci\u00f3n interna. La detecci\u00f3n fiable pasa por identificar la versi\u00f3n vulnerable del componente y su configuraci\u00f3n, no por patrones inseguros en el c\u00f3digo fuente JS/TS/Node.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2022-24112",
+    "reason": "CVE-2022-24112 es una vulnerabilidad en el propio producto Apache APISIX (bypass de autenticaci\u00f3n que permite RCE) ligada a su implementaci\u00f3n y configuraci\u00f3n, no a patrones de c\u00f3digo de una app Node.js/TS/JS. Se mitiga actualizando/configurando correctamente APISIX, por lo que encaja en vulnerabilidad de tercero/SCA o configuraci\u00f3n, no en l\u00f3gica insegura del c\u00f3digo fuente de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2022-24706",
+    "reason": "CVE-2022-24706 es una vulnerabilidad en la configuraci\u00f3n/estado inicial por defecto de Apache CouchDB (producto servidor). Se mitiga cambiando la configuraci\u00f3n/versi\u00f3n del propio CouchDB, no modificando el c\u00f3digo fuente de la aplicaci\u00f3n Node.js/TS. No es un patr\u00f3n de uso inseguro de APIs en el c\u00f3digo, sino un problema de inicializaci\u00f3n y permisos del servicio, por lo que no es detectable de forma confiable solo con SAST sobre el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2022-4135",
+    "reason": "No es posible: CVE-2022-4135 es un desbordamiento de buffer en el componente GPU de Chromium (C++). Es un bug de memoria en un binario del navegador, no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. La mitigaci\u00f3n pasa por actualizar el navegador/engine (SCA/gesti\u00f3n de dependencias), no por cambiar el c\u00f3digo fuente de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2022-2294",
+    "reason": "No. CVE-2022-2294 es un desbordamiento de buffer en memoria dentro de la implementaci\u00f3n nativa de WebRTC (C/C++) usada por navegadores como Chrome. No se manifiesta como un patr\u00f3n inseguro en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n, sino como un bug en el motor subyacente que se mitiga actualizando el navegador/engine, no cambiando el c\u00f3digo fuente propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-36193",
+    "reason": "La vulnerabilidad reside en la implementaci\u00f3n interna de la librer\u00eda PEAR Archive_Tar (CVE-2020-36193) y se mitiga actualizando dicha dependencia; en una app JS/TS/Node.js solo ver\u00edas su uso, no el bug de validaci\u00f3n de symlinks en Tar.php. Por tanto, se detecta como problema de componente de terceros (SCA), no analizando el c\u00f3digo fuente propio con SAST.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-28949",
+    "reason": "La vulnerabilidad reside en la librer\u00eda PHP PEAR Archive_Tar (manejo de phar/PHAR y deserializaci\u00f3n interna). En un proyecto JavaScript/TypeScript/Node.js solo podr\u00edas detectarla como dependencia vulnerable (SCA), no analizando patrones de c\u00f3digo propio. Adem\u00e1s, la correcci\u00f3n pasa por actualizar la librer\u00eda afectada, no por cambiar la l\u00f3gica de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-38406",
+    "reason": "La vulnerabilidad es un desbordamiento de memoria (out-of-bounds write) en un producto espec\u00edfico (Delta Electronics DOPSoft 2), implementado en c\u00f3digo compilado nativo. No es un patr\u00f3n gen\u00e9rico de uso inseguro de APIs en JavaScript/TypeScript/Node.js, sino un bug de memoria en un componente binario de terceros que se mitiga actualizando la versi\u00f3n afectada.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2022-22536",
+    "reason": "No. CVE-2022-22536 es un fallo de HTTP request smuggling en componentes SAP (NetWeaver, Web Dispatcher, etc.) que depende de c\u00f3mo el servidor/proxy interpreta y enruta peticiones HTTP. Es esencialmente un problema de implementaci\u00f3n/protocolo y configuraci\u00f3n en la infraestructura SAP, no de patrones de c\u00f3digo en una app JavaScript/TypeScript/Node.js. Detectarlo requiere analizar el comportamiento del servidor y la cadena de proxies (DAST/configuraci\u00f3n), no solo el c\u00f3digo fuente de la aplicaci\u00f3n.",
+    "approach": "DAST"
+  },
+  {
+    "id": "CVE-2019-5825",
+    "reason": "No. CVE-2019-5825 es un bug de memoria en el motor V8 (C++) de Chromium. Es una vulnerabilidad en un componente compilado/tercero que se mitiga actualizando el navegador o el runtime, no cambiando el c\u00f3digo fuente JS/TS/Node.js. No existe un patr\u00f3n de uso de API en el c\u00f3digo de la aplicaci\u00f3n que permita detectarla de forma confiable solo con SAST sobre el c\u00f3digo fuente.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2022-2856",
+    "reason": "CVE-2022-2856 es un fallo interno de validaci\u00f3n de entradas no confiables en la implementaci\u00f3n de Intents de Chromium (c\u00f3digo C++ del navegador). Afecta al motor del navegador y se corrige actualizando el propio Chromium/Chrome/Edge/Opera, no modificando el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Por tanto, no es detectable de forma confiable solo analizando el c\u00f3digo fuente de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2016-2388",
+    "reason": "CVE-2016-2388 es una vulnerabilidad espec\u00edfica de configuraci\u00f3n/comportamiento en el componente Universal Worklist Configuration de SAP NetWeaver AS JAVA. No se trata de l\u00f3gica en el c\u00f3digo fuente de una app JavaScript/TypeScript/Node.js, sino de un problema en un producto SAP y su configuraci\u00f3n/implementaci\u00f3n. Su detecci\u00f3n fiable requiere analizar el sistema SAP y sus endpoints HTTP, no el c\u00f3digo fuente de una app Node/JS.",
+    "approach": "DAST"
+  },
+  {
+    "id": "CVE-2018-6065",
+    "reason": "Es un bug de memoria (integer overflow/heap corruption) en el motor V8 (C++) del navegador/Runtime, no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Se mitiga actualizando el motor/ navegador (SCA) y no analizando patrones de uso en el c\u00f3digo fuente de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2018-17480",
+    "reason": "No. Es un bug de memoria en el motor V8 (C++) de Chromium/Chrome/Edge/Opera. La vulnerabilidad reside en el componente compilado del navegador, no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n, y se mitiga actualizando el motor/librer\u00eda, no cambiando el c\u00f3digo fuente propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2018-17463",
+    "reason": "No. CVE-2018-17463 es un bug de memoria en el motor V8 (C++) del navegador/Runtime, explotable mediante JavaScript, pero la vulnerabilidad reside en el componente compilado, no en el c\u00f3digo fuente JS/TS/Node.js de la aplicaci\u00f3n. Se mitiga actualizando el motor (Chrome/Chromium/V8/Node), no cambiando el c\u00f3digo propio, por lo que no es detectable de forma confiable solo con SAST sobre el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-30533",
+    "reason": "La vulnerabilidad CVE-2021-30533 es un bug en el motor de Chromium (C++/navegador) relacionado con el PopupBlocker y la pol\u00edtica de navegaci\u00f3n, no con el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Se mitiga actualizando el navegador/Chromium (tercera parte), no cambiando el c\u00f3digo fuente propio, por lo que no es detectable de forma confiable solo con SAST sobre el c\u00f3digo de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2017-5070",
+    "reason": "No. CVE-2017-5070 es un bug de type confusion en el motor V8 (C++) del navegador/Chromium, es decir, un fallo de memoria en un componente compilado. No se origina en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n, sino en la implementaci\u00f3n interna del engine. Por tanto, no es detectable de forma confiable analizando solo el c\u00f3digo fuente de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2016-5198",
+    "reason": "No. Es un bug de memoria en el motor V8 (C++) del navegador/Runtime, no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Se mitiga actualizando el componente afectado (Chrome/Chromium/V8), no cambiando el c\u00f3digo fuente propio, y no es detectable de forma confiable solo con SAST sobre el c\u00f3digo de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2015-1671",
+    "reason": "CVE-2015-1671 es un bug de ejecuci\u00f3n remota de c\u00f3digo en componentes compilados de Windows/.NET/Office/Lync/Silverlight relacionado con el manejo de fuentes TrueType. No depende de patrones de c\u00f3digo en una app JavaScript/TypeScript/Node.js, sino de vulnerabilidades en binarios del sistema/entorno que se mitigan actualizando esos componentes, no cambiando el c\u00f3digo fuente propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2016-1646",
+    "reason": "No. Es un bug de memoria en el motor V8 (C++) del navegador/Runtime, no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. No se puede detectar de forma confiable solo analizando el c\u00f3digo fuente de la app; la mitigaci\u00f3n pasa por actualizar el runtime/navegador.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2017-5030",
+    "reason": "No, es un bug de corrupci\u00f3n de memoria en el motor V8 (C++) del navegador/Chromium. Afecta al runtime nativo, no a la l\u00f3gica de la aplicaci\u00f3n JavaScript/TypeScript/Node.js, y se mitiga actualizando el componente subyacente, no cambiando el c\u00f3digo fuente de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2007-5659",
+    "reason": "No. Es un desbordamiento de b\u00fafer en el motor nativo de Adobe Acrobat/Reader (C/C++), explotado v\u00eda PDFs con JavaScript, pero la vulnerabilidad reside en el componente compilado, no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Se mitiga actualizando el lector/librer\u00eda PDF, no cambiando el c\u00f3digo fuente propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2013-2423",
+    "reason": "CVE-2013-2423 es una vulnerabilidad en la JVM/HotSpot (componente compilado de la plataforma Java). Se mitiga actualizando el JRE, no cambiando el c\u00f3digo fuente de la aplicaci\u00f3n JavaScript/TypeScript/Node.js, por lo que no es detectable de forma confiable solo con SAST sobre ese c\u00f3digo.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2016-0162",
+    "reason": "CVE-2016-0162 es un fallo interno del navegador Internet Explorer al manejar JavaScript (bug en componente compilado del browser). No depende de patrones espec\u00edficos en el c\u00f3digo fuente de la aplicaci\u00f3n, sino de c\u00f3mo el motor del navegador procesa cualquier JavaScript. Por tanto, no es detectable de forma confiable analizando solo el c\u00f3digo JS/TS/Node.js de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2019-5786",
+    "reason": "No. Es un bug de memoria (use-after-free) en el motor Blink de Chrome, implementado en C++, no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. No se puede detectar de forma confiable solo analizando el c\u00f3digo fuente de la app; la mitigaci\u00f3n pasa por actualizar el navegador/engine afectado.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2013-0431",
+    "reason": "CVE-2013-0431 es una vulnerabilidad interna del JRE (sandbox bypass) en el propio runtime de Oracle Java. Se corrige actualizando la plataforma/librer\u00eda subyacente, no modificando el c\u00f3digo fuente de la aplicaci\u00f3n JavaScript/TypeScript/Node.js. No es detectable de forma confiable solo analizando el c\u00f3digo de la aplicaci\u00f3n, sino identificando la versi\u00f3n vulnerable del componente Java instalado.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2010-0840",
+    "reason": "CVE-2010-0840 es una vulnerabilidad en el Java Runtime Environment (JRE), es decir, en un componente de plataforma compilado ajeno al c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. No se manifiesta como un patr\u00f3n de uso inseguro de APIs en el c\u00f3digo propio, sino como un fallo interno del runtime que se mitiga actualizando la plataforma/librer\u00eda, por lo que entra en la categor\u00eda de SCA y no puede detectarse de forma confiable solo con SAST sobre el c\u00f3digo.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2013-0422",
+    "reason": "CVE-2013-0422 es una vulnerabilidad en la implementaci\u00f3n de la JVM/Java Plugin (sandbox escape de applets), es decir, en el runtime compilado de Java, no en el c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Se mitiga actualizando el entorno Java afectado, no cambiando el c\u00f3digo propio, por lo que no es detectable de forma confiable solo con SAST sobre el c\u00f3digo de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2019-13720",
+    "reason": "No, es un use-after-free en el motor nativo de Chrome (C++/WebAudio). Es un bug de memoria en un componente compilado del navegador y se mitiga actualizando el navegador, no cambiando el c\u00f3digo JS/TS/Node.js de la aplicaci\u00f3n. No es detectable de forma confiable solo analizando el c\u00f3digo fuente de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2019-11707",
+    "reason": "No. Es un bug de memoria en el motor de JavaScript de Firefox/Thunderbird (C++), no en el c\u00f3digo fuente JS/TS/Node.js de la aplicaci\u00f3n. Se corrige actualizando el navegador/engine (SCA) y no analizando patrones de uso de Array.pop en el c\u00f3digo de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2022-22947",
+    "reason": "CVE-2022-22947 es una vulnerabilidad en Spring Cloud Gateway (ecosistema Java/Spring) que se mitiga actualizando la librer\u00eda afectada y/o configurando adecuadamente el endpoint Actuator. No aplica a c\u00f3digo JavaScript/TypeScript/Node.js y, adem\u00e1s, se trata principalmente de un problema en una librer\u00eda de terceros y de configuraci\u00f3n de endpoints expuestos, no de l\u00f3gica propia detectable solo por patrones en el c\u00f3digo fuente.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2022-1364",
+    "reason": "No. CVE-2022-1364 es un bug de type confusion en el motor V8 (C++) del navegador/Chromium, es decir, un fallo de memoria en un componente compilado de terceros. No se manifiesta como un patr\u00f3n inseguro en el c\u00f3digo fuente JS/TS/Node propio, sino en la implementaci\u00f3n interna del motor. La mitigaci\u00f3n pasa por actualizar el navegador/Chromium/V8, no por cambiar el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-39793",
+    "reason": "CVE-2021-39793 es un bug de memoria en componentes nativos de Android/Pixel (l\u00f3gica que lleva a escritura fuera de l\u00edmites y escalada de privilegios). Esto entra en la categor\u00eda de vulnerabilidades en c\u00f3digo compilado (C/C++ del sistema/driver), no en l\u00f3gica de una app JavaScript/TypeScript/Node.js, por lo que no es detectable de forma confiable solo analizando el c\u00f3digo fuente de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2017-11317",
+    "reason": "La CVE-2017-11317 es una vulnerabilidad en el componente de terceros Telerik UI for ASP.NET AJAX que se mitiga actualizando la librer\u00eda y su configuraci\u00f3n, no modificando el c\u00f3digo JavaScript/TypeScript/Node.js propio. Su detecci\u00f3n fiable requiere identificar la versi\u00f3n vulnerable del componente (SCA) y/o pruebas din\u00e1micas, no patrones de uso en el c\u00f3digo fuente.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2022-22965",
+    "reason": "CVE-2022-22965 (Spring4Shell) es una vulnerabilidad en el framework Spring (Java) que se mitiga actualizando la librer\u00eda y ajustando configuraci\u00f3n; no aplica a c\u00f3digo JavaScript/TypeScript/Node.js y, adem\u00e1s, su detecci\u00f3n fiable se basa en versi\u00f3n/configuraci\u00f3n del framework, no en patrones de c\u00f3digo propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2022-1096",
+    "reason": "CVE-2022-1096 es un bug de type confusion en el motor V8 (C++) del navegador/Chromium. Es un fallo de memoria en un componente compilado de terceros que se mitiga actualizando el runtime (Chrome/Edge/Chromium/V8), no cambiando el c\u00f3digo fuente JS/TS/Node.js de la aplicaci\u00f3n. No existe un patr\u00f3n de uso de APIs en el c\u00f3digo de la app que permita detectarlo de forma confiable solo con SAST.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2016-7200",
+    "reason": "CVE-2016-7200 es un bug de corrupci\u00f3n de memoria en el motor Chakra de Microsoft Edge (C/C++ del navegador), no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. No se puede detectar de forma confiable solo analizando el c\u00f3digo fuente de la app, ya que la vulnerabilidad reside en el int\u00e9rprete/engine y se mitiga actualizando el navegador/engine.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2012-5076",
+    "reason": "La vulnerabilidad CVE-2012-5076 se debe a una configuraci\u00f3n insegura de las propiedades de seguridad de la JVM (permisos a paquetes com.sun.org.glassfish.*) y a c\u00f3mo la sandbox de Java las aplica. No es un problema en el c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n, sino en el entorno de ejecuci\u00f3n Java y sus propiedades de seguridad, por lo que no puede detectarse de forma confiable solo analizando el c\u00f3digo fuente de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2016-7201",
+    "reason": "CVE-2016-7201 es un bug de corrupci\u00f3n de memoria en el motor Chakra (C/C++) del navegador Microsoft Edge. Afecta al componente compilado del runtime, no al c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. No es detectable de forma confiable analizando solo el c\u00f3digo fuente de la app, sino actualizando el navegador/engine vulnerable.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-9377",
+    "reason": "La vulnerabilidad CVE-2020-9377 es un RCE en firmware de router D-Link (PHP/cgi en dispositivo embebido), no en una aplicaci\u00f3n JavaScript/TypeScript/Node.js. Se trata de un problema espec\u00edfico de ese software/firmware y su endpoint command.php, por lo que no es detectable de forma confiable analizando solo c\u00f3digo fuente JS/TS/Node propio. Adem\u00e1s, su detecci\u00f3n pr\u00e1ctica se basa en pruebas din\u00e1micas sobre el dispositivo/servicio expuesto.",
+    "approach": "DAST"
+  },
+  {
+    "id": "CVE-2019-6340",
+    "reason": "CVE-2019-6340 es una vulnerabilidad espec\u00edfica de Drupal Core (PHP) relacionada con el saneamiento insuficiente de datos provenientes de fuentes no-form. En un proyecto JavaScript/TypeScript/Node.js, esta vulnerabilidad se manifiesta como un problema en una librer\u00eda/servicio externo (Drupal) y se mitiga actualizando la versi\u00f3n afectada, no modificando el c\u00f3digo propio. Por tanto, entra en la categor\u00eda de vulnerabilidad de tercero que se aborda con SCA, no con an\u00e1lisis est\u00e1tico del c\u00f3digo fuente JS/TS/Node.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-5410",
+    "reason": "CVE-2020-5410 es una vulnerabilidad espec\u00edfica del producto Spring Cloud Config Server (Java) que se corrige actualizando la librer\u00eda/servidor afectado. No se trata de l\u00f3gica propia en c\u00f3digo JavaScript/TypeScript/Node.js, sino de un fallo en un componente de terceros, por lo que la detecci\u00f3n fiable pasa por identificar la versi\u00f3n vulnerable del framework (SCA) y no por analizar patrones de c\u00f3digo fuente de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2018-11138",
+    "reason": "La vulnerabilidad est\u00e1 ligada a un endpoint espec\u00edfico (/common/download_agent_installer.php) de un producto concreto (Quest KACE) y a c\u00f3mo este endpoint permite ejecuci\u00f3n remota de c\u00f3digo. En el contexto de una aplicaci\u00f3n propia en JavaScript/TypeScript/Node.js, no es posible detectar de forma confiable esta CVE solo con SAST gen\u00e9rico, ya que se trata de una vulnerabilidad en un producto/librer\u00eda de terceros que se mitiga actualizando dicho componente, no modificando el c\u00f3digo fuente propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2018-1273",
+    "reason": "CVE-2018-1273 es una vulnerabilidad en Spring Data Commons (Java) que se mitiga actualizando la librer\u00eda afectada; no aplica a c\u00f3digo JavaScript/TypeScript/Node.js ni se detecta revisando \u00fanicamente el c\u00f3digo propio, sino identificando la versi\u00f3n vulnerable del componente de terceros.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2017-12617",
+    "reason": "CVE-2017-12617 es una vulnerabilidad de configuraci\u00f3n/uso de Apache Tomcat (m\u00e9todo PUT/Deployment de JSP v\u00eda HTTP) en el servidor de aplicaciones Java. No depende de patrones de c\u00f3digo en una app JavaScript/TypeScript/Node.js, sino de c\u00f3mo est\u00e1 configurado y desplegado Tomcat. Por tanto, no puede detectarse de forma confiable analizando solo el c\u00f3digo fuente de la aplicaci\u00f3n.",
+    "approach": "DAST"
+  },
+  {
+    "id": "CVE-2017-12615",
+    "reason": "CVE-2017-12615 es un problema de configuraci\u00f3n de Apache Tomcat (permite HTTP PUT y subida de JSP) en el servidor, no un patr\u00f3n de uso inseguro en el c\u00f3digo fuente de la aplicaci\u00f3n JavaScript/TypeScript/Node.js. Solo analizando el c\u00f3digo de la app no se puede determinar de forma confiable si el servidor Tomcat est\u00e1 configurado vulnerable.",
+    "approach": "DAST"
+  },
+  {
+    "id": "CVE-2014-3120",
+    "reason": "La vulnerabilidad CVE-2014-3120 se origina en la configuraci\u00f3n y el comportamiento interno de Elasticsearch (dynamic scripting habilitado y ejecuci\u00f3n de MVEL/Java en el servidor), no en el c\u00f3digo fuente de la aplicaci\u00f3n Node.js/TS/JS. Aunque el c\u00f3digo pueda hacer llamadas a Elasticsearch, el problema real es de configuraci\u00f3n/componente tercero y se mitiga actualizando o configurando Elasticsearch, no cambiando el c\u00f3digo propio. Por tanto, no es detectable de forma confiable solo con SAST sobre el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2014-0130",
+    "reason": "La vulnerabilidad CVE-2014-0130 est\u00e1 ligada a una implementaci\u00f3n concreta del framework Ruby on Rails (ActionPack) y se mitiga actualizando la librer\u00eda afectada. En un proyecto JavaScript/TypeScript/Node.js, el riesgo equivalente vendr\u00eda dado por el framework/router que se use y su versi\u00f3n, no por un patr\u00f3n gen\u00e9rico de c\u00f3digo propio f\u00e1cilmente detectable. Por tanto, encaja mejor como problema de dependencia de terceros (SCA) que como bug l\u00f3gico identificable solo por an\u00e1lisis est\u00e1tico del c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2013-2251",
+    "reason": "CVE-2013-2251 es una vulnerabilidad en Apache Struts (librer\u00eda/framework Java de terceros) relacionada con la evaluaci\u00f3n insegura de expresiones OGNL. Su detecci\u00f3n fiable pasa por identificar la versi\u00f3n vulnerable del framework y su configuraci\u00f3n, no por patrones en el c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Por tanto, encaja en el criterio de exclusi\u00f3n de vulnerabilidad en librer\u00eda de terceros que se soluciona actualizando el componente, no modificando el c\u00f3digo propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2012-1823",
+    "reason": "CVE-2012-1823 es un fallo en el binario de PHP CGI (cgi_main.c) y en c\u00f3mo interpreta query strings a nivel de motor/servidor, no en el c\u00f3digo fuente de la aplicaci\u00f3n JavaScript/TypeScript/Node.js. Es esencialmente un problema del componente compilado y de su configuraci\u00f3n como CGI, que se mitiga actualizando PHP o cambiando la configuraci\u00f3n del servidor, no modificando el c\u00f3digo de la app. Por tanto, no es detectable de forma confiable solo analizando el c\u00f3digo fuente de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-1938",
+    "reason": "CVE-2020-1938 (Ghostcat) es un problema en la configuraci\u00f3n/implementaci\u00f3n del conector AJP de Apache Tomcat y en la versi\u00f3n de la librer\u00eda/servidor, no en el c\u00f3digo fuente de la aplicaci\u00f3n Node.js/TS/JS. No se puede detectar de forma confiable solo analizando el c\u00f3digo de la aplicaci\u00f3n, ya que depende de c\u00f3mo est\u00e9 configurado el servidor Tomcat y de la versi\u00f3n desplegada.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2005-2773",
+    "reason": "CVE-2005-2773 afecta a HP OpenView Network Node Manager (software compilado y de infraestructura). Es una vulnerabilidad de producto/servicio espec\u00edfico, no de l\u00f3gica de una app JavaScript/TypeScript/Node.js. No se puede detectar de forma confiable solo analizando el c\u00f3digo fuente de la aplicaci\u00f3n; corresponde a versi\u00f3n/configuraci\u00f3n del componente afectado.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2017-8540",
+    "reason": "La vulnerabilidad es un bug de corrupci\u00f3n de memoria en el motor Microsoft Malware Protection Engine (componente compilado C/C++ del sistema/antimalware), no en el c\u00f3digo fuente de una aplicaci\u00f3n JavaScript/TypeScript/Node.js. Se mitiga actualizando el motor/OS, no cambiando el c\u00f3digo propio, por lo que no es detectable de forma confiable mediante SAST sobre el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2017-6663",
+    "reason": "La CVE-2017-6663 es una vulnerabilidad en la funcionalidad de Autonomic Networking de Cisco IOS/IOS XE, ligada a configuraci\u00f3n/protocolo de red en un sistema operativo de red espec\u00edfico, no a l\u00f3gica de aplicaci\u00f3n JavaScript/TypeScript/Node.js. No se puede detectar de forma confiable solo analizando c\u00f3digo fuente de una app; aplica el criterio de exclusi\u00f3n de problema de configuraci\u00f3n/infraestructura de red.",
+    "approach": "Manual"
+  },
+  {
+    "id": "CVE-2017-0001",
+    "reason": "CVE-2017-0001 es un bug de memoria en el componente GDI de Windows (C/C++ a nivel de sistema operativo). No est\u00e1 en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n, sino en el propio sistema/driver, por lo que no es detectable de forma confiable analizando solo el c\u00f3digo fuente de la app.",
+    "approach": "Manual"
+  },
+  {
+    "id": "CVE-2019-11043",
+    "reason": "No. CVE-2019-11043 es un bug de memoria en PHP-FPM (componente compilado C) que se manifiesta por una combinaci\u00f3n espec\u00edfica de versi\u00f3n de PHP, configuraci\u00f3n de FPM/Nginx y par\u00e1metros de petici\u00f3n HTTP. No depende de patrones de uso de APIs en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n, sino de la versi\u00f3n y configuraci\u00f3n del runtime PHP-FPM, por lo que no es detectable de forma confiable solo con SAST sobre el c\u00f3digo fuente de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2016-0099",
+    "reason": "CVE-2016-0099 es una vulnerabilidad de escalada de privilegios en el servicio Windows Secondary Logon (componente nativo del sistema operativo). Es un bug de manejo de memoria/handles en c\u00f3digo compilado del sistema, no en el c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. No puede detectarse de forma confiable solo analizando el c\u00f3digo fuente de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2015-4902",
+    "reason": "CVE-2015-4902 es una vulnerabilidad interna de Oracle Java SE (deployment) sin vector p\u00fablico detallado; se corrige actualizando la plataforma Java, no cambiando el c\u00f3digo JavaScript/TypeScript/Node.js. No es detectable de forma confiable analizando solo el c\u00f3digo fuente de la aplicaci\u00f3n, sino gestionando la versi\u00f3n del runtime afectado.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2012-4681",
+    "reason": "CVE-2012-4681 es una vulnerabilidad de ejecuci\u00f3n remota de c\u00f3digo en el propio JRE (Oracle Java SE), es decir, en un componente compilado de terceros. No se manifiesta como un patr\u00f3n inseguro en el c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n, sino como un fallo interno de la plataforma Java que se mitiga actualizando la versi\u00f3n del JRE. Por tanto, no es detectable de forma confiable solo con an\u00e1lisis est\u00e1tico del c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2012-1723",
+    "reason": "CVE-2012-1723 es una vulnerabilidad en el JRE/HotSpot (componente compilado de Oracle Java SE), no en el c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Se mitiga actualizando la plataforma/librer\u00eda subyacente, no cambiando la l\u00f3gica de la app, por lo que no es detectable de forma confiable solo con SAST sobre el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2017-9841",
+    "reason": "La vulnerabilidad se origina en un archivo espec\u00edfico de PHPUnit (eval-stdin.php) dentro del vendor y se mitiga actualizando/eliminando ese componente o cerrando el acceso al mismo. Es esencialmente un problema en una librer\u00eda de terceros y de exposici\u00f3n de ruta, no en el c\u00f3digo propio de la aplicaci\u00f3n JavaScript/TypeScript/Node.js; por tanto, se aborda v\u00eda SCA y configuraci\u00f3n, no analizando patrones de uso de APIs en el c\u00f3digo fuente.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2008-2992",
+    "reason": "CVE-2008-2992 es un fallo de validaci\u00f3n de entrada en la implementaci\u00f3n interna de JavaScript de Adobe Acrobat/Reader (componente compilado de un tercero). No se manifiesta como un patr\u00f3n inseguro en el c\u00f3digo fuente JS/TS/Node propio, sino como un bug en el motor/visor PDF que procesa ese JavaScript. Por tanto, no es detectable de forma confiable solo con SAST sobre el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2022-0609",
+    "reason": "No. Es un bug de memoria (use-after-free) en el motor nativo de Chromium (C/C++). No se manifiesta como patr\u00f3n inseguro en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n, sino en la implementaci\u00f3n interna del navegador, y se mitiga actualizando el navegador/librer\u00eda, no cambiando el c\u00f3digo fuente propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2012-0507",
+    "reason": "CVE-2012-0507 es un bug en la JVM (componente compilado de Oracle Java) y se mitiga actualizando la plataforma, no cambiando el c\u00f3digo fuente de la aplicaci\u00f3n JavaScript/TypeScript/Node.js. No existen patrones de uso de APIs en el c\u00f3digo de la app que permitan detectar de forma confiable esta vulnerabilidad solo con SAST.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2011-3544",
+    "reason": "CVE-2011-3544 es una vulnerabilidad de ejecuci\u00f3n remota en el componente Applet Rhino Script Engine de la JRE de Oracle (c\u00f3digo nativo/bytecode de la plataforma), no en el c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Se mitiga actualizando la versi\u00f3n de Java/JRE o el componente afectado, no modificando el c\u00f3digo propio. Por tanto, no es detectable de forma confiable solo analizando el c\u00f3digo fuente de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2006-1547",
+    "reason": "La vulnerabilidad CVE-2006-1547 reside en Apache Struts (<1.2.9) y su uso de BeanUtils 1.7, es decir, en una librer\u00eda/framework de terceros Java. No es un patr\u00f3n de l\u00f3gica insegura en c\u00f3digo fuente JavaScript/TypeScript/Node.js propio, sino un problema de versi\u00f3n de dependencia que se mitiga actualizando el framework, por lo que encaja en el criterio de exclusi\u00f3n de SCA.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2016-3088",
+    "reason": "CVE-2016-3088 es una vulnerabilidad espec\u00edfica de Apache ActiveMQ Fileserver (componente de terceros) explotable por configuraci\u00f3n/comportamiento del servidor HTTP (PUT + MOVE) y su mapeo a ejecuci\u00f3n, no por patrones de c\u00f3digo en una app Node.js/TS/JS. Se mitiga actualizando/configurando el componente, no cambiando el c\u00f3digo fuente propio, por lo que no es detectable de forma confiable solo con SAST sobre el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2017-9791",
+    "reason": "CVE-2017-9791 es una vulnerabilidad espec\u00edfica del plugin Struts 1 en Apache Struts (Java). En un proyecto JavaScript/TypeScript/Node.js no se implementa ese plugin ni su l\u00f3gica interna; el riesgo proviene de la versi\u00f3n y configuraci\u00f3n de la librer\u00eda de terceros, no de patrones de c\u00f3digo propio. Por tanto, se detecta de forma fiable mediante an\u00e1lisis de dependencias (SCA), no revisando solo el c\u00f3digo fuente de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2012-0391",
+    "reason": "CVE-2012-0391 es una vulnerabilidad en el componente ExceptionDelegator de Apache Struts 2 que se mitiga actualizando la librer\u00eda afectada; en un proyecto JavaScript/TypeScript/Node.js solo podr\u00eda detectarse revisando dependencias (SCA), no analizando el c\u00f3digo fuente propio en busca de patrones l\u00f3gicos inseguros.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-6572",
+    "reason": "CVE-2020-6572 es un use-after-free en el motor de media de Chrome (C++ nativo del navegador). Es un bug de memoria en un componente compilado de terceros, explotable v\u00eda HTML pero no presente en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. No se puede detectar de forma confiable solo analizando el c\u00f3digo fuente de la app; la mitigaci\u00f3n pasa por actualizar el navegador/engine afectado.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-4102",
+    "reason": "No, es un use-after-free en el motor V8 (C++) de Chromium, es decir, un bug de memoria en un componente compilado del navegador. No se puede detectar de forma confiable analizando solo el c\u00f3digo fuente JS/TS/Node.js de la aplicaci\u00f3n, ya que la vulnerabilidad reside en la implementaci\u00f3n interna del engine y se mitiga actualizando el navegador/librer\u00eda, no cambiando el c\u00f3digo propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2019-0193",
+    "reason": "CVE-2019-0193 es una vulnerabilidad en el m\u00f3dulo DataImportHandler de Apache Solr (componente de terceros Java/servidor). Se mitiga actualizando/configurando Solr, no modificando el c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Por tanto, no es detectable de forma confiable solo analizando el c\u00f3digo propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2010-1871",
+    "reason": "La vulnerabilidad CVE-2010-1871 est\u00e1 ligada a la plataforma JBoss Seam 2 y a su configuraci\u00f3n (incluyendo el Java Security Manager), no a patrones de c\u00f3digo JavaScript/TypeScript/Node.js. Es esencialmente un problema de configuraci\u00f3n/uso de un framework Java de terceros, que se mitiga actualizando o configurando correctamente el entorno, no analizando el c\u00f3digo fuente JS/TS/Node de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2013-2465",
+    "reason": "CVE-2013-2465 es una vulnerabilidad interna del JRE (componente 2D) a nivel de plataforma, no un patr\u00f3n de uso inseguro en el c\u00f3digo JavaScript/TypeScript/Node.js. Se mitiga actualizando la versi\u00f3n de Java, por lo que encaja en la categor\u00eda de vulnerabilidad de librer\u00eda/entorno de terceros (SCA) y no puede detectarse de forma confiable solo analizando el c\u00f3digo fuente de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2019-10758",
+    "reason": "La vulnerabilidad reside en la propia librer\u00eda mongo-express (uso inseguro de toBSON en sus endpoints) y se mitiga actualizando la dependencia a >= 0.54.0; es un caso t\u00edpico de SCA, no de patrones inseguros en el c\u00f3digo de la aplicaci\u00f3n que puedan detectarse solo con an\u00e1lisis est\u00e1tico del c\u00f3digo fuente propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-11261",
+    "reason": "La CVE-2020-11261 es un bug de corrupci\u00f3n de memoria en componentes nativos de Qualcomm (C/C++ en SoC Snapdragon). No se trata de l\u00f3gica insegura en c\u00f3digo JavaScript/TypeScript/Node.js ni de uso directo de APIs de memoria desde la aplicaci\u00f3n, sino de una vulnerabilidad en el firmware/driver que se mitiga actualizando el componente afectado. Por tanto, no es detectable de forma confiable solo analizando el c\u00f3digo fuente de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2017-9805",
+    "reason": "CVE-2017-9805 es una vulnerabilidad espec\u00edfica del plugin REST de Apache Struts (Java) por uso inseguro de XStream en deserializaci\u00f3n XML. En un proyecto JavaScript/TypeScript/Node.js, el problema reside en una librer\u00eda de terceros Java que se corrige actualizando la dependencia, no modificando el c\u00f3digo propio. Por tanto, no es detectable de forma confiable solo con SAST sobre el c\u00f3digo fuente JS/TS/Node.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-42013",
+    "reason": "CVE-2021-42013 es una vulnerabilidad del servidor Apache HTTPD (C/C++ y configuraci\u00f3n httpd.conf) relacionada con path traversal y ejecuci\u00f3n de c\u00f3digo remoto por configuraci\u00f3n de Alias/CGI. No se manifiesta en el c\u00f3digo fuente de una aplicaci\u00f3n Node.js/TS/JS, sino en el binario y la configuraci\u00f3n del servidor web, y se mitiga actualizando Apache y corrigiendo su configuraci\u00f3n, no cambiando el c\u00f3digo de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-44228",
+    "reason": "CVE-2021-44228 (Log4Shell) es una vulnerabilidad en la librer\u00eda de terceros Apache Log4j2 que se mitiga actualizando la dependencia o su configuraci\u00f3n; no se detecta de forma confiable solo analizando el c\u00f3digo fuente propio JavaScript/TypeScript/Node.js en busca de patrones l\u00f3gicos inseguros.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-40438",
+    "reason": "CVE-2021-40438 es un problema de configuraci\u00f3n/implementaci\u00f3n en el m\u00f3dulo mod_proxy de Apache HTTP Server (C/C++). No se manifiesta en el c\u00f3digo fuente de la aplicaci\u00f3n Node.js/TS/JS, sino en c\u00f3mo el servidor HTTP (Apache) enruta y reenv\u00eda peticiones. Se corrige actualizando/configurando el servidor, no cambiando el c\u00f3digo de la aplicaci\u00f3n, por lo que no es detectable de forma confiable solo con SAST sobre el c\u00f3digo de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-41773",
+    "reason": "La vulnerabilidad CVE-2021-41773 es principalmente un problema de configuraci\u00f3n del servidor Apache HTTPD (path traversal y posible RCE seg\u00fan directivas como Alias, Require, CGI, etc.). No se manifiesta en el c\u00f3digo fuente de la aplicaci\u00f3n Node.js/JS/TS, sino en la configuraci\u00f3n y versi\u00f3n del servidor web, por lo que no puede detectarse de forma confiable solo con SAST sobre el c\u00f3digo de la app.",
+    "approach": "DAST"
+  },
+  {
+    "id": "CVE-2019-0211",
+    "reason": "CVE-2019-0211 es un bug de memoria/privilegios en el propio servidor Apache HTTP (C/C++ y MPM), no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Se corrige actualizando el binario/librer\u00eda de Apache, no modificando la l\u00f3gica de la app. Por tanto, no es detectable de forma confiable solo con SAST sobre el c\u00f3digo fuente de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2017-17562",
+    "reason": "La vulnerabilidad CVE-2017-17562 afecta al servidor web GoAhead (C embebido) y su manejo de CGI din\u00e1micamente enlazados; es un bug en un componente compilado de terceros y se mitiga actualizando/configurando GoAhead, no cambiando el c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Por tanto, no es detectable de forma confiable solo con SAST sobre el c\u00f3digo de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2016-4437",
+    "reason": "La vulnerabilidad se debe al uso de una versi\u00f3n vulnerable de Apache Shiro y a la ausencia/mala configuraci\u00f3n de la clave de cifrado del remember-me. Es esencialmente un problema de librer\u00eda/configuraci\u00f3n que se mitiga actualizando Shiro o configurando correctamente la clave, no analizando solo el c\u00f3digo fuente JS/TS/Node. Encaja en el criterio de exclusi\u00f3n de vulnerabilidad en librer\u00eda de terceros (SCA) y de configuraci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2017-5638",
+    "reason": "CVE-2017-5638 es una vulnerabilidad en Apache Struts (librer\u00eda/framework Java) relacionada con el parser Jakarta Multipart y el manejo del header Content-Type. Se mitiga actualizando la dependencia de Struts o su configuraci\u00f3n, no modificando c\u00f3digo JavaScript/TypeScript/Node.js propio. Por tanto, entra en la categor\u00eda de vulnerabilidad en librer\u00eda de terceros (SCA) y no puede detectarse de forma confiable solo analizando el c\u00f3digo fuente de la aplicaci\u00f3n Node/JS.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-17530",
+    "reason": "La vulnerabilidad CVE-2020-17530 es un fallo en Apache Struts (librer\u00eda/ framework Java) que se mitiga actualizando la dependencia y ajustando configuraci\u00f3n/uso de tags OGNL. No es un problema propio de c\u00f3digo JavaScript/TypeScript/Node.js ni un patr\u00f3n de API insegura en ese stack; su detecci\u00f3n correcta requiere identificar la versi\u00f3n vulnerable de Struts y su configuraci\u00f3n, lo cual encaja en SCA y no en SAST puro sobre el c\u00f3digo de la app JS/TS/Node.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2018-11776",
+    "reason": "CVE-2018-11776 es una vulnerabilidad en Apache Struts (framework Java) relacionada con configuraci\u00f3n de namespaces y resultados. No aplica directamente a una aplicaci\u00f3n JavaScript/TypeScript/Node.js ni se manifiesta como patr\u00f3n de uso inseguro en ese c\u00f3digo, sino como problema en una librer\u00eda/stack distinto que se corrige actualizando la dependencia y ajustando configuraci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2018-18325",
+    "reason": "La vulnerabilidad CVE-2018-18325 est\u00e1 ligada a la implementaci\u00f3n criptogr\u00e1fica espec\u00edfica de DNN (uso de algoritmo de cifrado d\u00e9bil en par\u00e1metros) y a un parche incompleto previo. En un proyecto gen\u00e9rico JS/TS/Node.js no se puede mapear de forma confiable esta CVE solo por patrones de c\u00f3digo, ya que depende del producto DNN y su versi\u00f3n; la detecci\u00f3n fiable pasa por identificar la versi\u00f3n vulnerable del componente, no por el an\u00e1lisis del c\u00f3digo propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2019-17558",
+    "reason": "CVE-2019-17558 es una vulnerabilidad en Apache Solr (VelocityResponseWriter) que se mitiga actualizando/configurando el componente de terceros. No se origina en el c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n, sino en el servidor Solr y su plugin, por lo que no es detectable de forma confiable solo analizando el c\u00f3digo propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-8515",
+    "reason": "CVE-2020-8515 es una vulnerabilidad de ejecuci\u00f3n remota de c\u00f3digo en routers DrayTek asociada al firmware/dispositivo y su configuraci\u00f3n, no a c\u00f3digo fuente JavaScript/TypeScript/Node.js de una aplicaci\u00f3n. Se trata de un problema espec\u00edfico del producto/firmware y su exposici\u00f3n, no de patrones de uso de APIs en el c\u00f3digo de la app.",
+    "approach": "DAST"
+  },
+  {
+    "id": "CVE-2019-15752",
+    "reason": "La vulnerabilidad se debe a c\u00f3mo Docker Desktop (software de terceros) carga y ejecuta un binario externo (docker-credential-wincred.exe) desde una ruta en el sistema, permitiendo sustituci\u00f3n maliciosa y escalada de privilegios. Es un problema de dise\u00f1o/implementaci\u00f3n del propio Docker Desktop y de su configuraci\u00f3n en el host, no de la l\u00f3gica de una aplicaci\u00f3n Node.js/TS/JS. No puede detectarse de forma confiable analizando solo el c\u00f3digo fuente de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-15999",
+    "reason": "CVE-2020-15999 es un desbordamiento de buffer en memoria dentro de FreeType (C/C++) usado por Chrome. Es un bug en un componente compilado de terceros que se mitiga actualizando la librer\u00eda/navegador, no modificando el c\u00f3digo fuente JavaScript/TypeScript/Node.js. No es detectable de forma confiable solo analizando el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-16009",
+    "reason": "No, es un bug de memoria (type confusion / heap corruption) en el motor V8 de Chromium, implementado en C++, explotado a trav\u00e9s de HTML/JS pero localizado en el componente compilado del navegador. No se puede detectar de forma confiable analizando solo el c\u00f3digo fuente JS/TS/Node.js de la aplicaci\u00f3n; la mitigaci\u00f3n pasa por actualizar el navegador/engine (SCA) y no por cambiar el c\u00f3digo propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-21166",
+    "reason": "No, es un bug de carrera y corrupci\u00f3n de memoria en el motor nativo de Chromium (C++). Afecta al navegador/engine subyacente, no al c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n, y se mitiga actualizando el navegador/librer\u00eda, no cambiando el c\u00f3digo fuente propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-30632",
+    "reason": "No. CVE-2021-30632 es un bug de memoria en el motor V8 (C++) de Chromium. Afecta al runtime del navegador/engine, no al c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. No se puede detectar de forma confiable analizando solo el c\u00f3digo fuente de la app; la mitigaci\u00f3n pasa por actualizar el navegador/engine (SCA) y no por cambiar la l\u00f3gica de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-16017",
+    "reason": "CVE-2020-16017 es un use-after-free en el motor nativo de Chrome (C++). Es un bug de memoria en un componente compilado del navegador, no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. No puede detectarse de forma confiable analizando solo el c\u00f3digo fuente de la app, sino actualizando el navegador/engine afectado.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-37976",
+    "reason": "No, es un bug de memoria en el motor nativo de Chromium (C/C++). No depende de patrones inseguros en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n, sino de la implementaci\u00f3n interna del navegador, por lo que no es detectable de forma confiable mediante an\u00e1lisis est\u00e1tico del c\u00f3digo fuente de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-16013",
+    "reason": "No. CVE-2020-16013 es un bug de memoria en el motor V8 (C++) de Chromium, explotable mediante HTML/JS pero ubicado en el componente compilado del navegador. No se debe a patrones inseguros en el c\u00f3digo fuente JS/TS/Node propio, sino a una vulnerabilidad en la implementaci\u00f3n interna del engine que se corrige actualizando el navegador/librer\u00eda, no modificando el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-30633",
+    "reason": "No. Es un use-after-free en el motor nativo de Chromium (C++), explotable a trav\u00e9s de HTML pero localizado en el navegador, no en el c\u00f3digo JS/TS/Node.js de la aplicaci\u00f3n. Cumple el criterio de exclusi\u00f3n de bug de memoria en componente compilado y se mitiga actualizando el navegador/librer\u00eda (SCA), no cambiando el c\u00f3digo fuente propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-21148",
+    "reason": "No. Es un desbordamiento de memoria en el motor V8 (C/C++) del navegador/Chromium, no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. No se puede detectar de forma confiable solo analizando el c\u00f3digo fuente de la app; la mitigaci\u00f3n pasa por actualizar el navegador/engine afectado.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-37973",
+    "reason": "No es posible: CVE-2021-37973 es un use-after-free en el motor nativo de Chromium (C++). Es un bug de memoria en un componente compilado del navegador, no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. La detecci\u00f3n pasa por identificar la versi\u00f3n vulnerable del navegador/librer\u00eda y actualizarla, no por patrones en el c\u00f3digo fuente de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-37975",
+    "reason": "No. Es un bug de memoria (use-after-free) en el motor V8 de Chromium, implementado en C++, explotado a trav\u00e9s de HTML/JS pero localizado en el componente compilado del navegador. No se puede detectar de forma confiable analizando solo el c\u00f3digo fuente JS/TS/Node.js de la aplicaci\u00f3n; la mitigaci\u00f3n pasa por actualizar el navegador/librer\u00eda (SCA) y no por cambiar el c\u00f3digo propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2015-2590",
+    "reason": "CVE-2015-2590 es una vulnerabilidad interna de Oracle Java Runtime Environment (JRE), explotable a trav\u00e9s de su implementaci\u00f3n nativa/bytecode, no por patrones de uso en el c\u00f3digo fuente JavaScript/TypeScript/Node.js. Se mitiga actualizando la plataforma/librer\u00eda afectada, por lo que encaja en el criterio de exclusi\u00f3n de vulnerabilidad en librer\u00eda/entorno de terceros (SCA), no en l\u00f3gica propia detectable por SAST.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-6418",
+    "reason": "No. Es un bug de memoria (type confusion / heap corruption) en el motor V8 escrito en C++ dentro de Chromium/Chrome/Edge/Opera. No se origina en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n, sino en el runtime del navegador, y se mitiga actualizando el navegador (SCA sobre dependencias de plataforma), no cambiando el c\u00f3digo fuente de la app. Adem\u00e1s, su detecci\u00f3n requiere an\u00e1lisis del binario y/o ejecuci\u00f3n din\u00e1mica, no solo SAST sobre el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-30554",
+    "reason": "No es posible: CVE-2021-30554 es un use-after-free en el motor nativo de Chromium (C++/WebGL). Es un bug de memoria en un componente compilado del navegador, no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. La mitigaci\u00f3n pasa por actualizar el navegador/engine (SCA a nivel de dependencias de plataforma), no por cambiar la l\u00f3gica de la app ni patrones de uso de APIs WebGL en el c\u00f3digo fuente.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-30551",
+    "reason": "No. Es un bug de memoria (type confusion) en el motor V8 de Chromium, implementado en C++, explotable a trav\u00e9s de HTML/JS pero localizado en el componente compilado del navegador. No se puede detectar de forma confiable analizando solo el c\u00f3digo fuente JS/TS/Node.js de la aplicaci\u00f3n; la mitigaci\u00f3n pasa por actualizar el navegador/engine (SCA/gesti\u00f3n de dependencias de plataforma), no por cambiar el c\u00f3digo propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-21206",
+    "reason": "No es posible: CVE-2021-21206 es un use-after-free en el motor Blink de Chromium (C++). Es un bug de memoria en un componente compilado del navegador, no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. No se puede detectar de forma confiable solo analizando el c\u00f3digo fuente de la app; la mitigaci\u00f3n pasa por actualizar el navegador/engine afectado.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-38003",
+    "reason": "No: es un bug de memoria en el motor V8 (componente compilado del navegador/Node.js). No depende de patrones inseguros en el c\u00f3digo JS/TS de la aplicaci\u00f3n, sino de la versi\u00f3n vulnerable del runtime, por lo que no es detectable de forma confiable solo con SAST sobre el c\u00f3digo fuente.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-21224",
+    "reason": "No. CVE-2021-21224 es un bug de memoria (type confusion) en el motor V8 de Chromium, implementado en C++. Afecta al runtime del navegador, no al c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Se mitiga actualizando el navegador/engine (SCA) y no analizando patrones en el c\u00f3digo de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-21193",
+    "reason": "No. Es un use-after-free en el motor nativo de Chromium (Blink, C++). Es un bug de memoria en un componente compilado del navegador, no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. No puede detectarse de forma confiable solo analizando el c\u00f3digo fuente de la app; se mitiga actualizando el navegador/librer\u00eda afectada.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-38000",
+    "reason": "CVE-2021-38000 es un fallo de validaci\u00f3n de entrada en el motor de Chromium (c\u00f3digo C++ del navegador) relacionado con el manejo de Intents y navegaci\u00f3n a URLs arbitrarias. Es un bug en un componente compilado del navegador, no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. No se puede detectar de forma confiable solo analizando el c\u00f3digo fuente de la app, sino gestionando la versi\u00f3n del navegador/engine afectado.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-21220",
+    "reason": "No es posible: CVE-2021-21220 es un bug de memoria en el motor V8 (C++) del navegador/Chromium, no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Se corrige actualizando el motor/ navegador (SCA) y no analizando patrones de uso de APIs en el c\u00f3digo fuente de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-30563",
+    "reason": "No es posible: CVE-2021-30563 es un bug de memoria (type confusion) en el motor V8 de Chromium, implementado en C++, explotado mediante HTML/JS pero localizado en el componente compilado del navegador. Se mitiga actualizando el navegador/librer\u00eda (SCA) y no cambiando el c\u00f3digo fuente JS/TS/Node.js de la aplicaci\u00f3n. No existe un patr\u00f3n de uso de API en el c\u00f3digo de la app que pueda detectarse de forma confiable solo con SAST.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-38649",
+    "reason": "CVE-2021-38649 afecta a Microsoft Open Management Infrastructure (OMI), un componente nativo de infraestructura en Azure, y se mitiga actualizando dicho componente. No es un patr\u00f3n de uso inseguro en c\u00f3digo JavaScript/TypeScript/Node.js propio, sino una vulnerabilidad en un binario/servicio de terceros desplegado en la VM, por lo que no puede detectarse de forma confiable solo analizando el c\u00f3digo fuente de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-38647",
+    "reason": "CVE-2021-38647 afecta a Microsoft OMI (componente nativo/daemon de sistema) desplegado como extensi\u00f3n de Azure, no al c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Es esencialmente un problema en un binario/servicio de infraestructura que se mitiga actualizando la extensi\u00f3n/OMI y configurando correctamente el entorno, no modificando el c\u00f3digo de la app. Por tanto, no es detectable de forma confiable solo con SAST sobre el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-38645",
+    "reason": "CVE-2021-38645 afecta a Microsoft Open Management Infrastructure (OMI), un componente nativo/infraestructural usado por extensiones de Azure, no al c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Es esencialmente un problema en un binario/servicio de terceros y de configuraci\u00f3n de entorno, que se mitiga actualizando/ajustando OMI y las extensiones de Azure, no modificando el c\u00f3digo propio. Por tanto, no es detectable de forma confiable solo con SAST sobre el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2017-8759",
+    "reason": "CVE-2017-8759 es una vulnerabilidad de ejecuci\u00f3n remota de c\u00f3digo en Microsoft .NET Framework (componente compilado de terceros). Se mitiga actualizando el framework, no modificando el c\u00f3digo fuente JavaScript/TypeScript/Node.js, por lo que no es detectable de forma confiable solo con SAST sobre ese c\u00f3digo.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-26858",
+    "reason": "CVE-2021-26858 es una vulnerabilidad de Microsoft Exchange Server (producto compilado en C++/.NET) explotada como parte de la cadena ProxyLogon. No se manifiesta como un patr\u00f3n de uso inseguro en c\u00f3digo fuente JavaScript/TypeScript/Node.js propio, sino como un fallo interno del servidor Exchange que se mitiga actualizando el producto. Por tanto, no es detectable de forma confiable mediante an\u00e1lisis est\u00e1tico del c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-26855",
+    "reason": "CVE-2021-26855 (ProxyLogon) es una vulnerabilidad en Microsoft Exchange Server (producto compilado de Microsoft) relacionada con manejo de solicitudes y autenticaci\u00f3n en el servidor Exchange, no con c\u00f3digo fuente JavaScript/TypeScript/Node.js propio. Su detecci\u00f3n pasa por versi\u00f3n/parcheo del producto y configuraci\u00f3n del servidor, no por patrones de uso de APIs en el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-1472",
+    "reason": "CVE-2020-1472 (Zerologon) es un fallo en la implementaci\u00f3n del protocolo Netlogon en el Domain Controller de Windows (componente nativo de Microsoft) y se mitiga actualizando el sistema/patches. No depende de patrones de uso de APIs en c\u00f3digo JavaScript/TypeScript/Node.js propio, sino de una vulnerabilidad en un servicio de infraestructura, por lo que no es detectable de forma confiable solo con SAST sobre el c\u00f3digo fuente de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-1147",
+    "reason": "CVE-2020-1147 es una vulnerabilidad en componentes de Microsoft (.NET Framework, SharePoint, Visual Studio) relacionada con el manejo interno de XML y deserializaci\u00f3n en binarios compilados. Se mitiga actualizando dichos componentes, no modificando el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Por tanto, entra en la categor\u00eda de vulnerabilidad en librer\u00eda/plataforma de terceros (SCA) y no puede detectarse de forma confiable solo analizando el c\u00f3digo fuente propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-0646",
+    "reason": "CVE-2020-0646 es una vulnerabilidad de ejecuci\u00f3n remota de c\u00f3digo en Microsoft .NET Framework debida a validaci\u00f3n de entrada incorrecta en el propio framework. Es un fallo en un componente de plataforma compilado/tercero que se mitiga actualizando el framework, no modificando el c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Por tanto, no es detectable de forma confiable solo analizando el c\u00f3digo fuente de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-27065",
+    "reason": "CVE-2021-27065 afecta a Microsoft Exchange Server (c\u00f3digo nativo/C# y configuraci\u00f3n del producto), no a una aplicaci\u00f3n Node.js/TS/JS propia. Es parte de una cadena de explotaci\u00f3n sobre un software de terceros y su correcci\u00f3n pasa por parches y configuraci\u00f3n del servidor Exchange, no por patrones de uso de APIs en tu c\u00f3digo. Por tanto, no es detectable de forma confiable solo con SAST sobre el c\u00f3digo fuente de tu app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-26857",
+    "reason": "CVE-2021-26857 es una vulnerabilidad en Microsoft Exchange Server (componente compilado y de infraestructura) explotada como parte de ProxyLogon. No se trata de l\u00f3gica insegura en c\u00f3digo JavaScript/TypeScript/Node.js propio, sino de un fallo en el producto/servidor Exchange que se mitiga actualizando y configurando el servidor, por lo que no es detectable de forma confiable solo con SAST sobre el c\u00f3digo fuente de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2015-4852",
+    "reason": "CVE-2015-4852 es una vulnerabilidad de deserializaci\u00f3n en Oracle WebLogic/Apache Commons Java. Es un fallo en una librer\u00eda/stack de terceros y en su configuraci\u00f3n/uso en el servidor Java, no en el c\u00f3digo fuente JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Se mitiga actualizando componentes y configuraciones del servidor, no cambiando el c\u00f3digo propio JS/TS, por lo que no es detectable de forma confiable solo con SAST sobre ese c\u00f3digo.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-38648",
+    "reason": "CVE-2021-38648 afecta a Microsoft Open Management Infrastructure (OMI), un componente nativo de infraestructura en Azure, y se mitiga actualizando dicho componente. No es un problema en el c\u00f3digo fuente de una aplicaci\u00f3n Node.js/TS/JS ni un patr\u00f3n de uso de APIs en ese c\u00f3digo, por lo que no puede detectarse de forma confiable solo con SAST sobre el repositorio de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2019-18935",
+    "reason": "La vulnerabilidad CVE-2019-18935 reside en el componente compilado de terceros Progress Telerik UI for ASP.NET AJAX (RadAsyncUpload) y se mitiga actualizando la librer\u00eda/paquete, no modificando el c\u00f3digo JavaScript/TypeScript/Node.js propio. No es detectable de forma confiable solo analizando el c\u00f3digo fuente de la aplicaci\u00f3n, sino identificando la versi\u00f3n vulnerable del componente.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2010-5326",
+    "reason": "La vulnerabilidad CVE-2010-5326 afecta al componente SAP NetWeaver Application Server Java (Invoker Servlet) y se debe principalmente a una configuraci\u00f3n/dise\u00f1o inseguro del servidor de aplicaciones que permite invocaci\u00f3n remota sin autenticaci\u00f3n. No es un problema en el c\u00f3digo fuente de una aplicaci\u00f3n JavaScript/TypeScript/Node.js ni un patr\u00f3n de uso de API en ese c\u00f3digo, sino una vulnerabilidad del propio producto/servidor SAP y su configuraci\u00f3n. Por tanto, no puede detectarse de forma confiable analizando \u00fanicamente el c\u00f3digo fuente de la aplicaci\u00f3n.",
+    "approach": "DAST"
+  },
+  {
+    "id": "CVE-2020-6287",
+    "reason": "CVE-2020-6287 es una vulnerabilidad en el producto SAP NetWeaver AS Java (componente de servidor SAP) debida a falta de autenticaci\u00f3n en funciones cr\u00edticas de administraci\u00f3n. Es esencialmente un problema de configuraci\u00f3n/dise\u00f1o en el servidor SAP y su implementaci\u00f3n interna, no en el c\u00f3digo fuente de una aplicaci\u00f3n Node.js/JS/TS que lo consuma. Detectarla requiere conocer la versi\u00f3n y configuraci\u00f3n del servidor SAP y/o probar el endpoint vulnerable, no analizar patrones de c\u00f3digo en la aplicaci\u00f3n cliente.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2017-9248",
+    "reason": "La vulnerabilidad reside en Telerik.Web.UI.dll (librer\u00eda de terceros .NET) y se mitiga actualizando el componente o su configuraci\u00f3n criptogr\u00e1fica, no modificando el c\u00f3digo fuente JavaScript/TypeScript/Node.js. Su detecci\u00f3n fiable es de tipo SCA/DAST, no mediante an\u00e1lisis est\u00e1tico del c\u00f3digo propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-31755",
+    "reason": "La CVE-2021-31755 es un desbordamiento de buffer en pila en firmware de Tenda (C/C++ embebido). Es un bug de memoria en un componente compilado, no en c\u00f3digo JavaScript/TypeScript/Node.js, y su detecci\u00f3n fiable requiere analizar el binario/firmware o ejecutar pruebas din\u00e1micas sobre el dispositivo, no solo revisar c\u00f3digo fuente JS/TS.",
+    "approach": "DAST"
+  },
+  {
+    "id": "CVE-2018-14558",
+    "reason": "La vulnerabilidad se origina en c\u00f3digo nativo del firmware (funci\u00f3n formsetUsbUnload que llama a dosystemCmd en C/C++), no en l\u00f3gica JavaScript/TypeScript/Node.js. No es detectable de forma confiable analizando solo c\u00f3digo fuente de una aplicaci\u00f3n JS/TS/Node, ya que es un bug de inyecci\u00f3n de comandos en un componente compilado del dispositivo.",
+    "approach": "DAST"
+  },
+  {
+    "id": "CVE-2019-16759",
+    "reason": "La vulnerabilidad CVE-2019-16759 es un RCE espec\u00edfico de vBulletin (PHP) explotado v\u00eda el par\u00e1metro widgetConfig[code] en la ruta ajax/render/widget_php. No es un patr\u00f3n gen\u00e9rico en c\u00f3digo JavaScript/TypeScript/Node.js propio, sino un fallo en la l\u00f3gica interna de vBulletin (tercero) y su forma de evaluar c\u00f3digo. Detectarla requiere identificar la versi\u00f3n vulnerable del componente y/o probar la explotaci\u00f3n, no revisar \u00fanicamente el c\u00f3digo fuente JS/TS/Node.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-5847",
+    "reason": "CVE-2020-5847 es una vulnerabilidad espec\u00edfica de Unraid (PHP) basada en el uso inseguro de la funci\u00f3n extract(). No es un patr\u00f3n gen\u00e9rico en c\u00f3digo JavaScript/TypeScript/Node.js, sino un fallo concreto en otra tecnolog\u00eda. Detectarla requiere identificar la versi\u00f3n vulnerable de Unraid o su configuraci\u00f3n, no analizar el c\u00f3digo fuente JS/TS/Node propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-17496",
+    "reason": "La vulnerabilidad afecta al m\u00f3dulo PHP de vBulletin y se debe a c\u00f3mo el backend procesa datos subWidgets en una ruta espec\u00edfica, siendo adem\u00e1s un parche incompleto de una vulnerabilidad previa. Es esencialmente un problema en la l\u00f3gica interna de vBulletin (PHP) y su manejo de plantillas/ejecuci\u00f3n, no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Detectarla requiere revisar el c\u00f3digo/versi\u00f3n del componente vBulletin o probar din\u00e1micamente el endpoint, no basta con analizar solo el c\u00f3digo fuente JS/TS/Node propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2018-20062",
+    "reason": "CVE-2018-20062 es una vulnerabilidad espec\u00edfica del framework ThinkPHP (PHP). En un proyecto JavaScript/TypeScript/Node.js, la detecci\u00f3n pasa por identificar la presencia y versi\u00f3n vulnerable de ese componente externo, no por patrones de uso en el c\u00f3digo propio. Esto encaja con el criterio de exclusi\u00f3n de vulnerabilidad en librer\u00eda de terceros que se soluciona actualizando (SCA).",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-25213",
+    "reason": "La vulnerabilidad est\u00e1 en un plugin de terceros de WordPress (File Manager) y se mitiga actualizando dicho componente. No se trata de un patr\u00f3n inseguro en c\u00f3digo propio JS/TS/Node, sino de una falla espec\u00edfica en una librer\u00eda externa en PHP, por lo que encaja en el criterio de exclusi\u00f3n de SCA.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2019-9082",
+    "reason": "La vulnerabilidad CVE-2019-9082 es un fallo espec\u00edfico del framework ThinkPHP (PHP) y su mecanismo interno de enrutamiento/invocaci\u00f3n de funciones. En un proyecto JavaScript/TypeScript/Node.js, el riesgo asociado proviene del uso de una librer\u00eda/servicio vulnerable (ThinkPHP) o de una configuraci\u00f3n concreta de ese framework, no de patrones gen\u00e9ricos de c\u00f3digo JS/TS/Node. Por tanto, se encuadra como vulnerabilidad en un componente/tercera parte que se mitiga actualizando o configurando correctamente, no analizando el c\u00f3digo fuente propio en JS/TS/Node.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-16010",
+    "reason": "No, es un desbordamiento de memoria en el motor nativo de Chrome (C/C++). Afecta al navegador, no al c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n, y se mitiga actualizando el navegador/librer\u00eda, no cambiando el c\u00f3digo fuente propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2025-26458",
+    "reason": "La vulnerabilidad describe un fallo l\u00f3gico espec\u00edfico en el framework Android (LocationProviderManager.java) que permite lanzar actividades en background y escalar privilegios. Para una app JavaScript/TypeScript/Node.js, solo con SAST sobre su c\u00f3digo no es posible detectar de forma confiable este CVE, porque: (1) el bug reside en el c\u00f3digo nativo/plataforma de Android, no en la l\u00f3gica propia JS/TS/Node; (2) la detecci\u00f3n fiable depende de c\u00f3mo el sistema operativo maneja internamente las llamadas, no de un patr\u00f3n gen\u00e9rico de uso inseguro en el c\u00f3digo de la app; (3) la mitigaci\u00f3n real pasa por actualizar el componente vulnerable del sistema, no por cambiar el c\u00f3digo de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2025-38682",
+    "reason": "No. Es un bug de gesti\u00f3n de memoria/refcount en el kernel de Linux (C) relacionado con i2c_unregister_device y fwnode_handle_put, no con l\u00f3gica en c\u00f3digo JavaScript/TypeScript/Node.js. Se corrige actualizando el componente nativo afectado, no analizando el c\u00f3digo fuente de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2025-26462",
+    "reason": "La vulnerabilidad CVE-2025-26462 afecta a la l\u00f3gica interna del framework Android (accessibilityserviceconnection.java) y describe un fallo de control de actividades en segundo plano a nivel de sistema. No es un problema en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n, ni un patr\u00f3n de uso directo de APIs web est\u00e1ndar que pueda detectarse revisando solo el c\u00f3digo fuente de la app. Su detecci\u00f3n requiere an\u00e1lisis del framework/OS y su versi\u00f3n, no del c\u00f3digo propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2025-26436",
+    "reason": "La vulnerabilidad se encuentra en la implementaci\u00f3n interna del framework Android (PendingIntentRecord / clearAllowBgActivityStarts) y explota un bypass de las restricciones de inicio de actividades en background (BAL). No es un patr\u00f3n inseguro en el c\u00f3digo JavaScript/TypeScript/Node.js de la app, sino un fallo en la plataforma subyacente. Por tanto, no puede detectarse de forma confiable analizando solo el c\u00f3digo fuente de la aplicaci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2025-26464",
+    "reason": "La vulnerabilidad se origina en la l\u00f3gica interna de Android (AppSearchManagerService.java) y su gesti\u00f3n de lanzamientos en segundo plano, no en el c\u00f3digo JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Desde el c\u00f3digo fuente de la app solo se ven llamadas leg\u00edtimas a APIs del sistema, y la explotaci\u00f3n depende de c\u00f3mo el framework Android procesa esas llamadas. Por tanto, no es detectable de forma confiable solo analizando el c\u00f3digo de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2025-49692",
+    "reason": "La vulnerabilidad afecta al Azure Windows Virtual Machine Agent (componente de plataforma/sistema) y se mitiga actualizando dicho agente o configuraciones asociadas, no modificando el c\u00f3digo fuente de una app Node.js/TS/JS. No es un patr\u00f3n de uso de API en el c\u00f3digo de la aplicaci\u00f3n, sino un problema en un componente externo, por lo que no es detectable de forma confiable solo con SAST sobre el c\u00f3digo propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2025-54895",
+    "reason": "La vulnerabilidad describe un integer overflow en la implementaci\u00f3n de SPNEGO en Windows, es decir, en c\u00f3digo nativo del sistema/stack de autenticaci\u00f3n, no en la l\u00f3gica JavaScript/TypeScript/Node.js de la aplicaci\u00f3n. Se trata de un bug de memoria en un componente compilado de terceros que se mitiga actualizando el sistema/librer\u00edas, no modificando el c\u00f3digo fuente de la app. Por tanto, no es detectable de forma confiable solo analizando el c\u00f3digo fuente JS/TS.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2025-32331",
+    "reason": "La vulnerabilidad CVE-2025-32331 afecta a la l\u00f3gica interna del sistema Android (KeyguardService) y su manejo del app pinning, no al c\u00f3digo JavaScript/TypeScript/Node.js de una aplicaci\u00f3n. Es un fallo de l\u00f3gica en el framework/OS subyacente, no un patr\u00f3n de uso inseguro en el c\u00f3digo fuente de la app que pueda detectarse de forma confiable solo con SAST sobre JS/TS/Node.",
+    "approach": "Manual"
+  },
+  {
+    "id": "CVE-2025-10060",
+    "reason": "La vulnerabilidad reside en el propio servidor de MongoDB (motor C++ y su gesti\u00f3n interna de transacciones/write units of work), no en el c\u00f3digo JavaScript/TypeScript que usa la API. Se mitiga actualizando la versi\u00f3n del servidor, no cambiando el uso de la API en la aplicaci\u00f3n. Por tanto, no es detectable de forma confiable solo analizando el c\u00f3digo fuente de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2025-35939",
+    "reason": "La vulnerabilidad se origina en Craft CMS (producto tercero en PHP) y en c\u00f3mo gestiona par\u00e1metros web para escribir en el sistema de archivos. En un proyecto JavaScript/TypeScript/Node.js solo ver\u00edas el consumo de ese CMS como dependencia o servicio externo, no la l\u00f3gica interna vulnerable. Detectarla requiere identificar la versi\u00f3n afectada y el contexto de despliegue, no patrones de c\u00f3digo en tu base JS/TS/Node. Por tanto, no es razonable detectarla de forma confiable solo con SAST sobre tu c\u00f3digo.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2025-27915",
+    "reason": "La vulnerabilidad se origina en c\u00f3mo Zimbra procesa y renderiza contenido HTML proveniente de archivos ICS en el cliente web cl\u00e1sico. Implica el pipeline completo de parseo ICS \u2192 generaci\u00f3n de HTML \u2192 ejecuci\u00f3n en el navegador, y depende de c\u00f3mo el servidor y el cliente manejan y sanitizan ese contenido. Detectarla de forma confiable solo mirando c\u00f3digo fuente gen\u00e9rico JS/TS/Node sin contexto espec\u00edfico de Zimbra ni ejecuci\u00f3n din\u00e1mica es muy dif\u00edcil: requiere validar el flujo real de datos desde el ICS hasta el DOM y comprobar si los sanitizadores se aplican correctamente, lo que t\u00edpicamente exige pruebas din\u00e1micas o revisi\u00f3n manual muy contextualizada.",
+    "approach": "DAST"
+  },
+  {
+    "id": "CVE-2025-58437",
+    "reason": "La vulnerabilidad se debe a un fallo en el manejo de sesiones internas de la propia plataforma Coder (token de sesi\u00f3n de usuario prebuild que no se invalida al ser reclamado el workspace). Es un problema de implementaci\u00f3n y l\u00f3gica en el producto afectado que se corrige actualizando a 2.24.4/2.25.2, no en el c\u00f3digo de la aplicaci\u00f3n JavaScript/TypeScript/Node.js que simplemente consume Coder. Desde el c\u00f3digo fuente de la app solo ver\u00edas el uso de la API/variable coder_workspace_owner.session_token, pero no puedes inferir ni verificar que el backend de Coder invalide o no invalide correctamente el token anterior; eso requiere conocer y actualizar la versi\u00f3n del componente afectado o pruebas din\u00e1micas.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2023-5631",
+    "reason": "La CVE-2023-5631 es una vulnerabilidad espec\u00edfica de Roundcube Webmail ya identificada y corregida en versiones concretas del producto. Su detecci\u00f3n fiable se basa en conocer la versi\u00f3n afectada y el parche aplicado (SCA) o en pruebas din\u00e1micas sobre la instancia desplegada (DAST), no en el an\u00e1lisis gen\u00e9rico de patrones de c\u00f3digo de una aplicaci\u00f3n arbitraria en JS/TS/Node. Adem\u00e1s, el exploit depende del flujo completo de procesamiento/renderizado de correos HTML en el entorno real, lo que requiere contexto de ejecuci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-1956",
+    "reason": "CVE-2020-1956 es una vulnerabilidad espec\u00edfica de Apache Kylin (producto/librer\u00eda de terceros) que se mitiga principalmente actualizando la versi\u00f3n afectada; en un proyecto JavaScript/TypeScript/Node.js solo la detectar\u00edas de forma confiable mediante an\u00e1lisis de dependencias (SCA), no revisando el c\u00f3digo propio en busca de patrones inseguros.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2021-21315",
+    "reason": "CVE-2021-21315 afecta a la librer\u00eda de terceros systeminformation en Node.js (command injection por uso inseguro de child_process). La detecci\u00f3n fiable pasa por identificar la versi\u00f3n vulnerable de la dependencia y actualizarla; no se limita a patrones en el c\u00f3digo propio. Por tanto, encaja en el criterio de exclusi\u00f3n de vulnerabilidad en librer\u00eda de terceros que se soluciona v\u00eda actualizaci\u00f3n (SCA).",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2025-55182",
+    "reason": "La vulnerabilidad reside en c\u00f3mo React Server Components/Server Functions decodifican internamente los payloads; es un fallo en la librer\u00eda/plataforma de React, no en patrones espec\u00edficos del c\u00f3digo de la aplicaci\u00f3n. Se mitiga actualizando la dependencia afectada (SCA) y no modificando el c\u00f3digo propio, por lo que no es fiable detectarla solo con SAST sobre el c\u00f3digo de la app.",
+    "approach": "SCA"
+  },
+  {
+    "id": "65f77b1e-8e79-45bf-bb67-5988a8ce45a5",
+    "reason": "La detecci\u00f3n descrita corresponde a comportamiento de ejecuci\u00f3n (llamadas RPC remotas usadas por SharpHound para reconocimiento en AD). Es un patr\u00f3n de uso de la aplicaci\u00f3n en tiempo de ejecuci\u00f3n y de tr\u00e1fico/red, no un defecto l\u00f3gico o uso inseguro de APIs identificable de forma confiable solo inspeccionando c\u00f3digo fuente JavaScript/TypeScript/Node.js.",
+    "approach": "DAST"
+  },
+  {
+    "id": "2053961f-44c7-4a64-b62d-f6e72800af0d",
+    "reason": "La detecci\u00f3n de \u2018Remote Event Log Recon\u2019 se basa en observar llamadas RPC remotas a servicios de eventos de Windows (EVEN/EVEN6) en tiempo de ejecuci\u00f3n y en el contexto de red/host. Aunque el c\u00f3digo pudiera usar librer\u00edas para acceder remotamente a logs, el patr\u00f3n concreto (host remoto, contexto de dominio, uso efectivo de RPC) no puede determinarse de forma confiable solo con an\u00e1lisis est\u00e1tico de c\u00f3digo JavaScript/TypeScript/Node.js sin informaci\u00f3n de configuraci\u00f3n, despliegue y comportamiento en ejecuci\u00f3n.",
+    "approach": "DAST"
+  },
+  {
+    "id": "bc3a4b0c-e167-48e1-aa88-b3020950e560",
+    "reason": "Este escenario describe abuso de servicios de impresi\u00f3n remotos v\u00eda RPC (MS-RPRN/MS-PAR) como t\u00e9cnica de movimiento lateral, dependiente del entorno Windows, configuraci\u00f3n de red y comportamiento en tiempo de ejecuci\u00f3n. En c\u00f3digo JavaScript/TypeScript/Node.js no hay patrones de API est\u00e1ndar que permitan identificar de forma confiable estas llamadas RPC espec\u00edficas solo con an\u00e1lisis est\u00e1tico; adem\u00e1s, la detecci\u00f3n requiere observar tr\u00e1fico/llamadas reales y contexto de infraestructura.",
+    "approach": "DAST"
+  },
+  {
+    "id": "5f92fff9-82e2-48eb-8fc1-8b133556a551",
+    "reason": "Este tipo de abuso de MS-EFSR se manifiesta a nivel de llamadas RPC remotas al servicio de cifrado de archivos de Windows y depende del contexto de ejecuci\u00f3n, configuraci\u00f3n del sistema y comportamiento en tiempo de ejecuci\u00f3n. En c\u00f3digo JavaScript/TypeScript/Node.js no hay un patr\u00f3n gen\u00e9rico y fiable de \u2018uso inseguro\u2019 que pueda identificarse solo leyendo el c\u00f3digo fuente; la detecci\u00f3n requiere observar tr\u00e1fico RPC/SMB, contexto de red y c\u00f3mo se usan las credenciales y endpoints en tiempo de ejecuci\u00f3n.",
+    "approach": "DAST"
+  },
+  {
+    "id": "7f7c49eb-2977-4ac8-8ab0-ab1bae14730e",
+    "reason": "La detecci\u00f3n de esta actividad (llamadas RPC remotas al servicio de Task Scheduler para leer tareas programadas) depende del contexto de ejecuci\u00f3n, del host de destino y del comportamiento en tiempo de ejecuci\u00f3n. En c\u00f3digo JavaScript/TypeScript/Node.js solo ver\u00edas, como mucho, uso gen\u00e9rico de APIs de red/RPC o bindings nativos, pero no puedes determinar de forma confiable si se usan para hacer reconocimiento remoto de tareas programadas sin observar par\u00e1metros reales, entorno y flujo de ejecuci\u00f3n. Por tanto, requiere an\u00e1lisis din\u00e1mico/telemetr\u00eda, no solo SAST.",
+    "approach": "DAST"
+  },
+  {
+    "id": "f177f2bc-5f3e-4453-b599-57eefce9a59c",
+    "reason": "La detecci\u00f3n de \u2018Remote Schedule Task Recon via AtScv\u2019 se basa en observar llamadas RPC remotas al servicio de tareas programadas de Windows (comportamiento en tiempo de ejecuci\u00f3n y a nivel de sistema/infraestructura). Aunque el c\u00f3digo JavaScript/TypeScript/Node.js podr\u00eda invocar APIs que eventualmente hagan estas llamadas, no es posible determinar de forma confiable, solo con an\u00e1lisis est\u00e1tico del c\u00f3digo, si se producir\u00e1 realmente la recon remota (host de destino, contexto, permisos, configuraci\u00f3n del sistema, etc.). Adem\u00e1s, esta detecci\u00f3n corresponde a una regla de threat detection/telemetr\u00eda, no a un patr\u00f3n de l\u00f3gica insegura puramente en el c\u00f3digo fuente.",
+    "approach": "DAST"
+  },
+  {
+    "id": "d8ffe17e-04be-4886-beb9-c1dd1944b9a8",
+    "reason": "La detecci\u00f3n de 'Remote Registry Recon' se basa en observar llamadas RPC remotas en tiempo de ejecuci\u00f3n (comportamiento de red/sistema) y su contexto de uso. Aunque se podr\u00edan buscar indicios en el c\u00f3digo (por ejemplo, uso de APIs para acceso remoto a registro/servicios de Windows), no es posible determinar de forma confiable solo con SAST si esas llamadas se usan realmente para reconocimiento remoto malicioso o en qu\u00e9 entorno se ejecutan. La regla es esencialmente de monitoreo de comportamiento, no de bug l\u00f3gico est\u00e1tico.",
+    "approach": "DAST"
+  },
+  {
+    "id": "10018e73-06ec-46ec-8107-9172f1e04ff2",
+    "reason": "La detecci\u00f3n de abuso remoto del servicio MS-EFSR para movimiento lateral depende de c\u00f3mo se usan servicios del sistema y llamadas RPC en tiempo de ejecuci\u00f3n (host Windows, configuraci\u00f3n, credenciales, contexto de red). No es un bug l\u00f3gico t\u00edpico en el c\u00f3digo JS/TS/Node, sino un patr\u00f3n de comportamiento en la infraestructura y el entorno de ejecuci\u00f3n, por lo que no puede identificarse de forma confiable solo con an\u00e1lisis est\u00e1tico del c\u00f3digo fuente.",
+    "approach": "DAST"
+  },
+  {
+    "id": "35c55673-84ca-4e99-8d09-e334f3c29539",
+    "reason": "La detecci\u00f3n fiable de movimiento lateral mediante Remote Registry requiere observar llamadas RPC remotas reales, contexto de red, host de destino y comportamiento en tiempo de ejecuci\u00f3n. Analizar solo el c\u00f3digo fuente JS/TS/Node.js no permite distinguir de forma confiable entre uso leg\u00edtimo de APIs remotas y abuso para modificar el registro de forma maliciosa, ni confirmar que se ejecuten realmente esas rutas de c\u00f3digo en un escenario de movimiento lateral.",
+    "approach": "DAST"
+  },
+  {
+    "id": "0fcd1c79-4eeb-4746-aba9-1b458f7a79cb",
+    "reason": "La detecci\u00f3n de movimiento lateral mediante creaci\u00f3n/ejecuci\u00f3n remota de tareas programadas v\u00eda ATSvc depende de llamadas RPC remotas en tiempo de ejecuci\u00f3n, contexto de red, host de destino y comportamiento del proceso. No se puede inferir de forma confiable solo a partir del c\u00f3digo fuente JS/TS/Node.js, ya que el mismo uso de APIs podr\u00eda ser leg\u00edtimo o malicioso y la vulnerabilidad es de comportamiento/uso en entorno, no de l\u00f3gica est\u00e1tica defectuosa.",
+    "approach": "DAST"
+  },
+  {
+    "id": "ace3ff54-e7fd-46bd-8ea0-74b49a0aca1d",
+    "reason": "La detecci\u00f3n de movimiento lateral mediante creaci\u00f3n/ejecuci\u00f3n remota de tareas programadas v\u00eda ITaskSchedulerService depende de c\u00f3mo y desde d\u00f3nde se invocan las APIs de sistema (RPC remotos, contexto de ejecuci\u00f3n, host remoto, credenciales, etc.). Aunque se pueden ver llamadas a APIs relacionadas en el c\u00f3digo, distinguir de forma confiable si se usan para movimiento lateral malicioso o para administraci\u00f3n leg\u00edtima requiere contexto de ejecuci\u00f3n, par\u00e1metros reales, entorno y comportamiento en tiempo de ejecuci\u00f3n, lo que excede el alcance de un an\u00e1lisis puramente est\u00e1tico del c\u00f3digo fuente JS/TS/Node.",
+    "approach": "DAST"
+  },
+  {
+    "id": "56fda488-113e-4ce9-8076-afc2457922c3",
+    "reason": "La detecci\u00f3n de un posible ataque DCSync/DCShadow depende de eventos de red/infraestructura (llamadas RPC MS-DRSR desde hosts no DC) y del contexto de ejecuci\u00f3n en el dominio Active Directory, no de patrones de c\u00f3digo fuente en una app JavaScript/TypeScript/Node.js. Requiere monitorizaci\u00f3n din\u00e1mica y configuraci\u00f3n de entorno, no se puede inferir de forma confiable solo con SAST.",
+    "approach": "DAST"
+  },
+  {
+    "id": "b6ea3cc7-542f-43ef-bbe4-980fbed444c7",
+    "reason": "La detecci\u00f3n de abuso remoto del servicio MS-SRVS mediante llamadas RPC remotas depende del comportamiento en tiempo de ejecuci\u00f3n, del entorno Windows, de la red y de c\u00f3mo se establecen y usan las conexiones RPC hacia servicios remotos. No puede determinarse de forma confiable solo inspeccionando c\u00f3digo JavaScript/TypeScript/Node.js, ya que la mera presencia de llamadas de red o a APIs RPC no basta para concluir abuso; se requiere contexto din\u00e1mico (hosts destino, credenciales, patrones de uso, etc.). Esto encaja m\u00e1s con detecci\u00f3n de actividad maliciosa/lateral movement a nivel de red/host que con un patr\u00f3n de API insegura en el c\u00f3digo fuente.",
+    "approach": "DAST"
+  },
+  {
+    "id": "6d580420-ff3f-4e0e-b6b0-41b90c787e28",
+    "reason": "La detecci\u00f3n de SharpHound Recon Sessions se basa en identificar patrones de comportamiento en tiempo de ejecuci\u00f3n (llamadas RPC remotas espec\u00edficas, contexto de uso, origen/destino, etc.) t\u00edpicos de la herramienta SharpHound. Esto es un problema de detecci\u00f3n de actividad maliciosa en el entorno (telemetr\u00eda, logs, EDR/SIEM), no un defecto de l\u00f3gica o uso inseguro de APIs en el c\u00f3digo fuente de una app JS/TS/Node. Por tanto, no puede detectarse de forma confiable solo con SAST.",
+    "approach": "DAST"
+  },
+  {
+    "id": "0a3ff354-93fc-4273-8a03-1078782de5b7",
+    "reason": "La detecci\u00f3n se basa en identificar llamadas RPC remotas en tiempo de ejecuci\u00f3n para leer informaci\u00f3n de tareas programadas v\u00eda SASec, lo cual depende del comportamiento del sistema y del entorno, no de un patr\u00f3n de c\u00f3digo JavaScript/TypeScript/Node.js claramente inseguro. Requiere observaci\u00f3n din\u00e1mica del tr\u00e1fico/llamadas RPC y contexto de infraestructura, no solo an\u00e1lisis est\u00e1tico del c\u00f3digo fuente.",
+    "approach": "DAST"
+  },
+  {
+    "id": "aff229ab-f8cd-447b-b215-084d11e79eb0",
+    "reason": "La detecci\u00f3n de movimiento lateral mediante creaci\u00f3n/ejecuci\u00f3n remota de tareas programadas v\u00eda SASec depende de comportamiento en tiempo de ejecuci\u00f3n, contexto de red, uso de RPC remotos y configuraci\u00f3n del entorno. No puede inferirse de forma confiable solo analizando el c\u00f3digo fuente JavaScript/TypeScript/Node.js sin observar llamadas reales, destinos remotos y contexto de autenticaci\u00f3n.",
+    "approach": "DAST"
+  },
+  {
+    "id": "68050b10-e477-4377-a99b-3721b422d6ef",
+    "reason": "La detecci\u00f3n de movimiento lateral v\u00eda DCOM/WMI depende de c\u00f3mo y desde d\u00f3nde se realizan llamadas RPC remotas en tiempo de ejecuci\u00f3n (host, credenciales, contexto de red, comportamiento del proceso). Aunque en teor\u00eda se podr\u00edan buscar GUIDs de interfaces DCOM/WMI o patrones de uso de APIs remotas en el c\u00f3digo, no es posible determinar de forma confiable solo con SAST si ese uso es leg\u00edtimo o malicioso ni si se est\u00e1 produciendo movimiento lateral. La regla descrita es esencialmente de monitoreo de comportamiento en tiempo de ejecuci\u00f3n.",
+    "approach": "DAST"
+  },
+  {
+    "id": "19aefed0-ffd4-47dc-a7fc-f8b1425e84f9",
+    "reason": "La regla describe la detecci\u00f3n de excepciones SQL en Python seg\u00fan PEP 249 (DataError, IntegrityError, ProgrammingError, OperationalError). Esto es un indicador de errores en tiempo de ejecuci\u00f3n o manejo de errores de base de datos, no un patr\u00f3n est\u00e1tico de vulnerabilidad en c\u00f3digo JavaScript/TypeScript/Node.js. Para saber si estas excepciones implican una vulnerabilidad real (p.ej. inyecci\u00f3n SQL, fallo l\u00f3gico, fuga de informaci\u00f3n) se requiere observar el comportamiento en ejecuci\u00f3n y el contexto de la consulta, no solo la presencia de nombres de excepciones en el c\u00f3digo fuente JS/TS.",
+    "approach": "DAST"
+  },
+  {
+    "id": "d65f37da-a26a-48f8-8159-3dde96680ad2",
+    "reason": "La regla describe errores de ejecuci\u00f3n de procesos en aplicaciones JVM (ProcessBuilder, ProcessImpl) detectados en tiempo de ejecuci\u00f3n y asociados a posibles RCE. En un contexto JavaScript/TypeScript/Node.js no existen esas clases JVM, y adem\u00e1s la detecci\u00f3n se basa en excepciones y mensajes de error en runtime, no en un patr\u00f3n de c\u00f3digo est\u00e1tico claramente definible. Por tanto, requiere observaci\u00f3n din\u00e1mica del comportamiento y de los errores producidos.",
+    "approach": "DAST"
+  },
+  {
+    "id": "bb0e9cec-d4da-46f5-997f-22efc59f3dca",
+    "reason": "La explotaci\u00f3n de JNDI Injection descrita est\u00e1 ligada a componentes JVM (Log4j, JNDI, clases Java espec\u00edficas) y a patrones de explotaci\u00f3n en tiempo de ejecuci\u00f3n. En una aplicaci\u00f3n JavaScript/TypeScript/Node.js no existen directamente estas APIs JVM (com.sun.jndi.ldap, JndiManager), por lo que el patr\u00f3n de vulnerabilidad no es detectable de forma fiable solo con SAST sobre ese c\u00f3digo. Adem\u00e1s, la detecci\u00f3n robusta de explotaci\u00f3n de JNDI Injection suele requerir observaci\u00f3n din\u00e1mica (logs, tr\u00e1fico, payloads) y/o an\u00e1lisis de dependencias JVM, no solo del c\u00f3digo fuente JS/TS.",
+    "approach": "DAST"
+  },
+  {
+    "id": "4d0af518-828e-4a04-a751-a7d03f3046ad",
+    "reason": "La explotaci\u00f3n OGNL ocurre en tiempo de ejecuci\u00f3n dentro de frameworks JVM (Struts, Confluence, etc.) y depende de c\u00f3mo se eval\u00faan din\u00e1micamente expresiones OGNL, configuraci\u00f3n del framework, datos de entrada y versiones espec\u00edficas de librer\u00edas Java. Analizar solo c\u00f3digo fuente JavaScript/TypeScript/Node.js no permite ver ni el motor OGNL ni su configuraci\u00f3n, por lo que no se puede determinar de forma confiable si existe una v\u00eda real de inyecci\u00f3n OGNL/RCE; adem\u00e1s, la detecci\u00f3n fiable requiere observar peticiones y respuestas reales hacia la aplicaci\u00f3n JVM objetivo.",
+    "approach": "DAST"
+  },
+  {
+    "id": "fd435618-981e-4a7c-81f8-f78ce480d616",
+    "reason": "La regla describe detecci\u00f3n de excepciones de Django en tiempo de ejecuci\u00f3n que indican posibles intentos de explotaci\u00f3n (p.ej. DisallowedHost, SuspiciousOperation). Estas condiciones dependen de entradas reales, configuraci\u00f3n de despliegue y comportamiento en producci\u00f3n, no de un patr\u00f3n de uso inseguro de APIs en c\u00f3digo JavaScript/TypeScript/Node.js. No es posible inferir de forma confiable solo con SAST que dichas excepciones se producir\u00e1n de forma maliciosa.",
+    "approach": "DAST"
+  },
+  {
+    "id": "0d2c3d4c-4b48-4ac3-8f23-ea845746bb1a",
+    "reason": "La regla describe detecci\u00f3n de excepciones de Ruby on Rails en tiempo de ejecuci\u00f3n que indican posibles intentos de explotaci\u00f3n. No es un fallo espec\u00edfico en el c\u00f3digo fuente JavaScript/TypeScript/Node.js ni un patr\u00f3n de uso inseguro de APIs, sino un indicador de ataque observado en logs/entorno de ejecuci\u00f3n. Requiere monitorizaci\u00f3n din\u00e1mica de errores y tr\u00e1fico, no se puede detectar de forma confiable solo con an\u00e1lisis est\u00e1tico del c\u00f3digo.",
+    "approach": "DAST"
+  },
+  {
+    "id": "e9edd087-89d8-48c9-b0b4-5b9bb10896b8",
+    "reason": "La vulnerabilidad se basa en el uso de Spring Expression Language (SpEL) en aplicaciones Java/Spring, no en JavaScript/TypeScript/Node.js. En un c\u00f3digo puramente JS/TS/Node no existe el framework ni las APIs de Spring necesarias para que esta vulnerabilidad aplique, por lo que no es detectable de forma significativa en ese contexto analizando solo el c\u00f3digo fuente.",
+    "approach": "SCA"
+  },
+  {
+    "id": "ae48ab93-45f7-4051-9dfe-5d30a3f78e33",
+    "reason": "La regla describe detecci\u00f3n de excepciones de Spring en tiempo de ejecuci\u00f3n que pueden indicar intentos de explotaci\u00f3n (p.ej. AccessDeniedException, CsrfException, etc.). Esto es monitoreo de comportamiento y errores en runtime, no un patr\u00f3n de uso inseguro en c\u00f3digo JavaScript/TypeScript/Node.js. No se puede determinar de forma confiable solo con an\u00e1lisis est\u00e1tico del c\u00f3digo fuente, ya que depende de c\u00f3mo se disparan y registran esas excepciones en ejecuci\u00f3n.",
+    "approach": "DAST"
+  },
+  {
+    "id": "22777c9e-873a-4b49-855f-6072ab861a52",
+    "reason": "La detecci\u00f3n se basa en eventos de red/ejecuci\u00f3n (peticiones SMB a un honeypot OpenCanary), no en patrones inseguros del c\u00f3digo fuente. Es esencialmente una regla de monitorizaci\u00f3n/detecci\u00f3n de actividad sospechosa, no una vulnerabilidad intr\u00ednseca al c\u00f3digo JavaScript/TypeScript/Node.js.",
+    "approach": "DAST"
+  },
+  {
+    "id": "547dfc53-ebf6-4afe-8d2e-793d9574975d",
+    "reason": "La detecci\u00f3n se basa en eventos de ejecuci\u00f3n contra un honeypot OpenCanary (intentos de comandos REDIS), es decir, en tr\u00e1fico y comportamiento en tiempo de ejecuci\u00f3n, no en patrones inseguros del c\u00f3digo fuente de la aplicaci\u00f3n. Es esencialmente un tema de monitoreo/detecci\u00f3n en infraestructura, no de l\u00f3gica de la app.",
+    "approach": "DAST"
+  },
+  {
+    "id": "4fe17521-aef3-4e6a-9d6b-4a7c8de155a8",
+    "reason": "La detecci\u00f3n de un evento de Git Clone sobre un honeypot OpenCanary es un indicador de actividad en tiempo de ejecuci\u00f3n y de configuraci\u00f3n/monitorizaci\u00f3n de servicios, no un patr\u00f3n de uso inseguro de APIs en el c\u00f3digo fuente de una app Node.js. Requiere observar tr\u00e1fico y eventos en el servicio Git expuesto, no se infiere de la l\u00f3gica de la aplicaci\u00f3n.",
+    "approach": "DAST"
+  },
+  {
+    "id": "ff7139bc-fdb1-4437-92f2-6afefe8884cb",
+    "reason": "La detecci\u00f3n de este evento corresponde a actividad en tiempo de ejecuci\u00f3n (intentos de login SSH contra un honeypot OpenCanary) y a configuraci\u00f3n/monitorizaci\u00f3n de infraestructura, no a un patr\u00f3n de uso inseguro de APIs en el c\u00f3digo fuente de una app Node.js. No puede identificarse de forma confiable solo con SAST sobre el c\u00f3digo.",
+    "approach": "DAST"
+  },
+  {
+    "id": "af6c3078-84cd-4c68-8842-08b76bd81b13",
+    "reason": "No es una vulnerabilidad de c\u00f3digo sino un evento de detecci\u00f3n en un honeypot (OpenCanary) que indica que se ha recibido una petici\u00f3n HTTP GET. Es un tema de monitorizaci\u00f3n/telemetr\u00eda y de configuraci\u00f3n de infraestructura, no de uso inseguro de APIs en el c\u00f3digo fuente de la aplicaci\u00f3n.",
+    "approach": "DAST"
+  },
+  {
+    "id": "e30de276-68ec-435c-ab99-ef3befec6c61",
+    "reason": "La regla 'OpenCanary - SIP Request' describe un evento de detecci\u00f3n en un honeypot (OpenCanary) basado en tr\u00e1fico SIP observado en tiempo de ejecuci\u00f3n. No se trata de un patr\u00f3n de uso inseguro de APIs en el c\u00f3digo fuente, sino de actividad de red detectada por un sensor. Por definici\u00f3n, requiere observaci\u00f3n din\u00e1mica del tr\u00e1fico y del entorno, no puede inferirse de forma confiable solo analizando el c\u00f3digo JavaScript/TypeScript/Node.js.",
+    "approach": "DAST"
+  },
+  {
+    "id": "7cded4b3-f09e-405a-b96f-24248433ba44",
+    "reason": "La detecci\u00f3n de una petici\u00f3n NTP monlist a un nodo OpenCanary es un evento de red/ejecuci\u00f3n (detecci\u00f3n de amenaza en tiempo de ejecuci\u00f3n), no un patr\u00f3n de uso inseguro de APIs en el c\u00f3digo fuente. Requiere monitorizaci\u00f3n del tr\u00e1fico o de logs, no se puede identificar de forma confiable solo inspeccionando c\u00f3digo JavaScript/TypeScript/Node.js.",
+    "approach": "DAST"
+  },
+  {
+    "id": "e9856028-fd4e-46e6-b3d1-10f7ceb95078",
+    "reason": "La regla describe un evento de detecci\u00f3n en tiempo de ejecuci\u00f3n (peticiones SNMP a un nodo OpenCanary). No es un fallo de l\u00f3gica en el c\u00f3digo de la aplicaci\u00f3n JS/TS/Node.js, sino actividad de red/infraestructura relacionada con descubrimiento o movimiento lateral. Detectarlo requiere monitorizaci\u00f3n de tr\u00e1fico o logs, no an\u00e1lisis est\u00e1tico del c\u00f3digo.",
+    "approach": "DAST"
+  },
+  {
+    "id": "5498fc09-adc6-4804-b9d9-5cca1f0b8760",
+    "reason": "No es una vulnerabilidad en el c\u00f3digo de la aplicaci\u00f3n sino un evento de detecci\u00f3n en un honeypot (OpenCanary) que indica intento de uso de un proxy HTTP como canal de acceso/C2. Es esencialmente un indicador de actividad maliciosa en tiempo de ejecuci\u00f3n y/o de configuraci\u00f3n de servicios, no un patr\u00f3n de uso inseguro de APIs en el c\u00f3digo fuente JavaScript/TypeScript/Node.js.",
+    "approach": "DAST"
+  },
+  {
+    "id": "6e78f90f-0043-4a01-ac41-f97681613a66",
+    "reason": "La detecci\u00f3n descrita es un evento de intento de login a MSSQL observado en tiempo de ejecuci\u00f3n (telemetr\u00eda de OpenCanary). No se trata de un patr\u00f3n de uso inseguro de APIs en el c\u00f3digo fuente, sino de actividad de autenticaci\u00f3n en un servicio externo. Requiere monitorizaci\u00f3n/ejecuci\u00f3n din\u00e1mica y configuraci\u00f3n de sensores, no an\u00e1lisis est\u00e1tico del c\u00f3digo JavaScript/TypeScript/Node.js.",
+    "approach": "DAST"
+  },
+  {
+    "id": "9db5446c-b44a-4291-8b89-fcab5609c3b3",
+    "reason": "La detecci\u00f3n se basa en eventos de red en tiempo de ejecuci\u00f3n (intentos de conexi\u00f3n VNC a un honeypot OpenCanary), no en patrones de c\u00f3digo fuente ni en uso inseguro de APIs en la aplicaci\u00f3n. Es esencialmente un caso de monitorizaci\u00f3n/configuraci\u00f3n de infraestructura y telemetr\u00eda, no un fallo l\u00f3gico en el c\u00f3digo.",
+    "approach": "DAST"
+  },
+  {
+    "id": "af1ac430-df6b-4b38-b976-0b52f07a0252",
+    "reason": "La detecci\u00f3n se basa en identificar intentos de login v\u00eda HTTP POST contra un honeypot OpenCanary en tiempo de ejecuci\u00f3n. Es un evento de red/monitorizaci\u00f3n (detecci\u00f3n de ataque/actividad) y no una vulnerabilidad intr\u00ednseca del c\u00f3digo fuente de la aplicaci\u00f3n. No puede inferirse de forma confiable solo analizando patrones de uso de APIs o l\u00f3gica en JavaScript/TypeScript/Node.js.",
+    "approach": "DAST"
+  },
+  {
+    "id": "512cff7a-683a-43ad-afe0-dd398e872f36",
+    "reason": "La detecci\u00f3n descrita corresponde a un evento de intento de login Telnet observado en tiempo de ejecuci\u00f3n por un honeypot (OpenCanary). Es un indicador de actividad de red/ataque, no una vulnerabilidad espec\u00edfica en el c\u00f3digo fuente de una aplicaci\u00f3n Node.js. Requiere monitorizaci\u00f3n de tr\u00e1fico y eventos en el servicio/honeypot, no an\u00e1lisis est\u00e1tico del c\u00f3digo.",
+    "approach": "DAST"
+  },
+  {
+    "id": "6991bc2b-ae2e-447f-bc55-3a1ba04c14e5",
+    "reason": "La detecci\u00f3n corresponde a un evento de intento de login FTP observado en un honeypot (OpenCanary). Es un tema de monitoreo/detecci\u00f3n de actividad en red/infraestructura, no una vulnerabilidad derivada de uso inseguro de APIs o l\u00f3gica en el c\u00f3digo fuente de una app Node.js. Requiere observar tr\u00e1fico y comportamiento en tiempo de ejecuci\u00f3n, no se puede inferir de forma confiable solo analizando el c\u00f3digo.",
+    "approach": "DAST"
+  },
+  {
+    "id": "e7d79a1b-25ed-4956-bd56-bd344fa8fd06",
+    "reason": "No es una vulnerabilidad de c\u00f3digo sino un evento de detecci\u00f3n en un honeypot (OpenCanary) que indica intentos de login a MySQL. Depende de tr\u00e1fico de red y comportamiento en tiempo de ejecuci\u00f3n, no de patrones inseguros en el c\u00f3digo fuente de la aplicaci\u00f3n.",
+    "approach": "DAST"
+  },
+  {
+    "id": "cd55f721-5623-4663-bd9b-5229cab5237d",
+    "reason": "La detecci\u00f3n se basa en eventos de red en tiempo de ejecuci\u00f3n (intentos de conexi\u00f3n SSH a un honeypot OpenCanary), no en patrones de c\u00f3digo JavaScript/TypeScript/Node.js. Es esencialmente un tema de monitorizaci\u00f3n/configuraci\u00f3n de infraestructura y telemetr\u00eda, no de uso inseguro de APIs en el c\u00f3digo fuente.",
+    "approach": "DAST"
+  },
+  {
+    "id": "b4e6b016-a2ac-4759-ad85-8000b300d61e",
+    "reason": "La regla describe un evento de detecci\u00f3n (petici\u00f3n TFTP a un honeypot OpenCanary), no una vulnerabilidad en el c\u00f3digo de la aplicaci\u00f3n. Es un indicador de actividad de red/exfiltraci\u00f3n y depende de configuraci\u00f3n/entorno y tr\u00e1fico real, no de patrones inseguros en el c\u00f3digo fuente JavaScript/TypeScript/Node.js.",
+    "approach": "DAST"
+  },
+  {
+    "id": "3ec9a16d-0b4f-4967-9542-ebf38ceac7dd",
+    "reason": "La detecci\u00f3n descrita es un evento de runtime (intentos de login MSSQL contra un honeypot OpenCanary) y depende de tr\u00e1fico de red y comportamiento en ejecuci\u00f3n, no de patrones inseguros en el c\u00f3digo fuente de una app Node.js/TS. No se puede identificar de forma confiable solo con SAST.",
+    "approach": "DAST"
+  },
+  {
+    "id": "8a670c6d-7189-4b1c-8017-a417ca84a086",
+    "reason": "La regla describe detecci\u00f3n de mensajes de error SQL en tiempo de ejecuci\u00f3n que indican intentos de inyecci\u00f3n (p.ej. errores de sintaxis, comillas no cerradas). Esto es un patr\u00f3n de comportamiento observable en logs/respuestas bajo inputs maliciosos, no una construcci\u00f3n est\u00e1tica espec\u00edfica del c\u00f3digo. Aunque SAST puede encontrar posibles puntos de inyecci\u00f3n SQL, no puede determinar de forma confiable si en ejecuci\u00f3n se generar\u00e1n exactamente esos mensajes de error sin an\u00e1lisis din\u00e1mico del flujo de datos, configuraci\u00f3n de BD y manejo de errores.",
+    "approach": "DAST"
+  },
+  {
+    "id": "ad9012a6-e518-4432-9890-f3b82b8fc71f",
+    "reason": "La detecci\u00f3n de inyecci\u00f3n de sidecars en despliegues de Kubernetes depende de c\u00f3mo se usan herramientas/credenciales (kubectl, API de Kubernetes) y de la configuraci\u00f3n/estado del cl\u00faster en tiempo de ejecuci\u00f3n. No es un problema intr\u00ednseco al c\u00f3digo fuente de la app, sino de uso de infraestructura y operaciones (kubectl patch, permisos RBAC, etc.), por lo que no puede detectarse de forma confiable solo con SAST sobre c\u00f3digo JavaScript/TypeScript/Node.js.",
+    "approach": "Manual"
+  },
+  {
+    "id": "eeb3e9e1-b685-44e4-9232-6bb701f925b5",
+    "reason": "La enumeraci\u00f3n de Kubernetes Secrets es un comportamiento en tiempo de ejecuci\u00f3n que depende de permisos RBAC, configuraci\u00f3n del cluster y uso real de credenciales. El c\u00f3digo fuente solo muestra posibles llamadas a la API de Kubernetes, pero no permite determinar si se producir\u00e1 una enumeraci\u00f3n maliciosa ni si el contexto de ejecuci\u00f3n lo hace vulnerable. Requiere observaci\u00f3n din\u00e1mica del comportamiento y configuraci\u00f3n del entorno.",
+    "approach": "DAST"
+  },
+  {
+    "id": "402b955c-8fe0-4a8c-b635-622b4ac5f902",
+    "reason": "La creaci\u00f3n de contenedores con vol\u00famenes hostPath es principalmente un problema de configuraci\u00f3n/seguridad de la infraestructura Kubernetes (manifiestos, Helm charts, pol\u00edticas), no de la l\u00f3gica de la aplicaci\u00f3n en JavaScript/TypeScript/Node.js. No puede detectarse de forma confiable analizando solo el c\u00f3digo fuente de la app.",
+    "approach": "Manual"
+  },
+  {
+    "id": "c5cd1b20-36bb-488d-8c05-486be3d0cb97",
+    "reason": "La creaci\u00f3n de contenedores privilegiados es un problema de configuraci\u00f3n de orquestaci\u00f3n/infraestructura (YAML de Kubernetes, Docker, etc.), no de l\u00f3gica de la aplicaci\u00f3n en JavaScript/TypeScript/Node.js. No se puede detectar de forma confiable analizando solo el c\u00f3digo fuente de la app, ya que los flags como securityContext.privileged, hostNetwork u hostPID se definen fuera del c\u00f3digo de negocio.",
+    "approach": "Manual"
+  },
+  {
+    "id": "a1b0ca4e-7835-413e-8471-3ff2b8a66be6",
+    "reason": "La detecci\u00f3n de intentos de ejecuci\u00f3n remota de comandos en contenedores (p.ej. uso de 'kubectl exec') depende del comportamiento en tiempo de ejecuci\u00f3n, del contexto de orquestaci\u00f3n Kubernetes y de qui\u00e9n/qu\u00e9 ejecuta esos comandos. No es un bug en el c\u00f3digo fuente de la aplicaci\u00f3n Node.js en s\u00ed, sino un evento operacional/infraestructural que no puede inferirse de forma confiable solo analizando el c\u00f3digo.",
+    "approach": "DAST"
+  },
+  {
+    "id": "3132570d-cab2-4561-9ea6-1743644b2290",
+    "reason": "La detecci\u00f3n de borrado malicioso de eventos de Kubernetes es un problema de monitorizaci\u00f3n y configuraci\u00f3n del cl\u00faster (auditor\u00eda, logging, reglas de detecci\u00f3n), no de l\u00f3gica insegura en el c\u00f3digo fuente de la aplicaci\u00f3n. No puede identificarse de forma confiable solo analizando JavaScript/TypeScript/Node.js.",
+    "approach": "DAST"
+  },
+  {
+    "id": "a80d927d-ac6e-443f-a867-e8d6e3897318",
+    "reason": "La creaci\u00f3n de pods en el namespace kube-system es principalmente un problema de configuraci\u00f3n/uso de la infraestructura Kubernetes (manifiestos, permisos RBAC, pol\u00edticas de namespaces). No puede detectarse de forma confiable solo analizando el c\u00f3digo fuente de una app Node.js/TS/JS, ya que depende de d\u00f3nde y c\u00f3mo se despliegan los pods y de las pol\u00edticas del cl\u00faster.",
+    "approach": "Manual"
+  },
+  {
+    "id": "84b777bd-c946-4d17-aa2e-c39f5a454325",
+    "reason": "El comportamiento descrito es un patr\u00f3n de uso leg\u00edtimo de la API de Kubernetes (consultas SelfSubjectAccessReview / 'kubectl auth can-i --list') que solo se vuelve sospechoso seg\u00fan el contexto de ejecuci\u00f3n, identidad, frecuencia y momento. Analizando \u00fanicamente el c\u00f3digo fuente no es posible distinguir de forma confiable entre un uso administrativo leg\u00edtimo y un intento malicioso de enumeraci\u00f3n de permisos; se requiere observaci\u00f3n de eventos en tiempo de ejecuci\u00f3n y del entorno del cl\u00faster.",
+    "approach": "DAST"
+  },
+  {
+    "id": "e31bae15-83ed-473e-bf31-faf4f8a17d36",
+    "reason": "La creaci\u00f3n maliciosa de Service Accounts en Kubernetes es principalmente un evento de configuraci\u00f3n/operaci\u00f3n en el cl\u00faster (manifiestos YAML, comandos kubectl, control plane), no un patr\u00f3n de uso inseguro de APIs en el c\u00f3digo fuente de una app Node.js. Aunque el c\u00f3digo pueda interactuar con la API de Kubernetes, la detecci\u00f3n fiable de esta amenaza requiere observar el comportamiento y los eventos del cl\u00faster en tiempo de ejecuci\u00f3n, no solo el c\u00f3digo.",
+    "approach": "DAST"
+  },
+  {
+    "id": "40967487-139b-4811-81d9-c9767a92aa5a",
+    "reason": "La detecci\u00f3n de la eliminaci\u00f3n de un deployment en Kubernetes es un evento operacional/infraestructura (auditor\u00eda de cluster) y no un patr\u00f3n de c\u00f3digo inseguro en la aplicaci\u00f3n. Requiere monitorizar acciones en el entorno de ejecuci\u00f3n (API de Kubernetes, logs de auditor\u00eda, SIEM), no se puede inferir de forma confiable solo analizando el c\u00f3digo fuente JS/TS/Node.",
+    "approach": "DAST"
+  }
+]

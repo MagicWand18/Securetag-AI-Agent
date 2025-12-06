@@ -1,0 +1,76 @@
+rules:
+  - id: synthetic-cwe79
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: >
+      Posible XSS reflejado (CWE-79): se inserta directamente en HTML una cadena
+      derivada de datos controlados por el usuario sin escape ni sanitización.
+      Un atacante puede inyectar código JavaScript malicioso que se ejecutará
+      en el navegador de la víctima. Valida y escapa siempre los datos antes de
+      incorporarlos a HTML.
+    metadata:
+      cwe: "CWE-79"
+      category: security
+      technology:
+        - express
+      references:
+        - https://cwe.mitre.org/data/definitions/79.html
+    patterns:
+      - pattern-inside: |
+          app.$ROUTE($METHOD, $PATH, ($REQ, $RES) => {
+            ...
+          })
+      - pattern-either:
+          - pattern: |
+              const $HTML = `
+                ...
+                ${$SINK}
+                ...
+              `;
+              ...
+              $RES.send($HTML)
+          - pattern: |
+              let $HTML = `
+                ...
+                ${$SINK}
+                ...
+              `;
+              ...
+              $RES.send($HTML)
+          - pattern: |
+              var $HTML = `
+                ...
+                ${$SINK}
+                ...
+              `;
+              ...
+              $RES.send($HTML)
+          - pattern: |
+              $RES.send(`
+                ...
+                ${$SINK}
+                ...
+              `)
+      - pattern-either:
+          - pattern: $SINK = $REQ.query.$PARAM
+          - pattern: $SINK = $REQ.params.$PARAM
+          - pattern: $SINK = $REQ.body.$PARAM
+          - pattern: $SINK = $REQ.$ANY[$KEY]
+      - pattern-not: |
+          $SINK = $ESCAPER(...);
+      - pattern-not: |
+          $SINK = $REQ.sanitize(...);
+    fix-regex:
+      regex: '(\$\{)([^}]+\})'
+      replacement: '${escapeHtml($2}'
+    fix: |
+      // Asegúrate de definir una función de escape robusta, por ejemplo:
+      // function escapeHtml(str) {
+      //   return String(str)
+      //     .replace(/&/g, "&amp;")
+      //     .replace(/</g, "&lt;")
+      //     .replace(/>/g, "&gt;")
+      //     .replace(/"/g, "&quot;")
+      //     .replace(/'/g, "&#39;");
+      // }
+      ...

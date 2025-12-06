@@ -1,0 +1,2752 @@
+[
+  {
+    "id": "CVE-2025-55182",
+    "title": "CVE-2025-55182 - Meta React Server Components Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Meta React Server Components contains a remote code execution vulnerability that could allow unauthenticated remote code execution by exploiting a flaw in how React decodes payloads sent to React Server Function endpoints.",
+    "affected_tech": [
+      "react server components"
+    ],
+    "year": 2025,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2025-13223",
+    "title": "CVE-2025-13223 - Google Chromium V8 Type Confusion Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 contains a type confusion vulnerability that allows for heap corruption.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2025,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2022-48503",
+    "title": "CVE-2022-48503 - Apple Multiple Products Unspecified Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apple macOS, iOS, tvOS, Safari, and watchOS contain an unspecified vulnerability in JavaScriptCore that when processing web content may lead to arbitrary code execution. The impacted product could be end-of-life (EoL) and/or end-of-service (EoS). Users should discontinue product utilization.",
+    "affected_tech": [
+      "multiple products"
+    ],
+    "year": 2022,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2025-27915",
+    "title": "CVE-2025-27915 - Synacor Zimbra Collaboration Suite (ZCS) Cross-site Scripting Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Synacor Zimbra Collaboration Suite (ZCS) contains a cross-site scripting vulnerability that exists in the Classic Web Client due to insufficient sanitization of HTML content in ICS files. When a user views an e-mail message containing a malicious ICS entry, its embedded JavaScript executes via an ontoggle event inside a tag. This allows an attacker to run arbitrary JavaScript within the victim's session, potentially leading to unauthorized actions such as setting e-mail filters to redirect messages to an attacker-controlled address. As a result, an attacker can perform unauthorized actions on the victim's account, including e-mail redirection and data exfiltration.",
+    "affected_tech": [
+      "zimbra collaboration suite (zcs)"
+    ],
+    "year": 2025,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2010-3765",
+    "title": "CVE-2010-3765 - Mozilla Multiple Products Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Mozilla Firefox, SeaMonkey, and Thunderbird contain an unspecified vulnerability when JavaScript is enabled. This allows remote attackers to execute arbitrary code via vectors related to nsCSSFrameConstructor::ContentAppended, the appendChild method, incorrect index tracking, and the creation of multiple frames, which triggers memory corruption.",
+    "affected_tech": [
+      "multiple products"
+    ],
+    "year": 2010,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2017-1000353",
+    "title": "CVE-2017-1000353 - Jenkins Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Jenkins contains a remote code execution vulnerability. This vulnerability that could allowed attackers to transfer a serialized Java SignedObject object to the remoting-based Jenkins CLI, that would be deserialized using a new ObjectInputStream, bypassing the existing blocklist-based protection mechanism.",
+    "affected_tech": [
+      "jenkins"
+    ],
+    "year": 2017,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2025-10035",
+    "title": "CVE-2025-10035 - Fortra GoAnywhere MFT Deserialization of Untrusted Data Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Fortra GoAnywhere MFT contains a deserialization of untrusted data vulnerability allows an actor with a validly forged license response signature to deserialize an arbitrary actor-controlled object, possibly leading to command injection.",
+    "affected_tech": [
+      "goanywhere mft"
+    ],
+    "year": 2025,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2025-10585",
+    "title": "CVE-2025-10585 - Google Chromium V8 Type Confusion Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium contains a type confusion vulnerability in the V8 JavaScript and WebAssembly engine.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2025,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2025-53690",
+    "title": "CVE-2025-53690 - Sitecore Multiple Products Deserialization of Untrusted Data Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Sitecore Experience Manager (XM), Experience Platform (XP), Experience Commerce (XC), and Managed Cloud contain a deserialization of untrusted data vulnerability involving the use of default machine keys. This flaw allows attackers to exploit exposed ASP.NET machine keys to achieve remote code execution. ",
+    "affected_tech": [
+      "multiple products"
+    ],
+    "year": 2025,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2025-57819",
+    "title": "CVE-2025-57819 - Sangoma FreePBX Authentication Bypass Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Sangoma FreePBX contains an authentication bypass vulnerability due to insufficiently sanitized user-supplied data allows unauthenticated access to FreePBX Administrator leading to arbitrary database manipulation and remote code execution.",
+    "affected_tech": [
+      "freepbx"
+    ],
+    "year": 2025,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2025-6558",
+    "title": "CVE-2025-6558 - Google Chromium ANGLE and GPU Improper Input Validation Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium contains an improper input validation vulnerability in ANGLE and GPU. This vulnerability could allow a remote attacker to potentially perform a sandbox escape via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium"
+    ],
+    "year": 2025,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2019-5418",
+    "title": "CVE-2019-5418 - Rails Ruby on Rails Path Traversal Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Rails Ruby on Rails contains a path traversal vulnerability in Action View. Specially crafted accept headers in combination with calls to `render file:` can cause arbitrary files on the target server to be rendered, disclosing the file contents.",
+    "affected_tech": [
+      "ruby on rails"
+    ],
+    "year": 2019,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2016-10033",
+    "title": "CVE-2016-10033 - PHPMailer Command Injection Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] PHPMailer contains a command injection vulnerability because it fails to sanitize user-supplied input. Specifically, this issue affects the 'mail()' function of 'class.phpmailer.php' script. An attacker can exploit this issue to execute arbitrary code within the context of the application. Failed exploit attempts will result in a denial-of-service condition.",
+    "affected_tech": [
+      "phpmailer"
+    ],
+    "year": 2016,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2025-6554",
+    "title": "CVE-2025-6554 - Google Chromium V8 Type Confusion Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 contains a type confusion vulnerability that could allow a remote attacker to perform arbitrary read/write via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2025,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2025-48927",
+    "title": "CVE-2025-48927 - TeleMessage TM SGNL Initialization of a Resource with an Insecure Default Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] TeleMessage TM SGNL contains an initialization of a resource with an insecure default vulnerability. This vulnerability relies on how the Spring Boot Actuator is configured with an exposed heap dump endpoint at a /heapdump URI.",
+    "affected_tech": [
+      "tm sgnl"
+    ],
+    "year": 2025,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-42009",
+    "title": "CVE-2024-42009 - RoundCube Webmail Cross-Site Scripting Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] RoundCube Webmail contains a cross-site scripting vulnerability. This vulnerability could allow a remote attacker to steal and send emails of a victim via a crafted e-mail message that abuses a Desanitization issue in message_body() in program/actions/mail/show.php.",
+    "affected_tech": [
+      "webmail"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2025-5419",
+    "title": "CVE-2025-5419 - Google Chromium V8 Out-of-Bounds Read and Write Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 contains an out-of-bounds read and write vulnerability that could allow a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2025,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2025-21479",
+    "title": "CVE-2025-21479 - Qualcomm Multiple Chipsets Incorrect Authorization Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Multiple Qualcomm chipsets contain an incorrect authorization vulnerability. This vulnerability allows for memory corruption due to unauthorized command execution in GPU micronode while executing specific sequence of commands.",
+    "affected_tech": [
+      "multiple chipsets"
+    ],
+    "year": 2025,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2025-21480",
+    "title": "CVE-2025-21480 - Qualcomm Multiple Chipsets Incorrect Authorization Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Multiple Qualcomm chipsets contain an incorrect authorization vulnerability. This vulnerability allows for memory corruption due to unauthorized command execution in GPU micronode while executing specific sequence of commands.",
+    "affected_tech": [
+      "multiple chipsets"
+    ],
+    "year": 2025,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2025-35939",
+    "title": "CVE-2025-35939 - Craft CMS External Control of Assumed-Immutable Web Parameter Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Craft CMS contains an external control of assumed-immutable web parameter vulnerability. This vulnerability could allow an unauthenticated client to introduce arbitrary values, such as PHP code, to a known local file location on the server. This vulnerability could be chained with CVE-2024-58136 as represented by CVE-2025-32432.",
+    "affected_tech": [
+      "craft cms"
+    ],
+    "year": 2025,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-56145",
+    "title": "CVE-2024-56145 - Craft CMS Code Injection Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Craft CMS contains a code injection vulnerability. Users with affected versions are vulnerable to remote code execution if their php.ini configuration has `register_argc_argv` enabled.",
+    "affected_tech": [
+      "craft cms"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-27443",
+    "title": "CVE-2024-27443 - Synacor Zimbra Collaboration Suite (ZCS) Cross-Site Scripting (XSS) Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Zimbra Collaboration contains a cross-site scripting (XSS) vulnerability in the CalendarInvite feature of the Zimbra webmail classic user interface. An attacker can exploit this vulnerability via an email message containing a crafted calendar header, leading to the execution of arbitrary JavaScript code.",
+    "affected_tech": [
+      "zimbra collaboration suite (zcs)"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-11182",
+    "title": "CVE-2024-11182 - MDaemon Email Server Cross-Site Scripting (XSS) Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] MDaemon Email Server contains a cross-site scripting (XSS) vulnerability that allows a remote attacker to load arbitrary JavaScript code via an HTML e-mail message.",
+    "affected_tech": [
+      "email server"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2025-4427",
+    "title": "CVE-2025-4427 - Ivanti Endpoint Manager Mobile (EPMM) Authentication Bypass Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Ivanti Endpoint Manager Mobile (EPMM) contains an authentication bypass vulnerability in the API component that allows an attacker to access protected resources without proper credentials via crafted API requests. This vulnerability results from an insecure implementation of the Spring Framework open-source library.",
+    "affected_tech": [
+      "endpoint manager mobile (epmm)"
+    ],
+    "year": 2025,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-12987",
+    "title": "CVE-2024-12987 - DrayTek Vigor Routers OS Command Injection Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] DrayTek Vigor2960, Vigor300B, and Vigor3900 routers contain an OS command injection vulnerability due to an unknown function of the file /cgi-bin/mainfunction.cgi/apmcfgupload of the component web management interface.",
+    "affected_tech": [
+      "vigor routers"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-38475",
+    "title": "CVE-2024-38475 - Apache HTTP Server Improper Escaping of Output Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache HTTP Server contains an improper escaping of output vulnerability in mod_rewrite that allows an attacker to map URLs to filesystem locations that are permitted to be served by the server but are not intentionally/directly reachable by any URL, resulting in code execution or source code disclosure.",
+    "affected_tech": [
+      "http server"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2025-24813",
+    "title": "CVE-2025-24813 - Apache Tomcat Path Equivalence Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache Tomcat contains a path equivalence vulnerability that allows a remote attacker to execute code, disclose information, or inject malicious content via a partial PUT request.",
+    "affected_tech": [
+      "tomcat"
+    ],
+    "year": 2025,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2025-2783",
+    "title": "CVE-2025-2783 - Google Chromium Mojo Sandbox Escape Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium Mojo on Windows contains a sandbox escape vulnerability caused by a logic error, which results from an incorrect handle being provided in unspecified circumstances. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium mojo"
+    ],
+    "year": 2025,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2019-9875",
+    "title": "CVE-2019-9875 - Sitecore CMS and Experience Platform (XP) Deserialization Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Sitecore CMS and Experience Platform (XP) contain a deserialization vulnerability in the Sitecore.Security.AntiCSRF module that allows an authenticated attacker to execute arbitrary code by sending a serialized .NET object in the HTTP POST parameter __CSRFTOKEN.",
+    "affected_tech": [
+      "cms and experience platform (xp)"
+    ],
+    "year": 2019,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2019-9874",
+    "title": "CVE-2019-9874 - Sitecore CMS and Experience Platform (XP) Deserialization Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Sitecore CMS and Experience Platform (XP) contain a deserialization vulnerability in the Sitecore.Security.AntiCSRF module that allows an unauthenticated attacker to execute arbitrary code by sending a serialized .NET object in the HTTP POST parameter __CSRFTOKEN.",
+    "affected_tech": [
+      "cms and experience platform (xp)"
+    ],
+    "year": 2019,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2017-12637",
+    "title": "CVE-2017-12637 - SAP NetWeaver Directory Traversal Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] SAP NetWeaver Application Server (AS) Java contains a directory traversal vulnerability in scheduler/ui/js/ffffffffbca41eb4/UIUtilJavaScriptJS that allows a remote attacker to read arbitrary files via a .. (dot dot) in the query string.",
+    "affected_tech": [
+      "netweaver"
+    ],
+    "year": 2017,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2025-30066",
+    "title": "CVE-2025-30066 - tj-actions/changed-files GitHub Action Embedded Malicious Code Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] tj-actions/changed-files GitHub Action contains an embedded malicious code vulnerability that allows a remote attacker to discover secrets by reading Github Actions Workflow Logs. These secrets may include, but are not limited to, valid AWS access keys, GitHub personal access tokens (PATs), npm tokens, and private RSA keys.",
+    "affected_tech": [
+      "changed-files github action"
+    ],
+    "year": 2025,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-4885",
+    "title": "CVE-2024-4885 - Progress WhatsUp Gold Path Traversal Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Progress WhatsUp Gold contains a path traversal vulnerability that allows an unauthenticated attacker to achieve remote code execution.",
+    "affected_tech": [
+      "whatsup gold"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2022-43769",
+    "title": "CVE-2022-43769 - Hitachi Vantara Pentaho BA Server Special Element Injection Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Hitachi Vantara Pentaho BA Server contains a special element injection vulnerability that allows an attacker to inject Spring templates into properties files, allowing for arbitrary command execution.",
+    "affected_tech": [
+      "pentaho business analytics (ba) server"
+    ],
+    "year": 2022,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2017-3066",
+    "title": "CVE-2017-3066 - Adobe ColdFusion Deserialization Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Adobe ColdFusion contains a deserialization vulnerability in the Apache BlazeDS library that allows for arbitrary code execution.",
+    "affected_tech": [
+      "coldfusion"
+    ],
+    "year": 2017,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2025-0108",
+    "title": "CVE-2025-0108 - Palo Alto Networks PAN-OS Authentication Bypass Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Palo Alto Networks PAN-OS contains an authentication bypass vulnerability in its management web interface. This vulnerability allows an unauthenticated attacker with network access to the management web interface to bypass the authentication normally required and invoke certain PHP scripts.",
+    "affected_tech": [
+      "pan-os"
+    ],
+    "year": 2025,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-29059",
+    "title": "CVE-2024-29059 - Microsoft .NET Framework Information Disclosure Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Microsoft .NET Framework contains an information disclosure vulnerability that exposes the ObjRef URI to an attacker, ultimately enabling remote code execution.",
+    "affected_tech": [
+      ".net framework"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-45195",
+    "title": "CVE-2024-45195 - Apache OFBiz Forced Browsing Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache OFBiz contains a forced browsing vulnerability that allows a remote attacker to obtain unauthorized access.",
+    "affected_tech": [
+      "ofbiz"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-55591",
+    "title": "CVE-2024-55591 - Fortinet FortiOS and FortiProxy Authentication Bypass Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Fortinet FortiOS and FortiProxy contain an authentication bypass vulnerability that may allow an unauthenticated, remote attacker to gain super-admin privileges via crafted requests to Node.js websocket module.",
+    "affected_tech": [
+      "fortios and fortiproxy"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-11680",
+    "title": "CVE-2024-11680 - ProjectSend Improper Authentication Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] ProjectSend contains an improper authentication vulnerability that allows a remote, unauthenticated attacker to enable unauthorized modification of the application's configuration via crafted HTTP requests to options.php. Successful exploitation allows attackers to create accounts, upload webshells, and embed malicious JavaScript.",
+    "affected_tech": [
+      "projectsend"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-37383",
+    "title": "CVE-2024-37383 - RoundCube Webmail Cross-Site Scripting (XSS) Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] RoundCube Webmail contains a cross-site scripting (XSS) vulnerability in the handling of SVG animate attributes that allows a remote attacker to run malicious JavaScript code.",
+    "affected_tech": [
+      "webmail"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-15415",
+    "title": "CVE-2020-15415 - DrayTek Multiple Vigor Routers OS Command Injection Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] DrayTek Vigor3900, Vigor2960, and Vigor300B devices contain an OS command injection vulnerability in cgi-bin/mainfunction.cgi/cvmcfgupload that allows for remote code execution via shell metacharacters in a filename when the text/x-python-script content type is used.",
+    "affected_tech": [
+      "multiple vigor routers"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-27348",
+    "title": "CVE-2024-27348 - Apache HugeGraph-Server Improper Access Control Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache HugeGraph-Server contains an improper access control vulnerability that could allow a remote attacker to execute arbitrary code.",
+    "affected_tech": [
+      "hugegraph-server"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-6670",
+    "title": "CVE-2024-6670 - Progress WhatsUp Gold SQL Injection Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Progress WhatsUp Gold contains a SQL injection vulnerability that allows an unauthenticated attacker to retrieve the user's encrypted password if the application is configured with only a single user.",
+    "affected_tech": [
+      "whatsup gold"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-20124",
+    "title": "CVE-2021-20124 - Draytek VigorConnect Path Traversal Vulnerability ",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Draytek VigorConnect contains a path traversal vulnerability in the file download functionality of the WebServlet endpoint. An unauthenticated attacker could leverage this vulnerability to download arbitrary files from the underlying operating system with root privileges.",
+    "affected_tech": [
+      "vigorconnect"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-20123",
+    "title": "CVE-2021-20123 - Draytek VigorConnect Path Traversal Vulnerability ",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Draytek VigorConnect contains a path traversal vulnerability in the DownloadFileServlet endpoint. An unauthenticated attacker could leverage this vulnerability to download arbitrary files from the underlying operating system with root privileges. ",
+    "affected_tech": [
+      "vigorconnect"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-7965",
+    "title": "CVE-2024-7965 - Google Chromium V8 Inappropriate Implementation Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 contains an inappropriate implementation vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-38856",
+    "title": "CVE-2024-38856 - Apache OFBiz Incorrect Authorization Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache OFBiz contains an incorrect authorization vulnerability that could allow remote code execution via a Groovy payload in the context of the OFBiz user process by an unauthenticated attacker.",
+    "affected_tech": [
+      "ofbiz"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-7971",
+    "title": "CVE-2024-7971 - Google Chromium V8 Type Confusion Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 contains a type confusion vulnerability that allows a remote attacker to exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-32113",
+    "title": "CVE-2024-32113 - Apache OFBiz Path Traversal Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache OFBiz contains a path traversal vulnerability that could allow for remote code execution.",
+    "affected_tech": [
+      "ofbiz"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-4577",
+    "title": "CVE-2024-4577 - PHP-CGI OS Command Injection Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] PHP, specifically Windows-based PHP used in CGI mode, contains an OS command injection vulnerability that allows for arbitrary code execution. This vulnerability is a patch bypass for CVE-2012-1823.",
+    "affected_tech": [
+      "php"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-5274",
+    "title": "CVE-2024-5274 - Google Chromium V8 Type Confusion Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 contains a type confusion vulnerability that allows a remote attacker to execute code via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-17519",
+    "title": "CVE-2020-17519 - Apache Flink Improper Access Control Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache Flink contains an improper access control vulnerability that allows an attacker to read any file on the local filesystem of the JobManager through its REST interface.",
+    "affected_tech": [
+      "flink"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-4947",
+    "title": "CVE-2024-4947 - Google Chromium V8 Type Confusion Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 contains a type confusion vulnerability that allows a remote attacker to execute code via a crafted HTML page.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-4761",
+    "title": "CVE-2024-4761 - Google Chromium V8 Out-of-Bounds Memory Write Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains an unspecified out-of-bounds memory write vulnerability via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera. ",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-40655",
+    "title": "CVE-2021-40655 - D-Link DIR-605 Router Information Disclosure Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] D-Link DIR-605 routers contain an information disclosure vulnerability that allows attackers to obtain a username and password by forging a post request to the /getcfg.php page. ",
+    "affected_tech": [
+      "dir-605 router"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-4671",
+    "title": "CVE-2024-4671 - Google Chromium Visuals Use-After-Free Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium Visuals contains a use-after-free vulnerability that allows a remote attacker to exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2022-38028",
+    "title": "CVE-2022-38028 - Microsoft Windows Print Spooler Privilege Escalation Vulnerability ",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Microsoft Windows Print Spooler service contains a privilege escalation vulnerability. An attacker may modify a JavaScript constraints file and execute it with SYSTEM-level permissions.",
+    "affected_tech": [
+      "windows"
+    ],
+    "year": 2022,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-4762",
+    "title": "CVE-2023-4762 - Google Chromium V8 Type Confusion Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 contains a type confusion vulnerability that allows a remote attacker to execute code via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2024-0519",
+    "title": "CVE-2024-0519 - Google Chromium V8 Out-of-Bounds Memory Access Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains an out-of-bounds memory access vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2024,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2018-15133",
+    "title": "CVE-2018-15133 - Laravel Deserialization of Untrusted Data Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Laravel Framework contains a deserialization of untrusted data vulnerability, allowing for remote command execution. This vulnerability may only be exploited if a malicious user has accessed the application encryption key (APP_KEY environment variable).",
+    "affected_tech": [
+      "laravel framework"
+    ],
+    "year": 2018,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-27524",
+    "title": "CVE-2023-27524 - Apache Superset Insecure Default Initialization of Resource Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache Superset contains an insecure default initialization of a resource vulnerability that allows an attacker to authenticate and access unauthorized resources on installations that have not altered the default configured SECRET_KEY according to installation instructions.",
+    "affected_tech": [
+      "superset"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-7024",
+    "title": "CVE-2023-7024 - Google Chromium WebRTC Heap Buffer Overflow Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium WebRTC, an open-source project providing web browsers with real-time communication, contains a heap buffer overflow vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could impact web browsers using WebRTC, including but not limited to Google Chrome.",
+    "affected_tech": [
+      "chromium webrtc"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-6345",
+    "title": "CVE-2023-6345 - Google Skia Integer Overflow Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium Skia contains an integer overflow vulnerability that allows a remote attacker, who has compromised the renderer process, to potentially perform a sandbox escape via a malicious file. This vulnerability affects Google Chrome and ChromeOS, Android, Flutter, and possibly other products.",
+    "affected_tech": [
+      "chromium skia"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-49103",
+    "title": "CVE-2023-49103 - ownCloud graphapi Information Disclosure Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] ownCloud graphapi contains an information disclosure vulnerability that can reveal sensitive data stored in phpinfo() via GetPhpInfo.php, including administrative credentials.",
+    "affected_tech": [
+      "owncloud graphapi"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-36844",
+    "title": "CVE-2023-36844 - Juniper Junos OS EX Series PHP External Variable Modification Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Juniper Junos OS on EX Series contains a PHP external variable modification vulnerability that allows an unauthenticated, network-based attacker to control certain, important environment variables. Using a crafted request an attacker is able to modify certain PHP environment variables, leading to partial loss of integrity, which may allow chaining to other vulnerabilities.",
+    "affected_tech": [
+      "junos os"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-36845",
+    "title": "CVE-2023-36845 - Juniper Junos OS EX Series and SRX Series PHP External Variable Modification Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Juniper Junos OS on EX Series and SRX Series contains a PHP external variable modification vulnerability that allows an unauthenticated, network-based attacker to control an important environment variable. Using a crafted request, which sets the variable PHPRC, an attacker is able to modify the PHP execution environment allowing the injection und execution of code.",
+    "affected_tech": [
+      "junos os"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-36846",
+    "title": "CVE-2023-36846 - Juniper Junos OS SRX Series Missing Authentication for Critical Function Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Juniper Junos OS on SRX Series contains a missing authentication for critical function vulnerability that allows an unauthenticated, network-based attacker to cause limited impact to the file system integrity. With a specific request to user.php that doesn't require authentication, an attacker is able to upload arbitrary files via J-Web, leading to a loss of integrity for a certain part of the file system, which may allow chaining to other vulnerabilities.",
+    "affected_tech": [
+      "junos os"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-36847",
+    "title": "CVE-2023-36847 - Juniper Junos OS EX Series Missing Authentication for Critical Function Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Juniper Junos OS on EX Series contains a missing authentication for critical function vulnerability that allows an unauthenticated, network-based attacker to cause limited impact to the file system integrity. With a specific request to installAppPackage.php that doesn't require authentication, an attacker is able to upload arbitrary files via J-Web, leading to a loss of integrity for a certain part of the file system, which may allow chaining to other vulnerabilities.",
+    "affected_tech": [
+      "junos os"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-36851",
+    "title": "CVE-2023-36851 - Juniper Junos OS SRX Series Missing Authentication for Critical Function Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Juniper Junos OS on SRX Series contains a missing authentication for critical function vulnerability that allows an unauthenticated, network-based attacker to cause limited impact to the file system integrity. With a specific request to webauth_operation.php that doesn't require authentication, an attacker is able to upload arbitrary files via J-Web, leading to a loss of integrity for a certain part of the file system, which may allow chaining to other vulnerabilities.",
+    "affected_tech": [
+      "junos os"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-46604",
+    "title": "CVE-2023-46604 - Apache ActiveMQ Deserialization of Untrusted Data Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache ActiveMQ contains a deserialization of untrusted data vulnerability that may allow a remote attacker with network access to a broker to run shell commands by manipulating serialized class types in the OpenWire protocol to cause the broker to instantiate any class on the classpath.",
+    "affected_tech": [
+      "activemq"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-5631",
+    "title": "CVE-2023-5631 - Roundcube Webmail Persistent Cross-Site Scripting (XSS) Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Roundcube Webmail contains a persistent cross-site scripting (XSS) vulnerability that allows a remote attacker to run malicious JavaScript code.",
+    "affected_tech": [
+      "webmail"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-5217",
+    "title": "CVE-2023-5217 - Google Chromium libvpx Heap Buffer Overflow Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium libvpx contains a heap buffer overflow vulnerability in vp8 encoding that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could impact web browsers using libvpx, including but not limited to Google Chrome.",
+    "affected_tech": [
+      "chromium libvpx"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2018-14667",
+    "title": "CVE-2018-14667 - Red Hat JBoss RichFaces Framework Expression Language Injection Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Red Hat JBoss RichFaces Framework contains an expression language injection vulnerability via the UserResource resource. A remote, unauthenticated attacker could exploit this vulnerability to execute malicious code using a chain of Java serialized objects via org.ajax4jsf.resource.UserResource$UriData.",
+    "affected_tech": [
+      "jboss richfaces framework"
+    ],
+    "year": 2018,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-28434",
+    "title": "CVE-2023-28434 - MinIO Security Feature Bypass Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] MinIO contains a security feature bypass vulnerability that allows an attacker to use crafted requests to bypass metadata bucket name checking and put an object into any bucket while processing `PostPolicyBucket` to conduct privilege escalation. To carry out this attack, the attacker requires credentials with `arn:aws:s3:::*` permission, as well as enabled Console API access.",
+    "affected_tech": [
+      "minio"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-3129",
+    "title": "CVE-2021-3129 - Laravel Ignition File Upload Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Laravel Ignition contains a file upload vulnerability that allows unauthenticated remote attackers to execute malicious code due to insecure usage of file_get_contents() and file_put_contents().",
+    "affected_tech": [
+      "ignition"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-4863",
+    "title": "CVE-2023-4863 - Google Chromium WebP Heap-Based Buffer Overflow Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium WebP contains a heap-based buffer overflow vulnerability that allows a remote attacker to perform an out-of-bounds memory write via a crafted HTML page. This vulnerability can affect applications that use the WebP Codec.",
+    "affected_tech": [
+      "chromium webp"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-33246",
+    "title": "CVE-2023-33246 - Apache RocketMQ Command Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Several components of Apache RocketMQ, including NameServer, Broker, and Controller, are exposed to the extranet and lack permission verification. An attacker can exploit this vulnerability by using the update configuration function to execute commands as the system users that RocketMQ is running as or achieve the same effect by forging the RocketMQ protocol content.",
+    "affected_tech": [
+      "rocketmq"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-38035",
+    "title": "CVE-2023-38035 - Ivanti Sentry Authentication Bypass Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Ivanti Sentry, formerly known as MobileIron Sentry, contains an authentication bypass vulnerability that may allow an attacker to bypass authentication controls on the administrative interface due to an insufficiently restrictive Apache HTTPD configuration.",
+    "affected_tech": [
+      "sentry"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-38180",
+    "title": "CVE-2023-38180 - Microsoft .NET Core and Visual Studio Denial-of-Service Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Microsoft .NET Core and Visual Studio contain an unspecified vulnerability that allows for denial-of-service (DoS).",
+    "affected_tech": [
+      ".net core and visual studio"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-35730",
+    "title": "CVE-2020-35730 - Roundcube Webmail Cross-Site Scripting (XSS) Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Roundcube Webmail contains a cross-site scripting (XSS) vulnerability that allows an attacker to send a plain text e-mail message with Javascript in a link reference element that is mishandled by linkref_addinindex in rcube_string_replacer.php.",
+    "affected_tech": [
+      "roundcube webmail"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-3079",
+    "title": "CVE-2023-3079 - Google Chromium V8 Type Confusion Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains a type confusion vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-34362",
+    "title": "CVE-2023-34362 - Progress MOVEit Transfer SQL Injection Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Progress MOVEit Transfer contains a SQL injection vulnerability that could allow an unauthenticated attacker to gain unauthorized access to MOVEit Transfer's database. Depending on the database engine being used (MySQL, Microsoft SQL Server, or Azure SQL), an attacker may be able to infer information about the structure and contents of the database in addition to executing SQL statements that alter or delete database elements.",
+    "affected_tech": [
+      "moveit transfer"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2016-6415",
+    "title": "CVE-2016-6415 - Cisco IOS, IOS XR, and IOS XE IKEv1 Information Disclosure Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Cisco IOS, IOS XR, and IOS XE contain insufficient condition checks in the part of the code that handles Internet Key Exchange version 1 (IKEv1) security negotiation requests. contains an information disclosure vulnerability in the Internet Key Exchange version 1 (IKEv1) that could allow an attacker to retrieve memory contents. Successful exploitation could allow the attacker to retrieve memory contents, which can lead to information disclosure.",
+    "affected_tech": [
+      "ios, ios xr, and ios xe"
+    ],
+    "year": 2016,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2016-3427",
+    "title": "CVE-2016-3427 - Oracle Java SE and JRockit Unspecified Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Oracle Java SE and JRockit contains an unspecified vulnerability that allows remote attackers to affect confidentiality, integrity, and availability via vectors related to Java Management Extensions (JMX). This vulnerability can be exploited through sandboxed Java Web Start applications and sandboxed Java applets. It can also be exploited by supplying data to APIs in the specified component without using sandboxed Java Web Start applications or sandboxed Java applets, such as through a web service.",
+    "affected_tech": [
+      "java se and jrockit"
+    ],
+    "year": 2016,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2016-8735",
+    "title": "CVE-2016-8735 - Apache Tomcat Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache Tomcat contains an unspecified vulnerability that allows for remote code execution if JmxRemoteLifecycleListener is used and an attacker can reach Java Management Extension (JMX) ports. This CVE exists because this listener wasn't updated for consistency with the Oracle patched issues for CVE-2016-3427 which affected credential types.",
+    "affected_tech": [
+      "tomcat"
+    ],
+    "year": 2016,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-45046",
+    "title": "CVE-2021-45046 - Apache Log4j2 Deserialization of Untrusted Data Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache Log4j2 contains a deserialization of untrusted data vulnerability due to the incomplete fix of CVE-2021-44228, where the Thread Context Lookup Pattern is vulnerable to remote code execution in certain non-default configurations.",
+    "affected_tech": [
+      "log4j2"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-2136",
+    "title": "CVE-2023-2136 - Google Chrome Skia Integer Overflow Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium Skia contains an integer overflow vulnerability that allows a remote attacker, who has compromised the renderer process, to potentially perform a sandbox escape via a crafted HTML page. This vulnerability affects Google Chrome and ChromeOS, Android, Flutter, and possibly other products.",
+    "affected_tech": [
+      "chromium skia"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-2033",
+    "title": "CVE-2023-2033 - Google Chromium V8 Type Confusion Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains a type confusion vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2022-42948",
+    "title": "CVE-2022-42948 - Fortra Cobalt Strike User Interface Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Fortra Cobalt Strike User Interface contains an unspecified vulnerability rooted in Java Swing that may allow remote code execution.",
+    "affected_tech": [
+      "cobalt strike"
+    ],
+    "year": 2022,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2022-3038",
+    "title": "CVE-2022-3038 - Google Chromium Network Service Use-After-Free Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium Network Service contains a use-after-free vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium network service"
+    ],
+    "year": 2022,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2022-33891",
+    "title": "CVE-2022-33891 - Apache Spark Command Injection Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache Spark contains a command injection vulnerability via Spark User Interface (UI) when Access Control Lists (ACLs) are enabled.",
+    "affected_tech": [
+      "spark"
+    ],
+    "year": 2022,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2022-36537",
+    "title": "CVE-2022-36537 - ZK Framework AuUploader Unspecified Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] ZK Framework AuUploader servlets contain an unspecified vulnerability that could allow an attacker to retrieve the content of a file located in the web context. The ZK Framework is an open-source Java framework. This vulnerability can impact multiple products, including but not limited to ConnectWise R1Soft Server Backup Manager.",
+    "affected_tech": [
+      "auuploader"
+    ],
+    "year": 2022,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-0669",
+    "title": "CVE-2023-0669 - Fortra GoAnywhere MFT Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Fortra (formerly, HelpSystems) GoAnywhere MFT contains a pre-authentication remote code execution vulnerability in the License Response Servlet due to deserializing an attacker-controlled object.",
+    "affected_tech": [
+      "goanywhere mft"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2023-22952",
+    "title": "CVE-2023-22952 - Multiple SugarCRM Products Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Multiple SugarCRM products contain a remote code execution vulnerability in the EmailTemplates. Using a specially crafted request, custom PHP code can be injected through the EmailTemplates.",
+    "affected_tech": [
+      "multiple products"
+    ],
+    "year": 2023,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2017-11357",
+    "title": "CVE-2017-11357 - Telerik UI for ASP.NET AJAX Insecure Direct Object Reference Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Telerik UI for ASP.NET AJAX contains an insecure direct object reference vulnerability in RadAsyncUpload that can result in file uploads in a limited location and/or remote code execution.",
+    "affected_tech": [
+      "user interface (ui) for asp.net ajax"
+    ],
+    "year": 2017,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2022-47966",
+    "title": "CVE-2022-47966 - Zoho ManageEngine Multiple Products Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Multiple Zoho ManageEngine products contain an unauthenticated remote code execution vulnerability due to the usage of an outdated third-party dependency, Apache Santuario.",
+    "affected_tech": [
+      "manageengine"
+    ],
+    "year": 2022,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2022-4262",
+    "title": "CVE-2022-4262 - Google Chromium V8 Type Confusion Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains a type confusion vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2022,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2022-4135",
+    "title": "CVE-2022-4135 - Google Chromium GPU Heap Buffer Overflow Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium GPU contains a heap buffer overflow vulnerability that allows a remote attacker, who has compromised the renderer process, to potentially perform a sandbox escape via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium gpu"
+    ],
+    "year": 2022,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2022-3723",
+    "title": "CVE-2022-3723 - Google Chromium V8 Type Confusion Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains a type confusion vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2022,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2022-3075",
+    "title": "CVE-2022-3075 - Google Chromium Mojo Insufficient Data Validation Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium Mojo contains an insufficient data validation vulnerability that allows a remote attacker, who has compromised the renderer process, to potentially perform a sandbox escape via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium mojo"
+    ],
+    "year": 2022,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2022-24706",
+    "title": "CVE-2022-24706 - Apache CouchDB Insecure Default Initialization of Resource Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache CouchDB contains an insecure default initialization of resource vulnerability which can allow an attacker to escalate to administrative privileges.",
+    "affected_tech": [
+      "couchdb"
+    ],
+    "year": 2022,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2022-24112",
+    "title": "CVE-2022-24112 - Apache APISIX Authentication Bypass Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache APISIX contains an authentication bypass vulnerability that allows for remote code execution.",
+    "affected_tech": [
+      "apisix"
+    ],
+    "year": 2022,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2022-22963",
+    "title": "CVE-2022-22963 - VMware Tanzu Spring Cloud Function Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] When using routing functionality in VMware Tanzu's Spring Cloud Function, it is possible for a user to provide a specially crafted SpEL as a routing-expression that may result in remote code execution and access to local resources.",
+    "affected_tech": [
+      "spring cloud"
+    ],
+    "year": 2022,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2022-2294",
+    "title": "CVE-2022-2294 - WebRTC Heap Buffer Overflow Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] WebRTC, an open-source project providing web browsers with real-time communication, contains a heap buffer overflow vulnerability that allows an attacker to perform shellcode execution. This vulnerability impacts web browsers using WebRTC including but not limited to Google Chrome.",
+    "affected_tech": [
+      "webrtc"
+    ],
+    "year": 2022,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-38406",
+    "title": "CVE-2021-38406 - Delta Electronics DOPSoft 2 Improper Input Validation Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Delta Electronics DOPSoft 2 lacks proper validation of user-supplied data when parsing specific project files (improper input validation) resulting in an out-of-bounds write that allows for code execution.",
+    "affected_tech": [
+      "dopsoft 2"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-36193",
+    "title": "CVE-2020-36193 - PEAR Archive_Tar Improper Link Resolution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] PEAR Archive_Tar Tar.php allows write operations with directory traversal due to inadequate checking of symbolic links. PEAR stands for PHP Extension and Application Repository and it is an open-source framework and distribution system for reusable PHP components with known usage in third-party products such as Drupal Core and Red Hat Linux.",
+    "affected_tech": [
+      "archive_tar"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-28949",
+    "title": "CVE-2020-28949 - PEAR Archive_Tar Deserialization of Untrusted Data Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] PEAR Archive_Tar allows an unserialization attack because phar: is blocked but PHAR: is not blocked. PEAR stands for PHP Extension and Application Repository and it is an open-source framework and distribution system for reusable PHP components with known usage in third-party products such as Drupal Core and Red Hat Linux.",
+    "affected_tech": [
+      "archive_tar"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2022-22536",
+    "title": "CVE-2022-22536 - SAP Multiple Products HTTP Request Smuggling Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] SAP NetWeaver Application Server ABAP, SAP NetWeaver Application Server Java, ABAP Platform, SAP Content Server and SAP Web Dispatcher allow HTTP request smuggling. An unauthenticated attacker can prepend a victim's request with arbitrary data, allowing for function execution impersonating the victim or poisoning intermediary Web caches.",
+    "affected_tech": [
+      "multiple products"
+    ],
+    "year": 2022,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2022-2856",
+    "title": "CVE-2022-2856 - Google Chromium Intents Insufficient Input Validation Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium Intents contains an insufficient validation of untrusted input vulnerability that allows a remote attacker to browse to a malicious website via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium intents"
+    ],
+    "year": 2022,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-30533",
+    "title": "CVE-2021-30533 - Google Chromium PopupBlocker Security Bypass Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium PopupBlocker contains an insufficient policy enforcement vulnerability that allows a remote attacker to bypass navigation restrictions via a crafted iframe. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium popupblocker"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2016-2388",
+    "title": "CVE-2016-2388 - SAP NetWeaver Information Disclosure Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] The Universal Worklist Configuration in SAP NetWeaver AS JAVA 7.4 allows remote attackers to obtain sensitive user information via a crafted HTTP request.",
+    "affected_tech": [
+      "netweaver"
+    ],
+    "year": 2016,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2019-5825",
+    "title": "CVE-2019-5825 - Google Chromium V8 Out-of-Bounds Write Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains an out-of-bounds write vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2019,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2018-6065",
+    "title": "CVE-2018-6065 - Google Chromium V8 Integer Overflow Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains an integer overflow vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2018,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2018-17480",
+    "title": "CVE-2018-17480 - Google Chromium V8 Out-of-Bounds Write Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains out-of-bounds write vulnerability that allows a remote attacker to execute code inside a sandbox via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2018,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2018-17463",
+    "title": "CVE-2018-17463 - Google Chromium V8 Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains an unspecified vulnerability that allows a remote attacker to execute code inside a sandbox via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2018,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2017-5070",
+    "title": "CVE-2017-5070 - Google Chromium V8 Type Confusion Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains a type confusion vulnerability that allows a remote attacker to execute code inside a sandbox via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2017,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2017-5030",
+    "title": "CVE-2017-5030 - Google Chromium V8 Memory Corruption Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains a memory corruption vulnerability that allows a remote attacker to execute code via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2017,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2016-5198",
+    "title": "CVE-2016-5198 - Google Chromium V8 Out-of-Bounds Memory Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains an out-of-bounds memory access vulnerability that allows a remote attacker to perform read/write operations, leading to code execution, via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2016,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2016-1646",
+    "title": "CVE-2016-1646 - Google Chromium V8 Out-of-Bounds Read Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains an out-of-bounds read vulnerability that allows a remote attacker to cause a denial of service or possibly have another unspecified impact via crafted JavaScript code. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2016,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2007-5659",
+    "title": "CVE-2007-5659 - Adobe Acrobat and Reader Buffer Overflow Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Adobe Acrobat and Reader contain a buffer overflow vulnerability that allows remote attackers to execute code via a PDF file with long arguments to unspecified JavaScript methods.",
+    "affected_tech": [
+      "acrobat and reader"
+    ],
+    "year": 2007,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2015-1671",
+    "title": "CVE-2015-1671 - Microsoft Windows Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] A remote code execution vulnerability exists when components of Windows, .NET Framework, Office, Lync, and Silverlight fail to properly handle TrueType fonts.",
+    "affected_tech": [
+      "windows"
+    ],
+    "year": 2015,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2013-2423",
+    "title": "CVE-2013-2423 - Oracle JRE Unspecified Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Unspecified vulnerability in hotspot for Java Runtime Environment (JRE) allows remote attackers to affect integrity.",
+    "affected_tech": [
+      "java runtime environment (jre)"
+    ],
+    "year": 2013,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2013-0431",
+    "title": "CVE-2013-0431 - Oracle JRE Sandbox Bypass Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Unspecified vulnerability in the Java Runtime Environment (JRE) component in Oracle allows remote attackers to bypass the Java security sandbox.",
+    "affected_tech": [
+      "java runtime environment (jre)"
+    ],
+    "year": 2013,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2013-0422",
+    "title": "CVE-2013-0422 - Oracle JRE Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] A vulnerability in the way Java restricts the permissions of Java applets could allow an attacker to execute commands on a vulnerable system.",
+    "affected_tech": [
+      "java runtime environment (jre)"
+    ],
+    "year": 2013,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2010-0840",
+    "title": "CVE-2010-0840 - Oracle JRE Unspecified Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Unspecified vulnerability in the Java Runtime Environment (JRE) in Java SE component allows remote attackers to affect confidentiality, integrity, and availability via Unknown vectors.",
+    "affected_tech": [
+      "java runtime environment (jre)"
+    ],
+    "year": 2010,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2016-0162",
+    "title": "CVE-2016-0162 - Microsoft Internet Explorer Information Disclosure Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] An information disclosure vulnerability exists when Internet Explorer does not properly handle JavaScript. The vulnerability could allow an attacker to detect specific files on the user's computer.",
+    "affected_tech": [
+      "internet explorer"
+    ],
+    "year": 2016,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2019-5786",
+    "title": "CVE-2019-5786 - Google Chrome Blink Use-After-Free Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chrome Blink contains a heap use-after-free vulnerability that allows an attacker to potentially perform out of bounds memory access via a crafted HTML page.",
+    "affected_tech": [
+      "chrome blink"
+    ],
+    "year": 2019,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2019-13720",
+    "title": "CVE-2019-13720 - Google Chrome WebAudio Use-After-Free Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chrome WebAudio contains a use-after-free vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page.",
+    "affected_tech": [
+      "chrome webaudio"
+    ],
+    "year": 2019,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2019-11707",
+    "title": "CVE-2019-11707 - Mozilla Firefox and Thunderbird Type Confusion Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Mozilla Firefox and Thunderbird contain a type confusion vulnerability that can occur when manipulating JavaScript objects due to issues in Array.pop, allowing for an exploitable crash.",
+    "affected_tech": [
+      "firefox and thunderbird"
+    ],
+    "year": 2019,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2022-22947",
+    "title": "CVE-2022-22947 - VMware Spring Cloud Gateway Code Injection Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Spring Cloud Gateway applications are vulnerable to a code injection attack when the Gateway Actuator endpoint is enabled, exposed and unsecured.",
+    "affected_tech": [
+      "spring cloud gateway"
+    ],
+    "year": 2022,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2022-1364",
+    "title": "CVE-2022-1364 - Google Chromium V8 Type Confusion Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains a type confusion vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2022,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-39793",
+    "title": "CVE-2021-39793 - Google Pixel Out-of-Bounds Write Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Pixel contains a possible out-of-bounds write due to a logic error in the code that could lead to local escalation of privilege.",
+    "affected_tech": [
+      "pixel"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2017-11317",
+    "title": "CVE-2017-11317 - Telerik UI for ASP.NET AJAX Unrestricted File Upload Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Telerik.Web.UI in Progress Telerik UI for ASP.NET AJAX allows remote attackers to perform arbitrary file uploads or execute arbitrary code.",
+    "affected_tech": [
+      "user interface (ui) for asp.net ajax"
+    ],
+    "year": 2017,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2022-22965",
+    "title": "CVE-2022-22965 - Spring Framework JDK 9+ Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Spring MVC or Spring WebFlux application running on JDK 9+ may be vulnerable to remote code execution (RCE) via data binding.",
+    "affected_tech": [
+      "spring framework"
+    ],
+    "year": 2022,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2022-1096",
+    "title": "CVE-2022-1096 - Google Chromium V8 Type Confusion Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains a type confusion vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2022,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2016-7201",
+    "title": "CVE-2016-7201 - Microsoft Edge Memory Corruption Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] The Chakra JavaScript scripting engine in Microsoft Edge allows remote attackers to execute remote code or cause a denial of service (memory corruption) via a crafted web site.",
+    "affected_tech": [
+      "edge"
+    ],
+    "year": 2016,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2016-7200",
+    "title": "CVE-2016-7200 - Microsoft Edge Memory Corruption Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] The Chakra JavaScript scripting engine in Microsoft Edge allows remote attackers to execute remote code or cause a denial of service (memory corruption) via a crafted web site.",
+    "affected_tech": [
+      "edge"
+    ],
+    "year": 2016,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2013-2465",
+    "title": "CVE-2013-2465 - Oracle Java SE Unspecified Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Unspecified vulnerability in the Java Runtime Environment (JRE) component in Oracle Java SE allows remote attackers to affect confidentiality, integrity, and availability via Unknown vectors related to 2D",
+    "affected_tech": [
+      "java se"
+    ],
+    "year": 2013,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2012-5076",
+    "title": "CVE-2012-5076 - Oracle Java SE Sandbox Bypass Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] The default Java security properties configuration did not restrict access to the com.sun.org.glassfish.external and com.sun.org.glassfish.gmbal packages. An untrusted Java application or applet could use these flaws to bypass Java sandbox restrictions.",
+    "affected_tech": [
+      "java se"
+    ],
+    "year": 2012,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-9377",
+    "title": "CVE-2020-9377 - D-Link DIR-610 Devices Remote Command Execution",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] D-Link DIR-610 devices allow remote code execution via the cmd parameter to command.php.",
+    "affected_tech": [
+      "dir-610 devices"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-5410",
+    "title": "CVE-2020-5410 - VMware Tanzu Spring Cloud Config Directory Traversal Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Spring, by VMware Tanzu, Cloud Config contains a path traversal vulnerability that allows applications to serve arbitrary configuration files.",
+    "affected_tech": [
+      "spring cloud configuration (config) server"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-1956",
+    "title": "CVE-2020-1956 - Apache Kylin OS Command Injection Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache Kylin contains an OS command injection vulnerability which could permit an attacker to perform remote code execution.",
+    "affected_tech": [
+      "kylin"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2019-6340",
+    "title": "CVE-2019-6340 - Drupal Core Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] In Drupal Core, some field types do not properly sanitize data from non-form sources. This can lead to arbitrary PHP code execution in some cases.",
+    "affected_tech": [
+      "core"
+    ],
+    "year": 2019,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2019-11043",
+    "title": "CVE-2019-11043 - PHP FastCGI Process Manager (FPM) Buffer Overflow Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] In some versions of PHP in certain configurations of FPM setup, it is possible to cause FPM module to write past allocated buffers allowing the possibility of remote code execution.",
+    "affected_tech": [
+      "fastcgi process manager (fpm)"
+    ],
+    "year": 2019,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2018-1273",
+    "title": "CVE-2018-1273 - VMware Tanzu Spring Data Commons Property Binder Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Spring Data Commons contains a property binder vulnerability which can allow an attacker to perform remote code execution.",
+    "affected_tech": [
+      "spring data commons"
+    ],
+    "year": 2018,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2018-11138",
+    "title": "CVE-2018-11138 - Quest KACE System Management Appliance Remote Command Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] The '/common/download_agent_installer.php' script in the Quest KACE System Management Appliance is accessible by anonymous users and can be abused to perform remote code execution.",
+    "affected_tech": [
+      "kace system management appliance"
+    ],
+    "year": 2018,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2018-0147",
+    "title": "CVE-2018-0147 - Cisco Secure Access Control System Java Deserialization Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] A vulnerability in Java deserialization used by Cisco Secure Access Control System (ACS) could allow an unauthenticated, remote attacker to execute arbitrary commands on an affected device. The vulnerability is due to insecure deserialization of user-supplied content by the affected software.",
+    "affected_tech": [
+      "secure access control system (acs)"
+    ],
+    "year": 2018,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2017-12617",
+    "title": "CVE-2017-12617 - Apache Tomcat Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] When running Apache Tomcat, it is possible to upload a JSP file to the server via a specially crafted request. This JSP could then be requested and any code it contained would be executed by the server.",
+    "affected_tech": [
+      "tomcat"
+    ],
+    "year": 2017,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2017-12615",
+    "title": "CVE-2017-12615 - Apache Tomcat on Windows Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] When running Apache Tomcat on Windows with HTTP PUTs enabled, it is possible to upload a JSP file to the server via a specially crafted request. This JSP could then be requested and any code it contained would be executed by the server.",
+    "affected_tech": [
+      "tomcat"
+    ],
+    "year": 2017,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2016-0752",
+    "title": "CVE-2016-0752 - Ruby on Rails Directory Traversal Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Directory traversal vulnerability in Action View in Ruby on Rails allows remote attackers to read arbitrary files.",
+    "affected_tech": [
+      "ruby on rails"
+    ],
+    "year": 2016,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2014-3120",
+    "title": "CVE-2014-3120 - Elasticsearch Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Elasticsearch enables dynamic scripting, which allows remote attackers to execute arbitrary MVEL expressions and Java code.",
+    "affected_tech": [
+      "elasticsearch"
+    ],
+    "year": 2014,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2014-0130",
+    "title": "CVE-2014-0130 - Ruby on Rails Directory Traversal Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Directory traversal vulnerability in actionpack/lib/abstract_controller/base.rb in the implicit-render implementation in Ruby on Rails allows remote attackers to read arbitrary files via a crafted request.",
+    "affected_tech": [
+      "ruby on rails"
+    ],
+    "year": 2014,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2013-2251",
+    "title": "CVE-2013-2251 - Apache Struts Improper Input Validation Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache Struts allows remote attackers to execute arbitrary Object-Graph Navigation Language (OGNL) expressions.",
+    "affected_tech": [
+      "struts"
+    ],
+    "year": 2013,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2012-1823",
+    "title": "CVE-2012-1823 - PHP-CGI Query String Parameter Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] sapi/cgi/cgi_main.c in PHP, when configured as a CGI script, does not properly handle query strings, which allows remote attackers to execute arbitrary code.",
+    "affected_tech": [
+      "php"
+    ],
+    "year": 2012,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2009-1151",
+    "title": "CVE-2009-1151 - phpMyAdmin Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Setup script used to generate configuration can be fooled using a crafted POST request to include arbitrary PHP code in generated configuration file.",
+    "affected_tech": [
+      "phpmyadmin"
+    ],
+    "year": 2009,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2005-2773",
+    "title": "CVE-2005-2773 - HP OpenView Network Node Manager Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] HP OpenView Network Node Manager could allow a remote attacker to execute arbitrary commands on the system.",
+    "affected_tech": [
+      "openview network node manager"
+    ],
+    "year": 2005,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-1938",
+    "title": "CVE-2020-1938 - Apache Tomcat Improper Privilege Management Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache Tomcat treats Apache JServ Protocol (AJP) connections as having higher trust than, for example, a similar HTTP connection. If such connections are available to an attacker, they can be exploited.",
+    "affected_tech": [
+      "tomcat"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2017-8540",
+    "title": "CVE-2017-8540 - Microsoft Malware Protection Engine Improper Restriction of Operations Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] The Microsoft Malware Protection Engine running on Microsoft Forefront and Microsoft Defender on Microsoft Windows Server 2008 SP2 and R2 SP1, Windows 7 SP1, Windows 8.1, Windows Server 2012 Gold and R2, Windows RT 8.1, Windows 10 Gold, 1511, 1607, and 1703, and Windows Server 2016, Microsoft Exchange Server 2013 and 2016, does not properly scan a specially crafted file leading to memory corruption. aka \"Microsoft Malware Protection Engine Remote Code Execution Vulnerability\".",
+    "affected_tech": [
+      "malware protection engine"
+    ],
+    "year": 2017,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2017-6663",
+    "title": "CVE-2017-6663 - Cisco IOS Software and Cisco IOS XE Software Denial-of-Service Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] A vulnerability in the Autonomic Networking feature of Cisco IOS Software and Cisco IOS XE Software could allow an unauthenticated, adjacent attacker to cause autonomic nodes of an affected system to reload, resulting in denial-of-service (DoS).",
+    "affected_tech": [
+      "ios and ios xe software"
+    ],
+    "year": 2017,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2017-0001",
+    "title": "CVE-2017-0001 - Microsoft Graphics Device Interface (GDI) Privilege Escalation Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] The Graphics Device Interface (GDI) in Microsoft Windows Vista SP2; Windows Server 2008 SP2 and R2 SP1; Windows 7 SP1; Windows 8.1; Windows Server 2012 Gold and R2; Windows RT 8.1; and Windows 10 Gold, 1511, and 1607 allows local users to gain privileges",
+    "affected_tech": [
+      "graphics device interface (gdi)"
+    ],
+    "year": 2017,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2016-0099",
+    "title": "CVE-2016-0099 - Microsoft Windows Secondary Logon Service Privilege Escalation Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] A privilege escalation vulnerability exists in Microsoft Windows if the Windows Secondary Logon Service fails to properly manage request handles in memory. An attacker who successfully exploited this vulnerability could run arbitrary code as an administrator.",
+    "affected_tech": [
+      "windows"
+    ],
+    "year": 2016,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2015-4902",
+    "title": "CVE-2015-4902 - Oracle Java SE Integrity Check Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Unspecified vulnerability in Oracle Java SE allows remote attackers to affect integrity via Unknown vectors related to deployment.",
+    "affected_tech": [
+      "java se"
+    ],
+    "year": 2015,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2015-2590",
+    "title": "CVE-2015-2590 - Oracle Java SE and Java SE Embedded Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] An unspecified vulnerability exists within Oracle Java Runtime Environment that allows an attacker to perform remote code execution.",
+    "affected_tech": [
+      "java se"
+    ],
+    "year": 2015,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2012-4681",
+    "title": "CVE-2012-4681 - Oracle Java SE Runtime Environment (JRE) Arbitrary Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] The Java Runtime Environment (JRE) component in Oracle Java SE allow for remote code execution.",
+    "affected_tech": [
+      "java se"
+    ],
+    "year": 2012,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2012-1723",
+    "title": "CVE-2012-1723 - Oracle Java SE Runtime Environment (JRE) Arbitrary Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Unspecified vulnerability in the Java Runtime Environment (JRE) component in Oracle Java SE allows remote attackers to affect confidentiality, integrity, and availability via Unknown vectors related to Hotspot.",
+    "affected_tech": [
+      "java se"
+    ],
+    "year": 2012,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2012-0507",
+    "title": "CVE-2012-0507 - Oracle Java SE Runtime Environment (JRE) Arbitrary Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] An incorrect type vulnerability exists in the Concurrency component of Oracle's Java Runtime Environment allows an attacker to remotely execute arbitrary code.",
+    "affected_tech": [
+      "java se"
+    ],
+    "year": 2012,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2011-3544",
+    "title": "CVE-2011-3544 - Oracle Java SE Runtime Environment (JRE) Arbitrary Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] An access control vulnerability exists in the Applet Rhino Script Engine component of Oracle's Java Runtime Environment allows an attacker to remotely execute arbitrary code.",
+    "affected_tech": [
+      "java se jdk and jre"
+    ],
+    "year": 2011,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2008-2992",
+    "title": "CVE-2008-2992 - Adobe Reader and Acrobat Input Validation Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Adobe Acrobat and Reader contain an input validation issue in a JavaScript method that could potentially lead to remote code execution.",
+    "affected_tech": [
+      "acrobat and reader"
+    ],
+    "year": 2008,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2022-0609",
+    "title": "CVE-2022-0609 - Google Chromium Animation Use-After-Free Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium Animation contains a use-after-free vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium animation"
+    ],
+    "year": 2022,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2017-9841",
+    "title": "CVE-2017-9841 - PHPUnit Command Injection Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] PHPUnit allows remote attackers to execute arbitrary PHP code via HTTP POST data beginning with a \"<?php \" substring, as demonstrated by an attack on a site with an exposed /vendor folder, i.e., external access to the /vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php URI.",
+    "affected_tech": [
+      "phpunit"
+    ],
+    "year": 2017,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2017-9791",
+    "title": "CVE-2017-9791 - Apache Struts 1 Improper Input Validation Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] The Struts 1 plugin in Apache Struts might allow remote code execution via a malicious field value passed in a raw message to the ActionMessage.",
+    "affected_tech": [
+      "struts 1"
+    ],
+    "year": 2017,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2016-3088",
+    "title": "CVE-2016-3088 - Apache ActiveMQ Improper Input Validation Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] The Fileserver web application in Apache ActiveMQ allows remote attackers to upload and execute arbitrary files via an HTTP PUT followed by an HTTP MOVE request",
+    "affected_tech": [
+      "activemq"
+    ],
+    "year": 2016,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2006-1547",
+    "title": "CVE-2006-1547 - Apache Struts 1 ActionForm Denial-of-Service Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] ActionForm in Apache Struts versions before 1.2.9 with BeanUtils 1.7 contains a vulnerability that allows for denial-of-service (DoS).",
+    "affected_tech": [
+      "struts 1"
+    ],
+    "year": 2006,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2012-0391",
+    "title": "CVE-2012-0391 - Apache Struts 2 Improper Input Validation Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] The ExceptionDelegator component in Apache Struts 2 before 2.2.3.1 contains an improper input validation vulnerability that allows for remote code execution.",
+    "affected_tech": [
+      "struts 2"
+    ],
+    "year": 2012,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-21315",
+    "title": "CVE-2021-21315 - System Information Library for Node.JS Command Injection",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] In this vulnerability, an attacker can send a malicious payload that will exploit the name parameter. After successful exploitation, attackers can execute remote.",
+    "affected_tech": [
+      "system information library for node.js"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-11978",
+    "title": "CVE-2020-11978 - Apache Airflow Command Injection",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] A remote code/command injection vulnerability was discovered in one of the example DAGs shipped with Airflow.",
+    "affected_tech": [
+      "airflow"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-13927",
+    "title": "CVE-2020-13927 - Apache Airflow's Experimental API Authentication Bypass",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] The previous default setting for Airflow's Experimental API was to allow all API requests without authentication.",
+    "affected_tech": [
+      "airflow's experimental api"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-6572",
+    "title": "CVE-2020-6572 - Google Chrome Media Use-After-Free Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chrome Media contains a use-after-free vulnerability that allows a remote attacker to execute code via a crafted HTML page.",
+    "affected_tech": [
+      "chrome media"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-4102",
+    "title": "CVE-2021-4102 - Google Chromium V8 Use-After-Free Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains a use-after-free vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2019-0193",
+    "title": "CVE-2019-0193 - Apache Solr DataImportHandler Code Injection Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] The optional Apache Solr module DataImportHandler contains a code injection vulnerability.",
+    "affected_tech": [
+      "solr"
+    ],
+    "year": 2019,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2017-17562",
+    "title": "CVE-2017-17562 - Embedthis GoAhead Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Embedthis GoAhead before 3.6.5 allows remote code execution if CGI is enabled and a CGI program is dynamically linked.",
+    "affected_tech": [
+      "goahead"
+    ],
+    "year": 2017,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2010-1871",
+    "title": "CVE-2010-1871 - Red Hat Linux JBoss Seam 2 Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] JBoss Seam 2 (jboss-seam2), as used in JBoss Enterprise Application Platform 4.3.0 for Red Hat Linux, allows attackers to perform remote code execution. This vulnerability can only be exploited when the Java Security Manager is not properly configured.",
+    "affected_tech": [
+      "jboss seam 2"
+    ],
+    "year": 2010,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2019-10758",
+    "title": "CVE-2019-10758 - MongoDB mongo-express Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] mongo-express before 0.54.0 is vulnerable to Remote Code Execution via endpoints that uses the `toBSON` method.",
+    "affected_tech": [
+      "mongo-express"
+    ],
+    "year": 2019,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-44228",
+    "title": "CVE-2021-44228 - Apache Log4j2 Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache Log4j2 contains a vulnerability where JNDI features do not protect against attacker-controlled JNDI-related endpoints, allowing for remote code execution.",
+    "affected_tech": [
+      "log4j2"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-11261",
+    "title": "CVE-2020-11261 - Qualcomm Multiple Chipsets Improper Input Validation Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Memory corruption due to improper check to return error when user application requests memory allocation of a huge size in Snapdragon Auto, Snapdragon Compute, Snapdragon Connectivity, Snapdragon Consumer IOT, Snapdragon Industrial IOT, Snapdragon Mobile, Snapdragon Voice & Music, Snapdragon Wearables",
+    "affected_tech": [
+      "snapdragon auto, snapdragon compute, snapdragon connectivity, snapdragon consumer iot, snapdragon industrial iot, snapdragon mobile, snapdragon voice & music, snapdragon wearables"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-40438",
+    "title": "CVE-2021-40438 - Apache HTTP Server-Side Request Forgery (SSRF)",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] A crafted request uri-path can cause mod_proxy to forward the request to an origin server choosen by the remote user. This issue affects Apache HTTP Server 2.4.48 and earlier.",
+    "affected_tech": [
+      "apache"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2017-9805",
+    "title": "CVE-2017-9805 - Apache Struts Deserialization of Untrusted Data Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache Struts REST Plugin uses an XStreamHandler with an instance of XStream for deserialization without any type filtering, which can lead to remote code execution when deserializing XML payloads.",
+    "affected_tech": [
+      "struts"
+    ],
+    "year": 2017,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-42013",
+    "title": "CVE-2021-42013 - Apache HTTP Server Path Traversal Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache HTTP Server contains a path traversal vulnerability that allows an attacker to perform remote code execution if files outside directories configured by Alias-like directives are not under default require all denied or if CGI scripts are enabled. This CVE ID resolves an incomplete patch for CVE-2021-41773.",
+    "affected_tech": [
+      "http server"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-41773",
+    "title": "CVE-2021-41773 - Apache HTTP Server Path Traversal Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache HTTP Server contains a path traversal vulnerability that allows an attacker to perform remote code execution if files outside directories configured by Alias-like directives are not under default \ufffdrequire all denied\ufffd or if CGI scripts are enabled. The original patch issued under this CVE ID is insufficient, please review remediation information under CVE-2021-42013.",
+    "affected_tech": [
+      "http server"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2019-0211",
+    "title": "CVE-2019-0211 - Apache HTTP Server Privilege Escalation Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache HTTP Server, with MPM event, worker or prefork, code executing in less-privileged child processes or threads (including scripts executed by an in-process scripting interpreter) could execute code with the privileges of the parent process (usually root) by manipulating the scoreboard.",
+    "affected_tech": [
+      "http server"
+    ],
+    "year": 2019,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2016-4437",
+    "title": "CVE-2016-4437 - Apache Shiro Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache Shiro contains a vulnerability which may allow remote attackers to execute code or bypass intended access restrictions via an unspecified request parameter when a cipher key has not been configured for the \"remember me\" feature.",
+    "affected_tech": [
+      "shiro"
+    ],
+    "year": 2016,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2019-17558",
+    "title": "CVE-2019-17558 - Apache Solr VelocityResponseWriter Plug-In Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] The Apache Solr VelocityResponseWriter plug-in contains an unspecified vulnerability which can allow for remote code execution.",
+    "affected_tech": [
+      "solr"
+    ],
+    "year": 2019,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-17530",
+    "title": "CVE-2020-17530 - Apache Struts Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Forced Object-Graph Navigation Language (OGNL) evaluation in Apache Struts, when evaluated on raw user input in tag attributes, can lead to remote code execution.",
+    "affected_tech": [
+      "struts"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2017-5638",
+    "title": "CVE-2017-5638 - Apache Struts Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache Struts Jakarta Multipart parser allows for malicious file upload using the Content-Type value, leading to remote code execution.",
+    "affected_tech": [
+      "struts"
+    ],
+    "year": 2017,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2018-11776",
+    "title": "CVE-2018-11776 - Apache Struts Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Apache Struts contains a vulnerability that allows for remote code execution under two circumstances. One, where the alwaysSelectFullNamespace option is true and the value isn't set for a result defined in underlying configurations and in same time, its upper package configuration have no or wildcard namespace.  Or, using URL tag which doesn't have value and action set and in same time, its upper package configuration have no or wildcard namespace.",
+    "affected_tech": [
+      "struts"
+    ],
+    "year": 2018,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2018-15811",
+    "title": "CVE-2018-15811 - DotNetNuke (DNN) Inadequate Encryption Strength Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] DotNetNuke (DNN) contains an inadequate encryption strength vulnerability resulting from the use of a weak encryption algorithm to protect input parameters.",
+    "affected_tech": [
+      "dotnetnuke (dnn)"
+    ],
+    "year": 2018,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2018-18325",
+    "title": "CVE-2018-18325 - DotNetNuke (DNN) Inadequate Encryption Strength Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] DotNetNuke (DNN) contains an inadequate encryption strength vulnerability resulting from the use of a weak encryption algorithm to protect input parameters. This CVE ID resolves an incomplete patch for CVE-2018-15811.",
+    "affected_tech": [
+      "dotnetnuke (dnn)"
+    ],
+    "year": 2018,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2019-15752",
+    "title": "CVE-2019-15752 - Docker Desktop Community Edition Privilege Escalation Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Docker Desktop Community Edition contains a vulnerability that may allow local users to escalate privileges by placing a trojan horse docker-credential-wincred.exe file in %PROGRAMDATA%\\DockerDesktop\\version-bin\\.",
+    "affected_tech": [
+      "desktop community edition"
+    ],
+    "year": 2019,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-8515",
+    "title": "CVE-2020-8515 - Multiple DrayTek Vigor Routers Web Management Page Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] DrayTek Vigor3900, Vigor2960, and Vigor300B routers contain an unspecified vulnerability that allows for remote code execution.",
+    "affected_tech": [
+      "multiple vigor routers"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-16010",
+    "title": "CVE-2020-16010 - Google Chrome for Android UI Heap Buffer Overflow Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chrome for Android UI contains a heap buffer overflow vulnerability that allows a remote attacker, who has compromised the renderer process, to potentially perform a sandbox escape via a crafted HTML page.",
+    "affected_tech": [
+      "chrome for android ui"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-15999",
+    "title": "CVE-2020-15999 - Google Chrome FreeType Heap Buffer Overflow Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chrome uses FreeType, an open-source software library to render fonts, which contains a heap buffer overflow vulnerability in the function Load_SBit_Png when processing PNG images embedded into fonts. This vulnerability is part of an exploit chain with CVE-2020-17087 on Windows and CVE-2020-16010 on Android.",
+    "affected_tech": [
+      "chrome freetype"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-21166",
+    "title": "CVE-2021-21166 - Google Chromium Race Condition Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium contains a race condition vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-16017",
+    "title": "CVE-2020-16017 - Google Chrome Use-After-Free Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chrome contains a use-after-free vulnerability that allows a remote attacker, who has compromised the renderer process, to potentially perform a sandbox escape via a crafted HTML page.  ",
+    "affected_tech": [
+      "chrome"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-37976",
+    "title": "CVE-2021-37976 - Google Chromium Information Disclosure Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium contains an information disclosure vulnerability within the core memory component that allows a remote attacker to obtain potentially sensitive information from process memory via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-16009",
+    "title": "CVE-2020-16009 - Google Chromium V8 Type Confusion Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains a type confusion vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-30632",
+    "title": "CVE-2021-30632 - Google Chromium V8 Out-of-Bounds Write Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains an out-of-bounds write vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-16013",
+    "title": "CVE-2020-16013 - Google Chromium V8 Incorrect Implementation Vulnerabililty",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains an inappropriate implementation vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-30633",
+    "title": "CVE-2021-30633 - Google Chromium Indexed DB API Use-After-Free Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium Indexed DB API contains a use-after-free vulnerability that allows a remote attacker, who has compromised the renderer process, to potentially perform a sandbox escape via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium indexed db api"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-21148",
+    "title": "CVE-2021-21148 - Google Chromium V8 Heap Buffer Overflow Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains a heap buffer overflow vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-37973",
+    "title": "CVE-2021-37973 - Google Chromium Portals Use-After-Free Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium Portals contains a use-after-free vulnerability that allows a remote attacker, who has compromised the renderer process, to potentially perform a sandbox escape via a crafted HTML page. This vulnerability affects web browsers that utilize Chromium, including Google Chrome and Microsoft Edge.",
+    "affected_tech": [
+      "chromium portals"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-30551",
+    "title": "CVE-2021-30551 - Google Chromium V8 Type Confusion Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains a type confusion vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-37975",
+    "title": "CVE-2021-37975 - Google Chromium V8 Use-After-Free Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains a use-after-free vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-6418",
+    "title": "CVE-2020-6418 - Google Chromium V8 Type Confusion Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains a type confusion vulnerability allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-30554",
+    "title": "CVE-2021-30554 - Google Chromium WebGL Use-After-Free Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium WebGL contains a use-after-free vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium webgl"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-21206",
+    "title": "CVE-2021-21206 - Google Chromium Blink Use-After-Free Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium Blink contains a use-after-free vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium blink"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-38000",
+    "title": "CVE-2021-38000 - Google Chromium Intents Improper Input Validation Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium Intents contains an improper input validation vulnerability that allows a remote attacker to arbitrarily browser to a malicious URL via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium intents"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-38003",
+    "title": "CVE-2021-38003 - Google Chromium V8 Memory Corruption Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine has a bug in JSON.stringify, where the internal TheHole value can leak to script code, causing memory corruption. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-21224",
+    "title": "CVE-2021-21224 - Google Chromium V8 Type Confusion Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains a type confusion vulnerability that allows a remote attacker to execute code inside a sandbox via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-21193",
+    "title": "CVE-2021-21193 - Google Chromium Blink Use-After-Free Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium Blink contains a use-after-free vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium blink"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-21220",
+    "title": "CVE-2021-21220 - Google Chromium V8 Improper Input Validation Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains an improper input validation vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-30563",
+    "title": "CVE-2021-30563 - Google Chromium V8 Type Confusion Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Google Chromium V8 Engine contains a type confusion vulnerability that allows a remote attacker to potentially exploit heap corruption via a crafted HTML page. This vulnerability could affect multiple web browsers that utilize Chromium, including, but not limited to, Google Chrome, Microsoft Edge, and Opera.",
+    "affected_tech": [
+      "chromium v8"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-38647",
+    "title": "CVE-2021-38647 - Microsoft Open Management Infrastructure (OMI) Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Microsoft Open Management Infrastructure (OMI) within Azure VM Management Extensions contains an unspecified vulnerability allowing remote code execution.",
+    "affected_tech": [
+      "open management infrastructure (omi)"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-38645",
+    "title": "CVE-2021-38645 - Microsoft Open Management Infrastructure (OMI) Privilege Escalation Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Microsoft Open Management Infrastructure (OMI) within Azure VM Management Extensions contains an unspecified vulnerability that allows for privilege escalation.",
+    "affected_tech": [
+      "open management infrastructure (omi)"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-38649",
+    "title": "CVE-2021-38649 - Microsoft Open Management Infrastructure (OMI) Privilege Escalation Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Microsoft Open Management Infrastructure (OMI) within Azure VM Management Extensions contains an unspecified vulnerability allowing privilege escalation.",
+    "affected_tech": [
+      "open management infrastructure (omi)"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2017-8759",
+    "title": "CVE-2017-8759 - Microsoft .NET Framework Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Microsoft .NET Framework contains a remote code execution vulnerability when processing untrusted input that could allow an attacker to take control of an affected system.",
+    "affected_tech": [
+      ".net framework"
+    ],
+    "year": 2017,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-1472",
+    "title": "CVE-2020-1472 - Microsoft Netlogon Privilege Escalation Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Microsoft's Netlogon Remote Protocol (MS-NRPC) contains a privilege escalation vulnerability when an attacker establishes a vulnerable Netlogon secure channel connection to a domain controller. An attacker who successfully exploits the vulnerability could run a specially crafted application on a device on the network. The vulnerability is also known under the moniker of Zerologon.",
+    "affected_tech": [
+      "netlogon"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-26855",
+    "title": "CVE-2021-26855 - Microsoft Exchange Server Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Microsoft Exchange Server contains an unspecified vulnerability that allows for remote code execution. This vulnerability is part of the ProxyLogon exploit chain.",
+    "affected_tech": [
+      "exchange server"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-26858",
+    "title": "CVE-2021-26858 - Microsoft Exchange Server Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Microsoft Exchange Server contains an unspecified vulnerability that allows for remote code execution. This vulnerability is part of the ProxyLogon exploit chain.",
+    "affected_tech": [
+      "exchange server"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-27065",
+    "title": "CVE-2021-27065 - Microsoft Exchange Server Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Microsoft Exchange Server contains an unspecified vulnerability that allows for remote code execution. This vulnerability is part of the ProxyLogon exploit chain.",
+    "affected_tech": [
+      "exchange server"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-0646",
+    "title": "CVE-2020-0646 - Microsoft .NET Framework Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Microsoft .NET Framework contains an improper input validation vulnerability that allows for remote code execution.",
+    "affected_tech": [
+      ".net framework"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-26857",
+    "title": "CVE-2021-26857 - Microsoft Exchange Server Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Microsoft Exchange Server contains an unspecified vulnerability that allows for remote code execution. This vulnerability is part of the ProxyLogon exploit chain.",
+    "affected_tech": [
+      "exchange server"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-1147",
+    "title": "CVE-2020-1147 - Microsoft .NET Framework, SharePoint, and Visual Studio Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Microsoft .NET Framework, Microsoft SharePoint, and Visual Studio contain a remote code execution vulnerability when the software fails to check the source markup of XML file input. Successful exploitation allows an attacker to execute code in the context of the process responsible for deserialization of the XML content.",
+    "affected_tech": [
+      ".net framework, sharepoint, visual studio"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-38648",
+    "title": "CVE-2021-38648 - Microsoft Open Management Infrastructure (OMI) Privilege Escalation Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Microsoft Open Management Infrastructure (OMI) within Azure VM Management Extensions contains an unspecified vulnerability allowing privilege escalation.",
+    "affected_tech": [
+      "open management infrastructure (omi)"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2015-4852",
+    "title": "CVE-2015-4852 - Oracle WebLogic Server Deserialization of Untrusted Data Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Oracle WebLogic Server contains a deserialization of untrusted data vulnerability within Apache Commons, which can allow for for remote code execution.",
+    "affected_tech": [
+      "weblogic server"
+    ],
+    "year": 2015,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2019-18935",
+    "title": "CVE-2019-18935 - Progress Telerik UI for ASP.NET AJAX Deserialization of Untrusted Data Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Progress Telerik UI for ASP.NET AJAX contains a deserialization of untrusted data vulnerability through RadAsyncUpload which leads to code execution on the server in the context of the w3wp.exe process.",
+    "affected_tech": [
+      "telerik ui for asp.net ajax"
+    ],
+    "year": 2019,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-10221",
+    "title": "CVE-2020-10221 - rConfig OS Command Injection Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] rConfig lib/ajaxHandlers/ajaxAddTemplate.php contains an OS command injection vulnerability that allows remote attackers to execute OS commands via shell metacharacters in the fileName POST parameter.",
+    "affected_tech": [
+      "rconfig"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2010-5326",
+    "title": "CVE-2010-5326 - SAP NetWeaver Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] SAP NetWeaver Application Server Java Platforms Invoker Servlet does not require authentication, allowing for remote code execution via a HTTP or HTTPS request.",
+    "affected_tech": [
+      "netweaver"
+    ],
+    "year": 2010,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2016-9563",
+    "title": "CVE-2016-9563 - SAP NetWeaver XML External Entity (XXE) Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] SAP NetWeaver Application Server Java Platforms contains an unspecified vulnerability in BC-BMT-BPM-DSK which allows remote, authenticated users to conduct XML External Entity (XXE) attacks.",
+    "affected_tech": [
+      "netweaver"
+    ],
+    "year": 2016,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-6287",
+    "title": "CVE-2020-6287 - SAP NetWeaver Missing Authentication for Critical Function Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] SAP NetWeaver Application Server Java Platforms contains a missing authentication for critical function vulnerability allowing unauthenticated access to execute configuration tasks and create administrative users.",
+    "affected_tech": [
+      "netweaver"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2016-3976",
+    "title": "CVE-2016-3976 - SAP NetWeaver Directory Traversal Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] SAP NetWeaver Application Server Java Platforms contains a directory traversal vulnerability via a ..\\ (dot dot backslash) in the fileName parameter to CrashFileDownloadServlet. This allows remote attackers to read files.",
+    "affected_tech": [
+      "netweaver"
+    ],
+    "year": 2016,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2017-9248",
+    "title": "CVE-2017-9248 - Progress Telerik UI for ASP.NET AJAX and Sitefinity Cryptographic Weakness Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Progress Telerik UI for ASP.NET AJAX and Sitefinity have a cryptographic weakness in Telerik.Web.UI.dll that can be exploited to disclose encryption keys (Telerik.Web.UI.DialogParametersEncryptionKey and/or the MachineKey), perform cross-site-scripting (XSS) attacks, compromise the ASP.NET ViewState, and/or upload and download files.",
+    "affected_tech": [
+      "asp.net ajax and sitefinity"
+    ],
+    "year": 2017,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2021-31755",
+    "title": "CVE-2021-31755 - Tenda AC11 Router Stack Buffer Overflow Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Tenda AC11 devices contain a stack buffer overflow vulnerability in /goform/setmac which allows attackers to execute code via a crafted post request.",
+    "affected_tech": [
+      "ac11 router"
+    ],
+    "year": 2021,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2018-14558",
+    "title": "CVE-2018-14558 - Tenda AC7, AC9, and AC10 Routers Command Injection Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Tenda AC7, AC9, and AC10 devices contain a command injection vulnerability due to  the \"formsetUsbUnload\" function executes a dosystemCmd function with untrusted input. Successful exploitation allows an attacker to execute OS commands via a crafted goform/setUsbUnload request.",
+    "affected_tech": [
+      "ac7, ac9, and ac10 routers"
+    ],
+    "year": 2018,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2018-20062",
+    "title": "CVE-2018-20062 - ThinkPHP \"noneCms\" Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] ThinkPHP \"noneCms\" contains an unspecified vulnerability that allows for remote code execution through crafted use of the filter parameter.",
+    "affected_tech": [
+      "nonecms"
+    ],
+    "year": 2018,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2019-9082",
+    "title": "CVE-2019-9082 - ThinkPHP Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] ThinkPHP contains an unspecified vulnerability that allows for remote code execution via public//?s=index/\\think\\app/invokefunction&function=call_user_func_array&vars[0]=system&vars[1][]= followed by the command.",
+    "affected_tech": [
+      "thinkphp"
+    ],
+    "year": 2019,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-5847",
+    "title": "CVE-2020-5847 - Unraid Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] Unraid contains a vulnerability due to the insecure use of the extract PHP function that can be abused to execute remote code as root. This CVE is chainable with CVE-2020-5849 for initial access.",
+    "affected_tech": [
+      "unraid"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2019-16759",
+    "title": "CVE-2019-16759 - vBulletin PHP Module Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] The PHP module within vBulletin contains an unspecified vulnerability that allows for remote code execution via the widgetConfig[code] parameter in an ajax/render/widget_php routestring request.",
+    "affected_tech": [
+      "vbulletin"
+    ],
+    "year": 2019,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-17496",
+    "title": "CVE-2020-17496 - vBulletin PHP Module Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] The PHP module within vBulletin contains an unspecified vulnerability that allows for remote code execution via crafted subWidgets data in an ajax/render/widget_tabbedcontainer_tab_panel request. This CVE ID resolves an incomplete patch for CVE-2019-16759.",
+    "affected_tech": [
+      "vbulletin"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  },
+  {
+    "id": "CVE-2020-25213",
+    "title": "CVE-2020-25213 - WordPress File Manager Plugin Remote Code Execution Vulnerability",
+    "cvss": 9.0,
+    "description": "[EXPLOTADO ACTIVAMENTE] WordPress File Manager plugin contains a remote code execution vulnerability that allows unauthenticated users to execute PHP code and upload malicious files on a target site.",
+    "affected_tech": [
+      "file manager plugin"
+    ],
+    "year": 2020,
+    "source": "CISA_KEV"
+  }
+]

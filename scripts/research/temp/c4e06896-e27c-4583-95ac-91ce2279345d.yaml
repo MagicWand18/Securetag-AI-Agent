@@ -1,0 +1,61 @@
+rules:
+  - id: synthetic-c4e06896e27c458395ac91ce2279345d
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: >
+      Posible intento de explotación XXE (XML External Entity) asociado a
+      c4e06896-e27c-4583-95ac-91ce2279345d: se está parseando XML con DOMParser
+      sin deshabilitar entidades externas ni DTD. En entornos JVM (Nashorn,
+      GraalVM, Rhino, etc.) esto puede delegar en parsers XML de Java que
+      permiten XXE, facilitando ataque.initial-access (attack.t1190). Asegúrate
+      de inicializar el parser de forma segura o usar una librería que bloquee
+      XXE por defecto.
+    metadata:
+      cve: "c4e06896-e27c-4583-95ac-91ce2279345d"
+      source: "CISA_KEV"
+      category: "security"
+      technology: ["nodejs", "xml", "xmldom", "jvm"]
+      attack:
+        - "attack.initial-access"
+        - "attack.t1190"
+      references:
+        - "https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing"
+    patterns:
+      - pattern-either:
+          # Uso directo de DOMParser de xmldom
+          - pattern: |
+              const { DOMParser } = require('xmldom');
+              ...
+              const $PARSER = new DOMParser();
+              ...
+              $PARSER.parseFromString($XML, $TYPE);
+          - pattern: |
+              var { DOMParser } = require('xmldom');
+              ...
+              const $PARSER = new DOMParser();
+              ...
+              $PARSER.parseFromString($XML, $TYPE);
+          - pattern: |
+              let { DOMParser } = require('xmldom');
+              ...
+              const $PARSER = new DOMParser();
+              ...
+              $PARSER.parseFromString($XML, $TYPE);
+          # Import ESModule de xmldom
+          - pattern: |
+              import { DOMParser } from 'xmldom';
+              ...
+              const $PARSER = new DOMParser();
+              ...
+              $PARSER.parseFromString($XML, $TYPE);
+      # Excluir casos donde se pasa un objeto de opciones explícito al constructor
+      # (asumimos que el endurecimiento se hace ahí; evita falsos positivos en
+      # código que configure el parser de forma segura).
+      - pattern-not: |
+          const { DOMParser } = require('xmldom');
+          ...
+          const $PARSER = new DOMParser({...});
+      - pattern-not: |
+          import { DOMParser } from 'xmldom';
+          ...
+          const $PARSER = new DOMParser({...});

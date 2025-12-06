@@ -1,0 +1,100 @@
+rules:
+  - id: synthetic-16c86189b5564ee8b4c77e350a195a4f
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: >
+      Posible Server-Side Template Injection (SSTI) en motor Velocity. Se está
+      construyendo y renderizando una plantilla Velocity a partir de input
+      controlado por el usuario y se exponen directamente los errores del
+      motor (por ejemplo, ParseErrorException, VelocityException,
+      TemplateInitException). Este patrón es consistente con explotación
+      remota similar a la descrita en el CVE 16c86189-b556-4ee8-b4c7-7e350a195a4f,
+      donde la inyección de expresiones en plantillas puede conducir a
+      ejecución remota de código (RCE) cuando el motor de plantillas evalúa
+      dinámicamente el contenido proporcionado por el atacante.
+    metadata:
+      cve: "16c86189-b556-4ee8-b4c7-7e350a195a4f"
+      source: "CISA_KEV"
+      category: "security"
+      technology: ["nodejs", "express", "velocity"]
+      attack:
+        - "attack.initial-access"
+        - "attack.t1190"
+      likelihood: "high"
+      impact: "high"
+      vulnerability_class: ["SSTI", "RCE"]
+    patterns:
+      - pattern-either:
+          # 1) Función que envuelve spawn/java -jar ... velocity-renderer.jar
+          - pattern: |
+              function $FUNC($TEMPLATE, $DATA, ...$REST) {
+                ...
+                const $CHILD = spawn('java', ['-jar', $JAR, $TEMPLATE, JSON.stringify($DATA), ...$ARGS]);
+                ...
+                $CHILD.stderr.on('data', ($CHUNK) => {
+                  $ERR_OUTPUT += $CHUNK.toString();
+                });
+                ...
+                $CHILD.on('close', ($CODE) => {
+                  if ($CODE !== 0) {
+                    console.error('Velocity error:', $ERR_OUTPUT);
+                    return $CB(new Error('VelocityException: ' + $ERR_OUTPUT));
+                  }
+                  $CB(null, $OUTPUT);
+                });
+              }
+          # Variante más genérica: cualquier java -jar con templateString y JSON.stringify(data)
+          - pattern: |
+              function $FUNC($TEMPLATE, $DATA, ...$REST) {
+                ...
+                const $CHILD = spawn('java', ['-jar', $JAR, $TEMPLATE, JSON.stringify($DATA), ...$ARGS]);
+                ...
+                $CHILD.stderr.on('data', ($CHUNK) => {
+                  $ERR_OUTPUT += $CHUNK.toString();
+                });
+                ...
+                $CHILD.on('close', ($CODE) => {
+                  if ($CODE !== 0) {
+                    console.error(...);
+                    return $CB(new Error(...$ERR_OUTPUT...));
+                  }
+                  $CB(null, $OUTPUT);
+                });
+              }
+      - pattern-either:
+          # 2) Ruta Express que pasa input directo del body como plantilla al renderer inseguro
+          - pattern: |
+              app.$METHOD($ROUTE, (req, res) => {
+                ...
+                const $USER_TEMPLATE = req.body.$FIELD;
+                ...
+                $FUNC($USER_TEMPLATE, $DATA, ($ERR, $HTML) => {
+                  if ($ERR) {
+                    return res.status(500).send(...$ERR.message...);
+                  }
+                  res.send($HTML);
+                });
+              });
+          - pattern: |
+              $APP.$METHOD($ROUTE, (req, res) => {
+                ...
+                const $USER_TEMPLATE = req.body.$FIELD;
+                ...
+                $RENDER($USER_TEMPLATE, $DATA, ($ERR, $OUT) => {
+                  if ($ERR) {
+                    res.status(500).send(...$ERR.message...);
+                    return;
+                  }
+                  res.send($OUT);
+                });
+              });
+      - pattern-inside: |
+          const { spawn } = require('child_process');
+          ...
+    fix: >
+      Evita pasar directamente al motor Velocity plantillas controladas por el
+      usuario. Usa plantillas estáticas predefinidas, aplica una lista blanca
+      estricta de tokens permitidos o un lenguaje de plantillas seguro que no
+      permita ejecución arbitraria. No devuelvas al cliente los mensajes de
+      error completos del motor de plantillas; registra los detalles solo en
+      el servidor y muestra mensajes genéricos al usuario.

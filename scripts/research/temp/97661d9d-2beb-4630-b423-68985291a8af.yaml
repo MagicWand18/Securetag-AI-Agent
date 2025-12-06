@@ -1,0 +1,62 @@
+rules:
+  - id: synthetic-97661d9d2beb4630b42368985291a8af
+    languages:
+      - javascript
+      - typescript
+    message: >
+      Posible intento de explotación de RCE en Node.js: se está usando `node:child_process`
+      para ejecutar comandos del sistema y se registran errores de ejecución del proceso.
+      Si el comando (`exec`/`spawn`/`execFile`) se construye directa o indirectamente con
+      entrada de usuario (por ejemplo, parámetros de URL, cuerpo HTTP, variables de entorno
+      controlables, etc.), un atacante puede ejecutar comandos arbitrarios en el sistema
+      (RCE). Este patrón es consistente con la explotación descrita en el contexto de
+      inteligencia de amenazas asociado al CVE 97661d9d-2beb-4630-b423-68985291a8af
+      (attack.initial-access, attack.t1190), donde errores de ejecución de procesos
+      derivados de entrada no confiable indican intentos de explotación.
+    severity: ERROR
+    metadata:
+      cve: "97661d9d-2beb-4630-b423-68985291a8af"
+      source: "CISA_KEV"
+      category: "rce"
+      technology:
+        - nodejs
+      attack:
+        - "attack.initial-access"
+        - "attack.t1190"
+    patterns:
+      - pattern-either:
+          - pattern: |
+              const { $FUNC } = require('node:child_process');
+              ...
+              $FUNC($CMD, ($ERR, $OUT, $STDERR) => {
+                ...
+                console.error(..., $ERR, ...);
+                ...
+              });
+          - pattern: |
+              import { $FUNC } from 'node:child_process';
+              ...
+              $FUNC($CMD, ($ERR, $OUT, $STDERR) => {
+                ...
+                console.error(..., $ERR, ...);
+                ...
+              });
+          - pattern: |
+              const child_process = require('node:child_process');
+              ...
+              child_process.$FUNC($CMD, ($ERR, $OUT, $STDERR) => {
+                ...
+                console.error(..., $ERR, ...);
+                ...
+              });
+          - pattern: |
+              import * as child_process from 'node:child_process';
+              ...
+              child_process.$FUNC($CMD, ($ERR, $OUT, $STDERR) => {
+                ...
+                console.error(..., $ERR, ...);
+                ...
+              });
+      - metavariable-regex:
+          metavariable: $FUNC
+          regex: "^(exec|execFile|spawn|fork)$"
