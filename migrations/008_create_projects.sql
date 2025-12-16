@@ -1,7 +1,7 @@
+--liquibase formatted sql
+--changeset securetag:008_create_projects
 -- Migration 008: Create Project Entity and Link Tasks
 -- Context: Allows grouping scans under a persistent project identity with an optional human-readable alias.
-
-BEGIN;
 
 -- 0. Fix missing schema gaps detected in live DB
 ALTER TABLE securetag.api_key ADD COLUMN IF NOT EXISTS scopes JSONB DEFAULT '[]';
@@ -9,7 +9,7 @@ ALTER TABLE securetag.api_key ADD COLUMN IF NOT EXISTS scopes JSONB DEFAULT '[]'
 -- 1. Create Project Table
 CREATE TABLE IF NOT EXISTS securetag.project (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    tenant_id UUID NOT NULL REFERENCES securetag.tenant(id) ON DELETE CASCADE,
+    tenant_id VARCHAR(50) NOT NULL REFERENCES securetag.tenant(id) ON DELETE CASCADE,
     alias TEXT,
     name TEXT, -- Optional descriptive name
     description TEXT,
@@ -32,5 +32,3 @@ CREATE INDEX IF NOT EXISTS idx_task_project ON securetag.task(project_id);
 ALTER TABLE securetag.task
 ADD COLUMN IF NOT EXISTS previous_task_id UUID REFERENCES securetag.task(id) ON DELETE SET NULL,
 ADD COLUMN IF NOT EXISTS is_retest BOOLEAN DEFAULT false;
-
-COMMIT;

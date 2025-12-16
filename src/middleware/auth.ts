@@ -1,6 +1,7 @@
 import http from 'http'
 import { dbQuery } from '../utils/db.js'
 import crypto from 'crypto'
+import { isBanned, getClientIP } from '../server/security.js'
 
 export interface AuthenticatedRequest extends http.IncomingMessage {
     tenantId?: string
@@ -52,6 +53,15 @@ export async function authenticate(
         }
 
         const apiKeyRecord = result.rows[0]
+
+        // Check for bans (API Key or Tenant)
+        const clientIP = getClientIP(req)
+        if (isBanned(clientIP, keyHash, apiKeyRecord.tenant_id)) {
+             res.statusCode = 403
+             res.setHeader('Content-Type', 'application/json')
+             res.end(JSON.stringify({ ok: false, error: 'Access denied. Banned due to security violations.' }))
+             return false
+        }
 
         // Check if key is expired
         if (apiKeyRecord.expires_at && new Date(apiKeyRecord.expires_at) < new Date()) {

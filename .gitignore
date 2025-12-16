@@ -25,6 +25,7 @@ securetag-model.tar.gz
 # Scripts (Large Data)
 scripts/finetuning/
 scripts/__pycache__/
+qa_artifacts/
 
 # Environment Variables
 .env

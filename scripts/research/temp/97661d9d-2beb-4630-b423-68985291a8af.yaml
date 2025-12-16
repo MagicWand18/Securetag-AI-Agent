@@ -4,59 +4,43 @@ rules:
       - javascript
       - typescript
     message: >
-      Posible intento de explotación de RCE en Node.js: se está usando `node:child_process`
-      para ejecutar comandos del sistema y se registran errores de ejecución del proceso.
-      Si el comando (`exec`/`spawn`/`execFile`) se construye directa o indirectamente con
-      entrada de usuario (por ejemplo, parámetros de URL, cuerpo HTTP, variables de entorno
-      controlables, etc.), un atacante puede ejecutar comandos arbitrarios en el sistema
-      (RCE). Este patrón es consistente con la explotación descrita en el contexto de
-      inteligencia de amenazas asociado al CVE 97661d9d-2beb-4630-b423-68985291a8af
-      (attack.initial-access, attack.t1190), donde errores de ejecución de procesos
-      derivados de entrada no confiable indican intentos de explotación.
+      Posible intento de explotación de RCE en Node.js: se detecta el uso de
+      'node:child_process' para ejecutar comandos del sistema operativo
+      construidos dinámicamente, potencialmente a partir de entrada de usuario.
+      Este patrón es consistente con vulnerabilidades de ejecución remota de
+      comandos (RCE) explotadas en escenarios similares al CVE
+      97661d9d-2beb-4630-b423-68985291a8af, donde errores de ejecución de
+      procesos pueden delatar intentos de explotación. Valida, restringe o
+      elimina la ejecución de comandos basados en datos controlables por el
+      usuario.
     severity: ERROR
     metadata:
-      cve: "97661d9d-2beb-4630-b423-68985291a8af"
-      source: "CISA_KEV"
-      category: "rce"
+      cwe: "CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')"
+      owasp: "A03:2021 - Injection"
+      category: "security"
       technology:
+        - javascript
+        - typescript
         - nodejs
-      attack:
-        - "attack.initial-access"
-        - "attack.t1190"
+      likelihood: "HIGH"
+      impact: "HIGH"
+      confidence: "MEDIUM"
+      references:
+        - "https://nvd.nist.gov/vuln/detail/97661d9d-2beb-4630-b423-68985291a8af"
     patterns:
+      - pattern-inside: |
+          const $HTTP = require('http');
+          ...
       - pattern-either:
           - pattern: |
-              const { $FUNC } = require('node:child_process');
+              const { exec } = require('node:child_process');
               ...
-              $FUNC($CMD, ($ERR, $OUT, $STDERR) => {
-                ...
-                console.error(..., $ERR, ...);
+              exec($CMD, ($ERR, $STDOUT, $STDERR) => {
                 ...
               });
           - pattern: |
-              import { $FUNC } from 'node:child_process';
+              const $CP = require('node:child_process');
               ...
-              $FUNC($CMD, ($ERR, $OUT, $STDERR) => {
+              $CP.exec($CMD, ($ERR, $STDOUT, $STDERR) => {
                 ...
-                console.error(..., $ERR, ...);
-                ...
-              });
-          - pattern: |
-              const child_process = require('node:child_process');
-              ...
-              child_process.$FUNC($CMD, ($ERR, $OUT, $STDERR) => {
-                ...
-                console.error(..., $ERR, ...);
-                ...
-              });
-          - pattern: |
-              import * as child_process from 'node:child_process';
-              ...
-              child_process.$FUNC($CMD, ($ERR, $OUT, $STDERR) => {
-                ...
-                console.error(..., $ERR, ...);
-                ...
-              });
-      - metavariable-regex:
-          metavariable: $FUNC
-          regex: "^(exec|execFile|spawn|fork)$"
+              })

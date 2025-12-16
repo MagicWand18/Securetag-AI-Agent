@@ -35,9 +35,9 @@ export class TaskExecutor {
 
             // Execute with timeout
             const result = await this.executeWithTimeout(
-                async () => {
+                async (heartbeat) => {
                     if (job.type === 'codeaudit') {
-                        return await this.executeSemgrep(job, tenant, started)
+                        return await this.executeSemgrep(job, tenant, started, heartbeat)
                     } else {
                         return await this.executeHttpx(job, tenant, started)
                     }
@@ -86,16 +86,28 @@ export class TaskExecutor {
     }
 
     private async executeWithTimeout<T>(
-        fn: () => Promise<T>,
+        fn: (heartbeat: () => void) => Promise<T>,
         timeoutMs: number,
         taskId: string
     ): Promise<T> {
         return new Promise((resolve, reject) => {
-            const timer = setTimeout(() => {
-                reject(new Error(`Task ${taskId} exceeded timeout of ${timeoutMs}ms`))
-            }, timeoutMs)
+            let timer: NodeJS.Timeout
 
-            fn()
+            const startTimer = () => {
+                if (timer) clearTimeout(timer)
+                timer = setTimeout(() => {
+                    reject(new Error(`Task ${taskId} exceeded timeout of ${timeoutMs}ms`))
+                }, timeoutMs)
+            }
+
+            const heartbeat = () => {
+                startTimer()
+                logger.info(`Task ${taskId} heartbeat received. Timeout reset to ${timeoutMs}ms.`)
+            }
+
+            startTimer()
+
+            fn(heartbeat)
                 .then((result) => {
                     clearTimeout(timer)
                     resolve(result)
@@ -107,7 +119,7 @@ export class TaskExecutor {
         })
     }
 
-    private async executeSemgrep(job: any, tenant: string, started: number): Promise<any> {
+    private async executeSemgrep(job: any, tenant: string, started: number, heartbeat: () => void): Promise<any> {
         const av = await ExternalToolManager.isAvailable('semgrep')
         if (!av) throw new Error('semgrep not available')
 
@@ -155,6 +167,7 @@ export class TaskExecutor {
             const items: any[] = payload && Array.isArray(payload.results) ? payload.results : []
 
             for (let i = 0; i < items.length; i++) {
+                heartbeat()
                 const it: any = items[i]
                 const sevRaw = (it.extra && it.extra.severity) || ''
                 const sevUpper = sevRaw.toUpperCase()

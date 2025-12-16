@@ -1,58 +1,61 @@
 const http = require('http');
-const fs = require('fs');
 const { exec } = require('child_process');
-const { DOMParser } = require('xmldom'); // Parser inseguro si se usa sin restricciones
+const { DOMParser } = require('xmldom');
 
 // Servidor HTTP sencillo que recibe XML y lo parsea de forma insegura
 http.createServer((req, res) => {
-  if (req.method === 'POST' && req.url === '/upload-xml') {
-    let body = '';
+  if (req.method !== 'POST') {
+    res.writeHead(405, { 'Content-Type': 'text/plain' });
+    return res.end('Use POST with XML body');
+  }
 
-    req.on('data', chunk => {
-      body += chunk.toString();
-    });
+  let body = '';
+  req.on('data', chunk => {
+    body += chunk.toString();
+  });
 
-    req.on('end', () => {
-      try {
-        // VULNERABILIDAD: parseo de XML sin deshabilitar entidades externas (XXE)
-        // En un entorno JVM, esto podría disparar errores como SAXParseException o DOMException
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(body, 'text/xml');
+  req.on('end', () => {
+    try {
+      // VULNERABLE: uso directo de DOMParser sin deshabilitar entidades externas
+      // En un entorno JVM (por ejemplo, Rhino/Nashorn o Graal.js) esto puede
+      // derivar en un XXE si el parser subyacente permite DTD/entidades externas.
+      const parser = new DOMParser({
+        errorHandler: {
+          warning: function (msg) { console.warn('warning', msg); },
+          error: function (msg) { console.error('error', msg); },
+          fatalError: function (msg) { console.error('fatalError', msg); }
+        }
+      });
 
-        const commandNode = xmlDoc.getElementsByTagName('command')[0];
-        const command = commandNode && commandNode.textContent ? commandNode.textContent.trim() : 'echo No command';
+      const doc = parser.parseFromString(body, 'text/xml');
 
-        // Uso inseguro del contenido del XML (solo para hacer el ejemplo más realista)
-        exec(command, (error, stdout, stderr) => {
-          if (error) {
+      // Acceso directo a nodos, sin validación de contenido
+      const commandNode = doc.getElementsByTagName('command')[0];
+      const command = commandNode && commandNode.textContent ? commandNode.textContent.trim() : '';
+
+      // Ejemplo de uso peligroso del contenido del XML
+      if (command) {
+        // VULNERABLE: ejecución de comando basado en datos del XML
+        exec(command, (err, stdout, stderr) => {
+          if (err) {
+            console.error('Command error:', err);
             res.writeHead(500, { 'Content-Type': 'text/plain' });
-            return res.end('Command error: ' + error.message);
+            return res.end('Error executing command');
           }
           res.writeHead(200, { 'Content-Type': 'text/plain' });
-          res.end('Command output: ' + stdout);
+          res.end(`Command output:\n${stdout}`);
         });
-      } catch (e) {
-        // En un entorno JVM, errores de parseo podrían manifestarse como SAXParseException o DOMException
-        console.error('XML parse error:', e);
+      } else {
         res.writeHead(400, { 'Content-Type': 'text/plain' });
-        res.end('Invalid XML');
+        res.end('No <command> element found');
       }
-    });
-  } else {
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.end(`
-      <html>
-        <body>
-          <form method="POST" action="/upload-xml">
-            <textarea name="xml" rows="10" cols="50"><root><command>echo Hello</command></root></textarea><br/>
-            <button type="submit">Send XML</button>
-          </form>
-        </body>
-      </html>
-    `);
-  }
+    } catch (e) {
+      // Palabras clave típicas que un motor SAST/IAST podría buscar
+      console.error('DOMException or SAXParseException while parsing XML:', e);
+      res.writeHead(400, { 'Content-Type': 'text/plain' });
+      res.end('Invalid XML');
+    }
+  });
 }).listen(3000, () => {
   console.log('Insecure XML server listening on port 3000');
 });
-
-// Nota: Este ejemplo es intencionalmente inseguro para probar reglas SAST relacionadas con XXE y parseo de XML.

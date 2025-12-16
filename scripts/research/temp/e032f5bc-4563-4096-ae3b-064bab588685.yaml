@@ -1,77 +1,103 @@
 rules:
   - id: synthetic-e032f5bc45634096ae3b064bab588685
-    languages: [javascript, typescript]
+    languages:
+      - javascript
+      - typescript
     severity: ERROR
-    message: >
-      Posible vulnerabilidad de lectura de archivos locales (LFI / path traversal)
-      en una aplicación basada en JVM/Node: se concatena directamente input
-      controlado por el usuario a una ruta de archivo sin validación ni
-      normalización segura. Un atacante puede usar payloads como `../../../../etc/passwd`
-      para leer archivos arbitrarios. Este patrón está asociado a vulnerabilidades
-      de tipo directory traversal / local file read (por ejemplo, CVE similares
-      a e032f5bc-4563-4096-ae3b-064bab588685) y se explota típicamente durante
-      la fase de initial access (ATT&CK T1190).
+    message: >-
+      Posible vulnerabilidad de lectura de archivos locales (path traversal) por uso de una ruta
+      controlada por el usuario en operaciones de lectura (p.ej., fs.readFile). Un atacante puede
+      suministrar payloads como "/../../.." para leer archivos sensibles fuera del directorio esperado.
+      En aplicaciones JVM esto suele manifestarse como "FileNotFoundException" con rutas filtradas.
+      Referencia: CVE e032f5bc-4563-4096-ae3b-064bab588685.
     metadata:
-      cve: "e032f5bc-4563-4096-ae3b-064bab588685"
-      source: "CISA_KEV"
-      attack:
-        - "attack.initial-access"
-        - "attack.t1190"
+      cwe: "CWE-22: Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')"
+      owasp: "A01:2021 - Broken Access Control"
       category: "security"
       technology:
-        - "nodejs"
-        - "express"
-      vulnerability: "local-file-read"
+        - javascript
+        - typescript
+        - nodejs
+      likelihood: "HIGH"
+      impact: "HIGH"
+      confidence: "MEDIUM"
+      references:
+        - "https://nvd.nist.gov/vuln/detail/e032f5bc-4563-4096-ae3b-064bab588685"
     patterns:
       - pattern-either:
-          # Caso 1: path.join(__dirname, <input_usuario>)
-          - pattern: |
-              $PATH = require('path');
-              ...
-              app.$METHOD($ROUTE, ($REQ, $RES) => {
-                ...
-                $USER_INPUT = $REQ.$PROP.$FIELD;
-                ...
-                $FILE_PATH = $PATH.join(__dirname, $USER_INPUT);
-                ...
-                require('fs').readFile($FILE_PATH, ...);
-              });
-          # Caso 2: path.join(__dirname, <input_usuario>) con fs separado
-          - pattern: |
-              const $FS = require('fs');
-              const $PATH = require('path');
-              ...
-              app.$METHOD($ROUTE, ($REQ, $RES) => {
-                ...
-                $USER_INPUT = $REQ.$PROP.$FIELD;
-                ...
-                $FILE_PATH = $PATH.join(__dirname, $USER_INPUT);
-                ...
-                $FS.readFile($FILE_PATH, ...);
-              });
-          # Caso 3: uso directo de input de req.* en fs.readFile/path.join
-          - pattern: |
-              const $FS = require('fs');
-              const $PATH = require('path');
-              ...
-              app.$METHOD($ROUTE, ($REQ, $RES) => {
-                ...
-                $FS.readFile($PATH.join(__dirname, $REQ.$PROP.$FIELD), ...);
-              });
-      - pattern-not: |
-          $FILE_PATH = $PATH.join(__dirname, $SAFE);
-          ...
-          $FS.readFile($FILE_PATH, ...);
-      - pattern-not: |
-          $FILE_PATH = $PATH.join(__dirname, $USER_INPUT);
-          ...
-          if ($FILE_PATH.includes('..')) {
-            ...
-          }
-          ...
-          $FS.readFile($FILE_PATH, ...);
-    fix: >
-      No concatenar directamente input del usuario a rutas de archivo. Usar una
-      lista blanca de nombres de archivo permitidos, normalizar la ruta y
-      rechazar cualquier valor que contenga `..`, rutas absolutas o separadores
-      inesperados.
+          # Direct user input used as path in fs.readFile / readFileSync
+          - patterns:
+              - pattern: |
+                  $FS.readFile($PATH, $ENC, $CB)
+              - pattern-inside: |
+                  $APP.$METHOD($ROUTE, ($REQ, $RES) => { ... })
+              - metavariable-regex:
+                  metavariable: $METHOD
+                  regex: "^(get|post|put|delete|patch|all|use)$"
+              - pattern-either:
+                  - pattern: |
+                      $PATH = $REQ.query.$P
+                  - pattern: |
+                      $PATH = $REQ.params.$P
+                  - pattern: |
+                      $PATH = $REQ.body.$P
+                  - pattern: |
+                      $PATH = $REQ.$P
+          - patterns:
+              - pattern: |
+                  $FS.readFileSync($PATH, $ENC)
+              - pattern-inside: |
+                  $APP.$METHOD($ROUTE, ($REQ, $RES) => { ... })
+              - metavariable-regex:
+                  metavariable: $METHOD
+                  regex: "^(get|post|put|delete|patch|all|use)$"
+              - pattern-either:
+                  - pattern: |
+                      $PATH = $REQ.query.$P
+                  - pattern: |
+                      $PATH = $REQ.params.$P
+                  - pattern: |
+                      $PATH = $REQ.body.$P
+                  - pattern: |
+                      $PATH = $REQ.$P
+          # User input joined into a path then read
+          - patterns:
+              - pattern: |
+                  $FS.readFile($TARGET, $ENC, $CB)
+              - pattern-inside: |
+                  $APP.$METHOD($ROUTE, ($REQ, $RES) => {
+                    ...
+                    $FILE = $REQ.query.$P;
+                    ...
+                    $TARGET = $PATHMOD.join($BASE, $FILE);
+                    ...
+                  })
+              - metavariable-regex:
+                  metavariable: $METHOD
+                  regex: "^(get|post|put|delete|patch|all|use)$"
+          - patterns:
+              - pattern: |
+                  $FS.readFileSync($TARGET, $ENC)
+              - pattern-inside: |
+                  $APP.$METHOD($ROUTE, ($REQ, $RES) => {
+                    ...
+                    $FILE = $REQ.query.$P;
+                    ...
+                    $TARGET = $PATHMOD.join($BASE, $FILE);
+                    ...
+                  })
+              - metavariable-regex:
+                  metavariable: $METHOD
+                  regex: "^(get|post|put|delete|patch|all|use)$"
+          # Optional signal: leaking FileNotFoundException-like message with user-controlled path
+          - patterns:
+              - pattern-inside: |
+                  $APP.$METHOD($ROUTE, ($REQ, $RES) => { ... })
+              - metavariable-regex:
+                  metavariable: $METHOD
+                  regex: "^(get|post|put|delete|patch|all|use)$"
+              - pattern-either:
+                  - pattern: |
+                      $RES.$SEND(`FileNotFoundException: ${$X}`)
+                  - pattern: |
+                      $RES.$SEND("FileNotFoundException: " + $X)

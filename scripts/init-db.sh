@@ -4,7 +4,8 @@ set -euo pipefail
 # ============================================================================
 # PostgreSQL Database Initialization Script
 # ============================================================================
-# Este script inicializa la base de datos PostgreSQL con el schema necesario
+# Este script inicializa configuraciones post-despliegue (API Keys, Tenants).
+# Las migraciones de esquema son manejadas por el contenedor 'securetag-migrate'.
 # ============================================================================
 
 # Colores
@@ -21,7 +22,6 @@ error() { echo -e "${RED}[ERROR]${NC} $*" >&2; exit 1; }
 DB_CONTAINER="${DB_CONTAINER:-securetag-db}"
 DB_USER="${POSTGRES_USER:-securetag}"
 DB_NAME="${POSTGRES_DB:-securetag}"
-MIGRATIONS_DIR="./migrations"
 
 # Cargar variables desde .env si existe (para obtener WORKER_API_KEY)
 if [ -f .env ]; then
@@ -42,7 +42,7 @@ if [ -f .env ]; then
     done < .env
 fi
 
-info "Inicializando base de datos PostgreSQL..."
+info "Verificando estado de PostgreSQL..."
 
 # Verificar que el contenedor está corriendo
 if ! docker ps | grep -q "$DB_CONTAINER"; then
@@ -62,37 +62,14 @@ for i in {1..30}; do
     sleep 1
 done
 
-# Verificar si la base de datos ya está inicializada
-info "Verificando estado de la base de datos..."
-TABLES_COUNT=$(docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'securetag';" 2>/dev/null | tr -d ' ' || echo "0")
-
-if [ "$TABLES_COUNT" -gt 0 ]; then
-    info "Base de datos ya está inicializada ($TABLES_COUNT tablas encontradas). Continuando con migraciones incrementales..."
-    # No salimos, simplemente no reinicializamos de cero.
-    # Las migraciones deben ser idempotentes (IF NOT EXISTS).
-else
-    info "Base de datos vacía. Se procederá a inicializar desde cero si hay scripts base."
-fi
-
-# Ejecutar migraciones
-if [ -d "$MIGRATIONS_DIR" ]; then
-    info "Ejecutando migraciones desde $MIGRATIONS_DIR..."
-    
-    for migration in "$MIGRATIONS_DIR"/*.sql; do
-        if [ -f "$migration" ]; then
-            info "Aplicando: $(basename "$migration")"
-            docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" < "$migration"
-        fi
-    done
-else
-    warn "Directorio de migraciones no encontrado: $MIGRATIONS_DIR"
-fi
+info "Nota: Las migraciones de esquema (tablas) son aplicadas automáticamente por el servicio 'securetag-migrate' al iniciar."
 
 # Auto-insertar/actualizar WORKER_API_KEY si existe en el entorno
 if [ -n "${WORKER_API_KEY:-}" ]; then
     info "Detectada WORKER_API_KEY en entorno. Configurando..."
     
     # Obtener UUID del tenant production de forma dinámica
+    # Nota: El tenant 'production' se crea en la migración 003
     TENANT_ID=$(docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT id FROM securetag.tenant WHERE name = 'production' LIMIT 1;" | tr -d '[:space:]')
     
     # Si no existe, intentar con 'default' o el primer tenant disponible
@@ -101,69 +78,26 @@ if [ -n "${WORKER_API_KEY:-}" ]; then
     fi
     
     if [ -n "$TENANT_ID" ]; then
-        info "Configurando WORKER_API_KEY para tenant ID: $TENANT_ID"
-        # UPSERT: Actualizar si existe, insertar si no existe
-        # NOTA: La aplicación usa SHA256 para validar las llaves (ver src/middleware/auth.ts)
+        info "Asociando Worker API Key al tenant: $TENANT_ID"
+        
+        # Insertar o actualizar la API Key del worker
+        # Usamos ON CONFLICT para hacer upsert basado en el hash (si es unique) o nombre
+        # Como key_hash es UNIQUE en la tabla api_key:
+        
+        KEY_HASH=$(echo -n "$WORKER_API_KEY" | sha256sum | awk '{print $1}')
+        
         docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -c "
-            INSERT INTO securetag.api_key (key_hash, tenant_id, name, scopes) 
-            VALUES (encode(digest('$WORKER_API_KEY', 'sha256'), 'hex'), '$TENANT_ID', 'Worker Key', '[\"worker\"]')
-            ON CONFLICT (key_hash) 
-            DO UPDATE SET key_hash = encode(digest('$WORKER_API_KEY', 'sha256'), 'hex');
-        " 2>/dev/null || {
-            # Si falla el UPSERT (por ejemplo, si el constraint es diferente), forzar UPDATE
-            docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -c "
-                DELETE FROM securetag.api_key WHERE name = 'Worker Key';
-                INSERT INTO securetag.api_key (key_hash, tenant_id, name, scopes) 
-                VALUES (encode(digest('$WORKER_API_KEY', 'sha256'), 'hex'), '$TENANT_ID', 'Worker Key', '[\"worker\"]');
-            "
-        }
+            INSERT INTO securetag.api_key (tenant_id, key_hash, name, scopes, is_active)
+            VALUES ('$TENANT_ID', '$KEY_HASH', 'Worker Key (Auto)', '[\"worker:read\", \"worker:write\"]', true)
+            ON CONFLICT (key_hash) DO UPDATE 
+            SET last_used_at = now(), is_active = true;
+        "
         info "✅ Worker API Key configurada exitosamente"
     else
-        warn "No se encontró ningún tenant válido. No se pudo configurar WORKER_API_KEY."
+        warn "No se encontraron tenants en la base de datos. Asegúrate de que las migraciones (securetag-migrate) hayan corrido."
     fi
 else
-    warn "WORKER_API_KEY no definida en el entorno. El worker podría fallar al conectar."
+    info "WORKER_API_KEY no definida. Saltando configuración automática."
 fi
 
-# Verificar tablas creadas
-info "Verificando tablas creadas..."
-TABLES=$(docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT table_name FROM information_schema.tables WHERE table_schema = 'securetag' ORDER BY table_name;")
-
-if [ -n "$TABLES" ]; then
-    info "Tablas creadas:"
-    echo "$TABLES" | while read -r table; do
-        [ -n "$table" ] && echo "  - $table"
-    done
-else
-    warn "No se encontraron tablas en el schema 'securetag'"
-fi
-
-# Crear usuario de solo lectura (opcional, para reporting)
-info "Creando usuario de solo lectura (opcional)..."
-docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" <<-EOSQL 2>/dev/null || true
-    -- Crear usuario de solo lectura
-    DO \$\$
-    BEGIN
-        IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'securetag_readonly') THEN
-            CREATE USER securetag_readonly WITH PASSWORD 'readonly_password_change_me';
-        END IF;
-    END
-    \$\$;
-    
-    -- Otorgar permisos de lectura
-    GRANT CONNECT ON DATABASE securetag TO securetag_readonly;
-    GRANT USAGE ON SCHEMA securetag TO securetag_readonly;
-    GRANT SELECT ON ALL TABLES IN SCHEMA securetag TO securetag_readonly;
-    ALTER DEFAULT PRIVILEGES IN SCHEMA securetag GRANT SELECT ON TABLES TO securetag_readonly;
-EOSQL
-
-info "✅ Inicialización de base de datos completada"
-info ""
-info "Conexión a la base de datos:"
-info "  Host: localhost (o securetag-db desde contenedores)"
-info "  Port: 5432"
-info "  Database: $DB_NAME"
-info "  User: $DB_USER"
-info ""
-info "Para conectarte manualmente:"
-info "  docker compose exec securetag-db psql -U $DB_USER -d $DB_NAME"
+info "✅ Inicialización de configuración completada"

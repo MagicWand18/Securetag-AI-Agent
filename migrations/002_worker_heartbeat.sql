@@ -1,3 +1,5 @@
+--liquibase formatted sql
+--changeset securetag:002_worker_heartbeat
 -- Migration: Add worker_heartbeat table for tracking worker health
 -- Date: 2025-11-19
 -- Description: Creates table to track periodic heartbeats from workers processing tasks

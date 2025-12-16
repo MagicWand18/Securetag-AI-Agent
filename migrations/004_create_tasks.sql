@@ -1,7 +1,7 @@
+--liquibase formatted sql
+--changeset securetag:004_create_tasks
 -- Migration 004: Create Task and Result Tables
 -- Created based on code inference from src/server/index.ts and src/worker/TaskExecutor.ts
-
-BEGIN;
 
 -- Task Table
 CREATE TABLE IF NOT EXISTS securetag.task (
@@ -71,5 +71,3 @@ CREATE TABLE IF NOT EXISTS securetag.scan_result (
     created_at TIMESTAMPTZ DEFAULT now(),
     CONSTRAINT uq_scan_result_task UNIQUE (task_id)
 );
-
-COMMIT;

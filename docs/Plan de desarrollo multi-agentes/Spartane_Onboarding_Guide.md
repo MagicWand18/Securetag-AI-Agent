@@ -20,9 +20,39 @@ A diferencia de los escáneres tradicionales que inundan a los desarrolladores c
 Su instancia dedicada de SecureTag AI opera bajo una arquitectura segura y aislada:
 
 *   **SecureTag API**: Puerta de entrada segura para recibir su código y entregar resultados.
-*   **Analysis Engine**: Orquesta herramientas de escaneo profundo (SAST).
+*   **Analysis Engine**: Orquesta herramientas de escaneo profundo (SAST) con mecanismos de **"Resilient Scanning"** (Heartbeat) para manejar grandes repositorios sin interrupciones.
+*   **Custom Rule Engine**: Motor de reglas personalizado y optimizado para el stack de Spartane (Vue 3, TypeScript, Pinia), capaz de detectar vulnerabilidades específicas que herramientas genéricas ignoran.
 *   **AI Security Core**: Nuestro modelo cognitivo (`securetag-v1`) alojado en infraestructura GPU privada, entrenado para entender vulnerabilidades complejas.
 *   **Tenant Isolation**: Sus datos (`spartane`) están lógicamente aislados y protegidos.
+
+---
+
+## 🛡️ Seguridad y Cumplimiento (NUEVO)
+
+En SecureTag, aplicamos la seguridad que predicamos ("Dogfooding"). Su instancia dedicada incluye las siguientes protecciones activas:
+
+### 🔒 Protección de Infraestructura
+1.  **Contenedores Endurecidos**: Todos los procesos de análisis corren bajo usuarios sin privilegios (non-root) con capacidades del kernel restringidas, minimizando el riesgo de escape.
+2.  **Aislamiento de Red**: La base de datos y los componentes críticos operan en una red interna privada, sin exposición a internet pública.
+3.  **Resiliencia de Datos (NUEVO)**:
+    *   **Migraciones Atómicas**: Utilizamos Liquibase para gestionar cambios en la base de datos de forma transaccional y versionada, asegurando integridad estructural.
+    *   **Backups Cifrados**: Se ejecutan copias de seguridad automatizadas diariamente (2:00 AM), cifradas con AES-256 y almacenadas localmente con rotación de 7 días.
+
+### 🌐 Seguridad Web y API
+1.  **Headers Defensivos**: Todas las respuestas incluyen cabeceras de seguridad de grado bancario (HSTS, CSP estricto, X-XSS-Protection) para proteger a sus usuarios.
+2.  **Rate Limiting Inteligente**:
+    *   Protección global contra ataques de denegación de servicio (DoS).
+    *   Límites estrictos en endpoints sensibles como la subida de archivos para evitar abusos.
+3.  **Validación de Archivos (AppSec)**:
+    *   Verificación profunda de integridad (Magic Bytes) para asegurar que solo archivos ZIP válidos sean procesados.
+    *   **Escaneo de Reputación Global**: Antes de aceptar cualquier código, consultamos una red de inteligencia de amenazas global para asegurar que el archivo no contenga malware conocido, bloqueando automáticamente amenazas detectadas por múltiples fuentes de seguridad.
+4.  **Política de Protección Activa (Advanced Banning)**:
+    *   **Tolerancia Cero**: Cualquier intento de subir archivos identificados como amenazas resultará en un **bloqueo automático** inmediato.
+    *   **Defensa en Profundidad**: El bloqueo se aplica en múltiples niveles para evitar evasión:
+        *   **IP Address**: Bloqueo de la dirección de origen.
+        *   **Credenciales (API Key)**: Inhabilitación automática de la llave utilizada en el ataque.
+        *   **Cuenta (Tenant)**: En casos graves, suspensión preventiva de la cuenta completa.
+    *   **Rate Limiting**: El exceso de peticiones o violaciones repetidas de seguridad también conllevará bloqueos temporales para proteger la integridad de la plataforma.
 
 ---
 
@@ -56,6 +86,16 @@ curl -X POST "http://143.198.61.64:8080/codeaudit/upload" \
 
 *   **`project_alias`** (Opcional pero recomendado): Un nombre legible para su proyecto (ej: `backend-core`, `frontend-app`). Si no existe, se crea automáticamente. Si existe, el nuevo escaneo se vincula al historial y se compara con versiones anteriores (**Retest automático**).
 
+**Response (Error de Seguridad - Bloqueo de Amenaza):**
+Si nuestro sistema de inteligencia de amenazas detecta contenido malicioso en el archivo subido, la solicitud será rechazada inmediatamente:
+
+```json
+{
+  "ok": false,
+  "error": "Security check failed: Security Policy Violation: File identified as potential threat."
+}
+```
+
 **Response (Éxito):**
 ```json
 {
@@ -86,7 +126,7 @@ curl -X GET "http://143.198.61.64:8080/codeaudit/550e8400-e29b-41d4-a716-4466554
 *   `completed`: Análisis finalizado (incluye resultados).
 *   `failed`: Ocurrió un error (ver campo `error`).
 
-**Response (Completado - Ejemplo Simplificado):**
+**Response (Completado - Ejemplo Estándar):**
 ```json
 {
   "ok": true,
@@ -94,31 +134,33 @@ curl -X GET "http://143.198.61.64:8080/codeaudit/550e8400-e29b-41d4-a716-4466554
   "taskId": "550e8400-e29b-41d4-a716-446655440000",
   "result": {
     "summary": {
-      "severity": { "high": 2, "medium": 5, "low": 0, "critical": 1 },
-      "findingsCount": 8
+      "severity": {
+        "low": 0,
+        "medium": 169,
+        "high": 129,
+        "critical": 0,
+        "info": 210
+      },
+      "findingsCount": 508
     },
     "findings": [
       {
-        "rule_name": "Detected user input used to manually construct a SQL string",
-        "severity": "high",
-        "cwe": "CWE-89",
+        "rule_name": "vue-v-html-xss",
+        "severity": "warning",
+        "category": "security",
+        "cwe": "CWE-79",
         "cve": null,
-        "file_path": "src/login.php",
+        "file_path": "src/views/components/UserBio.vue",
         "line": 45,
         "retest_status": "new",
         "analysis_json": {
-          "triage": "Verdadero Positivo",
-          "reasoning": "La variable $username se concatena directamente en la consulta SQL sin sanitización...",
-          "recommendation": "Utilice sentencias preparadas (PDO) en lugar de concatenación de cadenas."
+          "triage": "True Positive",
+          "reasoning": "Se detectó el uso de `v-html` con una variable (`userInput`) que no parece estar sanitizada. En el contexto de este componente de perfil público, esto permite ataques XSS almacenados.",
+          "recommendation": "Reemplace `v-html` por `v-text` o utilice una biblioteca de sanitización como DOMPurify antes de renderizar el contenido.",
+          "severity_adjustment": "critical"
         }
       }
-    ],
-    "diff": {
-      "fixed": 0,
-      "new": 8,
-      "residual": 0,
-      "previousTaskId": null
-    }
+    ]
   }
 }
 ```
@@ -172,6 +214,7 @@ El campo clave es `analysis_json` dentro de cada hallazgo. Este contiene la eval
 *   **triage**: Veredicto rápido (`Verdadero Positivo`, `Falso Positivo`, `Needs Review`).
 *   **reasoning**: Explicación técnica detallada de por qué es (o no es) una vulnerabilidad en **su contexto específico**.
 *   **recommendation**: Pasos concretos o código sugerido para remediar el fallo.
+*   **severity_adjustment** (NUEVO): Ajuste contextual de la severidad. La IA puede elevar un hallazgo `info` a `high` si detecta que afecta lógica crítica de negocio, o reducirlo si está en código muerto. **Priorice este campo sobre la severidad estática.**
 
 ---
 
@@ -179,7 +222,7 @@ El campo clave es `analysis_json` dentro de cada hallazgo. Este contiene la eval
 
 Si tiene dudas sobre la integración o los resultados, contacte a su administrador de cuenta Securetag.
 
-*Generado el: 2025-12-03*
+*Generado el: 2025-12-12*
 
-
+online
 d294016e293c0bbca80c9495ad4fe8f93ca26ae3e966a60cade11649461017bd

@@ -1,85 +1,90 @@
 const http = require('http');
 const { execFile } = require('child_process');
-const { XMLParser } = require('fast-xml-parser'); // Parser más seguro con opciones para deshabilitar entidades externas
+const sax = require('sax');
 
-// Configuración segura del parser: sin DTD, sin entidades externas, sin procesamiento de DOCTYPE
-const parserOptions = {
-  ignoreAttributes: false,
-  allowBooleanAttributes: true,
-  processEntities: false,          // No expandir entidades
-  dtd: false,                      // No procesar DTD
-  parseTagValue: true,
-  parseAttributeValue: true
-};
-
-const xmlParser = new XMLParser(parserOptions);
-
+// Servidor HTTP que procesa XML de forma más segura
 http.createServer((req, res) => {
-  if (req.method === 'POST' && req.url === '/upload-xml') {
-    let body = '';
-
-    req.on('data', chunk => {
-      body += chunk.toString();
-    });
-
-    req.on('end', () => {
-      try {
-        // El formulario envía algo como: xml=<contenido>
-        // Extraemos solo el valor del campo xml de forma sencilla
-        const match = body.match(/xml=([\s\S]*)/);
-        const xmlRaw = match ? decodeURIComponent(match[1]) : '';
-
-        if (!xmlRaw.trim()) {
-          res.writeHead(400, { 'Content-Type': 'text/plain' });
-          return res.end('XML payload is required');
-        }
-
-        // PARSEO SEGURO: sin DTD ni entidades externas (mitiga XXE)
-        const jsonObj = xmlParser.parse(xmlRaw);
-
-        const command = (jsonObj && jsonObj.root && jsonObj.root.command) ? String(jsonObj.root.command).trim() : '';
-
-        // Lista blanca de comandos permitidos para evitar ejecución arbitraria
-        const allowedCommands = {
-          hello: { cmd: 'echo', args: ['Hello'] },
-          date: { cmd: 'date', args: [] }
-        };
-
-        const selected = allowedCommands[command] || allowedCommands.hello;
-
-        execFile(selected.cmd, selected.args, (error, stdout, stderr) => {
-          if (error) {
-            res.writeHead(500, { 'Content-Type': 'text/plain' });
-            return res.end('Command error');
-          }
-          res.writeHead(200, { 'Content-Type': 'text/plain' });
-          res.end('Command output: ' + stdout);
-        });
-      } catch (e) {
-        // En entornos JVM, errores similares podrían verse como SAXParseException o DOMException,
-        // pero aquí el parser está configurado para no procesar DTD/entidades externas.
-        console.error('Safe XML parse error:', e);
-        res.writeHead(400, { 'Content-Type': 'text/plain' });
-        res.end('Invalid XML');
-      }
-    });
-  } else {
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.end(`
-      <html>
-        <body>
-          <form method="POST" action="/upload-xml">
-            <textarea name="xml" rows="10" cols="50"><root><command>hello</command></root></textarea><br/>
-            <button type="submit">Send XML</button>
-          </form>
-        </body>
-      </html>
-    `);
+  if (req.method !== 'POST') {
+    res.writeHead(405, { 'Content-Type': 'text/plain' });
+    return res.end('Use POST with XML body');
   }
+
+  let body = '';
+  req.on('data', chunk => {
+    body += chunk.toString();
+  });
+
+  req.on('end', () => {
+    // Parser SAX en modo estricto, sin soporte de DTD ni entidades externas
+    const strict = true;
+    const parser = sax.parser(strict, {
+      lowercase: true,
+      xmlns: false,
+      // No hay soporte de DTD/entidades externas en sax por diseño,
+      // lo que mitiga XXE en entornos JVM que usen este código.
+    });
+
+    let currentTag = null;
+    let commandText = '';
+
+    parser.onopentag = (node) => {
+      currentTag = node.name;
+    };
+
+    parser.ontext = (text) => {
+      if (currentTag === 'command') {
+        commandText += text;
+      }
+    };
+
+    parser.onclosetag = (name) => {
+      if (name === 'command') {
+        currentTag = null;
+      }
+    };
+
+    parser.onerror = (err) => {
+      console.error('SAXParseException while parsing XML:', err);
+      res.writeHead(400, { 'Content-Type': 'text/plain' });
+      res.end('Invalid XML');
+    };
+
+    parser.onend = () => {
+      const command = (commandText || '').trim();
+
+      // Validación estricta del comando permitido
+      const allowedCommands = {
+        'date': { cmd: 'date', args: [] },
+        'uptime': { cmd: 'uptime', args: [] }
+      };
+
+      if (!command || !allowedCommands[command]) {
+        res.writeHead(400, { 'Content-Type': 'text/plain' });
+        return res.end('Invalid or unsupported command');
+      }
+
+      const { cmd, args } = allowedCommands[command];
+
+      // Uso de execFile con lista blanca de comandos y sin concatenar entrada
+      execFile(cmd, args, (err, stdout, stderr) => {
+        if (err) {
+          console.error('Command error:', err);
+          res.writeHead(500, { 'Content-Type': 'text/plain' });
+          return res.end('Error executing command');
+        }
+        res.writeHead(200, { 'Content-Type': 'text/plain' });
+        res.end(`Command output:\n${stdout}`);
+      });
+    };
+
+    try {
+      parser.write(body).close();
+    } catch (e) {
+      console.error('Error while parsing XML:', e);
+      res.writeHead(400, { 'Content-Type': 'text/plain' });
+      res.end('Invalid XML');
+    }
+  });
 }).listen(3001, () => {
   console.log('Secure XML server listening on port 3001');
 });
-
-// Este ejemplo muestra cómo realizar la misma funcionalidad de parseo de XML
-// mitigando XXE mediante un parser configurado de forma segura y evitando el uso
-// directo de datos del XML en comandos del sistema.

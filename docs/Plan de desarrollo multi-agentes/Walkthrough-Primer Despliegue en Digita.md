@@ -38,8 +38,6 @@ Click en "New SSH Key"
 
 
 
-
-
 Paso 1.2: Generar SSH Key (si no tienes una)
 Abre tu terminal local y ejecuta:
 
@@ -59,10 +57,6 @@ SHA256:eYfk6yf2o3SVBfE72wVTnI4CtmGvQfIW/QqtDk19YLo master@MacBook-Pro-3.local
 # Copiar clave pública
 cat ~/.ssh/securetag_deploy.pub
 Copia todo el contenido que empieza con ssh-rsa...
-
-
-
-
 
 
 Paso 1.3: Agregar SSH Key a DigitalOcean
@@ -87,8 +81,6 @@ Paso 1.5: Obtener IP del Droplet
 Una vez creado, verás:
 
 IP Address: 123.45.67.89 ← Copia esta IP
-
-
 
 
 
@@ -144,8 +136,6 @@ Secret: Genera un password seguro
 # Generar password
 openssl rand -base64 32
 Copia el resultado y pégalo como secreto.
-
-
 
 
 
@@ -239,6 +229,8 @@ POSTGRES_USER=securetag
 POSTGRES_PASSWORD=u9blh79e7Gb1Sp/YVd92RzCjRnn8Z4YcHIKTAKX3KjM=
 # TENANT
 TENANT_ID=production
+WORKER_API_KEY=8bf16ddbdadb444be019591d5b0653e6919fa8436dfa2fb23b7c9c17f453f2cd
+
 # STORAGE
 DB_DIR=/var/securetag/production/db
 UPLOADS_DIR=/var/securetag/production/uploads
@@ -254,6 +246,28 @@ SEMGREP_HAS_SHOWN_METRICS_NOTIFICATION=true
 # LOGGING
 LOG_LEVEL=info
 LOOP_MODE=true
+# VIRUSTOTAL (opcional)
+VIRUSTOTAL_API_KEY=b72669becf317999ee8ba89ba61d5a5c81652315a500e5c09dbbf756ef05487e
+# Number of malicious votes to trigger a block (0 = Strict, 2 = Lenient)
+VIRUSTOTAL_MALICIOUS_THRESHOLD=0
+# Rate Limiting Configuration
+# Maximum number of requests per minute per IP
+RATE_LIMIT_WINDOW_MS=60000
+RATE_LIMIT_MAX_REQUESTS=100
+
+# Strict limits for sensitive endpoints (e.g. uploads)
+RATE_LIMIT_UPLOAD_MAX=5
+# Security Ban Configuration
+# Duration in hours to ban an IP after malicious activity (default: 24)
+SECURITY_BAN_DURATION_HOURS=24
+# Enable permanent bans (0 = false, 1 = true)
+SECURITY_BAN_PERMANENT_ENABLED=0
+# Also ban the API Key used (0 = false, 1 = true)
+SECURITY_BAN_APIKEY_ENABLED=1
+# Also ban the Tenant (0 = false, 1 = true) - USE WITH CAUTION
+SECURITY_BAN_TENANT_ENABLED=0
+
+
 
 Presiona Ctrl + X
 Presiona Y
@@ -473,17 +487,19 @@ Para actualizar DigitalOcean con los cambios, NO es automático. Necesitas hacer
 Actualizar DigitalOcean con los Cambios
 Desde tu terminal SSH que ya tienes abierta:
 
+ssh -i ~/.ssh/id_ed25519 root@143.198.61.64
+
 # 1. Ir al directorio del proyecto
 cd /opt/securetag
 
 # 2. Hacer pull de los cambios
 git pull origin main
 
-# 3. Reconstruir las imágenes Docker con el código actualizado
-docker compose build securetag-worker
+# 3. Reconstruir las imágenes Docker con el código actualizado (18-20 minutos)
+docker compose down && docker compose build --no-cache && docker compose up -d
 
-# 4. Reiniciar los servicios
-docker compose up -d
-
-# 5. Verificar que todo esté corriendo
+# 4. Verificar que todo esté corriendo
 docker compose ps
+
+# 5. Actualizar la base de datos
+./scripts/init-db.sh

@@ -3,28 +3,22 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const PORT = 3000;
 
-// Ruta vulnerable: lee cualquier archivo del sistema según el parámetro "file"
-app.get('/read-file', (req, res) => {
-  const userFile = req.query.file; // input controlado por el usuario
+// Vulnerable: reads a file path directly from user input (path traversal)
+app.get('/read', (req, res) => {
+  const file = req.query.file; // e.g. ?file=../../../../etc/passwd
+  if (!file) return res.status(400).send('Missing file parameter');
 
-  // VULNERABILIDAD: concatenación directa del input del usuario a la ruta
-  // Un atacante puede usar payloads como: ?file=../../../../etc/passwd
-  const filePath = path.join(__dirname, userFile);
+  // Naively join without enforcing a base directory
+  const targetPath = path.join(__dirname, file);
 
-  fs.readFile(filePath, 'utf8', (err, data) => {
+  fs.readFile(targetPath, 'utf8', (err, data) => {
     if (err) {
-      // En un entorno JVM se verían excepciones tipo FileNotFoundException
-      // con payloads de path traversal (../../..). Aquí simulamos el mismo patrón.
-      console.error('Error leyendo archivo:', err.message);
-      return res.status(404).send('Archivo no encontrado');
+      // In JVM apps this often shows up as FileNotFoundException; here we leak the user-controlled path in the error
+      return res.status(404).send(`FileNotFoundException: ${targetPath}`);
     }
-
     res.type('text/plain').send(data);
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor vulnerable escuchando en http://localhost:${PORT}`);
-});
+app.listen(3000, () => console.log('Listening on http://localhost:3000'));

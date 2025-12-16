@@ -33,6 +33,15 @@ services:
       OLLAMA_HOST: ${OLLAMA_HOST}
       RUNPOD_API_KEY: ${RUNPOD_API_KEY}
       MODEL: ${MODEL:-securetag-v1}
+      VIRUSTOTAL_API_KEY: ${VIRUSTOTAL_API_KEY}
+      VIRUSTOTAL_MALICIOUS_THRESHOLD: ${VIRUSTOTAL_MALICIOUS_THRESHOLD:-0}
+      RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-60000}
+      RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-100}
+      RATE_LIMIT_UPLOAD_MAX: ${RATE_LIMIT_UPLOAD_MAX:-5}
+      SECURITY_BAN_DURATION_HOURS: ${SECURITY_BAN_DURATION_HOURS:-24}
+      SECURITY_BAN_PERMANENT_ENABLED: ${SECURITY_BAN_PERMANENT_ENABLED:-0}
+      SECURITY_BAN_APIKEY_ENABLED: ${SECURITY_BAN_APIKEY_ENABLED:-1}
+      SECURITY_BAN_TENANT_ENABLED: ${SECURITY_BAN_TENANT_ENABLED:-0}
     volumes:
       - ./data:/var/securetag
     networks:
@@ -40,6 +49,56 @@ services:
     depends_on:
       securetag-db:
         condition: service_healthy
+      securetag-migrate:
+        condition: service_completed_successfully
+
+  securetag-migrate:
+    image: liquibase/liquibase:4.24
+    container_name: securetag-migrate
+    command: update --changelog-file=changelog-master.xml
+    environment:
+      LIQUIBASE_COMMAND_URL: jdbc:postgresql://securetag-db:5432/securetag
+      LIQUIBASE_COMMAND_USERNAME: securetag
+      LIQUIBASE_COMMAND_PASSWORD: securetagpwd
+      LIQUIBASE_SEARCH_PATH: /liquibase/changelog
+    volumes:
+      - ./migrations:/liquibase/changelog
+    depends_on:
+      securetag-db:
+        condition: service_healthy
+    networks:
+      - securetag-net
+
+  securetag-backup:
+    image: postgres:18.1-alpine
+    container_name: securetag-backup
+    restart: always
+    environment:
+      POSTGRES_HOST: securetag-db
+      POSTGRES_DB: securetag
+      POSTGRES_USER: securetag
+      POSTGRES_PASSWORD: securetagpwd
+      BACKUP_ENCRYPTION_KEY: ${BACKUP_ENCRYPTION_KEY:-change_me_in_production_please}
+      CRON_SCHEDULE: "0 2 * * *" # Run at 2:00 AM daily
+    volumes:
+      - ./data/backups:/backups
+      - ./scripts/backup.sh:/usr/local/bin/backup.sh
+    entrypoint: |
+      /bin/sh -c '
+        echo "Iniciando servicio de backups..."
+        chmod +x /usr/local/bin/backup.sh
+        # Instalar openssl para cifrado
+        apk add --no-cache openssl
+        # Configurar cron
+        echo "$CRON_SCHEDULE /usr/local/bin/backup.sh >> /var/log/cron.log 2>&1" > /etc/crontabs/root
+        # Iniciar cron en primer plano
+        crond -f -l 8
+      '
+    depends_on:
+      securetag-db:
+        condition: service_healthy
+    networks:
+      - securetag-net
 
   securetag-worker:
     build:
@@ -59,6 +118,7 @@ services:
       MODEL: ${MODEL:-securetag-v1}
       WORKER_API_KEY: ${WORKER_API_KEY}
       LOOP_MODE: "true"
+      TASK_TIMEOUT_CODEAUDIT: 180000
     volumes:
       - ./data:/var/securetag
       - ./data/rules:/opt/securetag/rules

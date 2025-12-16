@@ -148,11 +148,44 @@ paths:
               schema:
                 $ref: '#/components/schemas/TaskResponse'
         400:
-          description: Bad Request
+          description: Bad Request or Security Violation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              examples:
+                security_error:
+                  value:
+                    ok: false
+                    error: "Security Policy Violation: File identified as potential threat."
+        403:
+          description: Access Denied (Banned)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                ip_ban:
+                  value:
+                    ok: false
+                    error: "Access denied. IP address temporarily banned due to security violations."
+                apikey_ban:
+                  value:
+                    ok: false
+                    error: "Access denied. API Key has been permanently banned due to security violations."
+                tenant_ban:
+                  value:
+                    ok: false
+                    error: "Access denied. Tenant account suspended due to Terms of Service violation."
+        429:
+          description: Rate Limit Exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                ok: false
+                error: "Upload limit exceeded. Please wait."
         503:
           description: Service Unavailable (DB Issue)
           content:

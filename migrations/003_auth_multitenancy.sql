@@ -1,3 +1,5 @@
+--liquibase formatted sql
+--changeset securetag:003_auth_multitenancy
 -- Migration 003: Authentication and Multi-tenancy
 -- Create schema and extensions
 CREATE SCHEMA IF NOT EXISTS securetag;

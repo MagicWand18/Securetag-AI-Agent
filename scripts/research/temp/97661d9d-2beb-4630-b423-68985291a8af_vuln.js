@@ -2,37 +2,40 @@ const http = require('http');
 const { exec } = require('node:child_process');
 
 // Servidor HTTP muy simple que ejecuta comandos del sistema
-// PELIGRO: Este código es vulnerable a RCE si se despliega en producción
+// en base a parámetros proporcionados por el usuario.
+// Este código es intencionalmente vulnerable para pruebas SAST.
+
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
 
   if (url.pathname === '/run') {
     const userCmd = url.searchParams.get('cmd') || 'ls';
 
-    // VULNERABILIDAD: el comando se construye directamente con input del usuario
-    // Si el comando falla, se captura el error, lo que puede disparar la regla de detección
-    exec(userCmd, (error, stdout, stderr) => {
-      if (error) {
-        // Proceso de ejecución relacionado con errores (potencial intento de explotación RCE)
-        console.error('Command execution failed:', error); // <-- patrón que la regla puede detectar
-        res.statusCode = 500;
-        return res.end('Command execution error');
-      }
+    // VULNERABILIDAD: se concatena directamente la entrada del usuario
+    // en un comando del sistema operativo.
+    const fullCommand = `sh -c "${userCmd}"`;
 
-      if (stderr) {
-        console.error('Command stderr:', stderr);
+    exec(fullCommand, (error, stdout, stderr) => {
+      if (error) {
+        // Este tipo de error puede ser detectado como intento de RCE
+        // por reglas que monitorizan errores de node:child_process.
+        console.error('Command execution error:', error);
+        res.statusCode = 500;
+        res.setHeader('Content-Type', 'text/plain');
+        return res.end('Error ejecutando comando');
       }
 
       res.statusCode = 200;
       res.setHeader('Content-Type', 'text/plain');
-      res.end(stdout || 'No output');
+      res.end(stdout || stderr || 'Comando ejecutado');
     });
   } else {
     res.statusCode = 404;
+    res.setHeader('Content-Type', 'text/plain');
     res.end('Not found');
   }
 });
 
 server.listen(3000, () => {
-  console.log('Vulnerable server listening on http://localhost:3000');
+  console.log('Servidor vulnerable escuchando en http://localhost:3000');
 });

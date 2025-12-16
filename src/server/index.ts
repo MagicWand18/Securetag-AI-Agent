@@ -1,3 +1,4 @@
+import crypto from 'crypto'
 import http from 'http'
 import { v4 as uuidv4 } from 'uuid'
 import fs from 'fs'
@@ -7,6 +8,8 @@ import { serveDocs } from './routes/docs.js'
 import { dbQuery, ensureTenant } from '../utils/db.js'
 import validator from 'validator'
 import { authenticate, AuthenticatedRequest } from '../middleware/auth.js'
+import { addSecurityHeaders, checkRateLimit, banEntity, getClientIP, isBanned } from './security.js'
+import { isZipFile, checkVirusTotal } from './validation.js'
 
 const port = parseInt(process.env.PORT || '8080', 10)
 
@@ -37,12 +40,27 @@ function escapeHtml(s: any) {
 }
 
 const server = http.createServer(async (req, res) => {
+  // 1. Apply Security Headers to ALL responses
+  addSecurityHeaders(res)
+
   const url = req.url || '/'
   const method = req.method || 'GET'
-  if (method === 'GET' && url === '/healthz') {
+
+  // 2. Global Rate Limiting (skip healthchecks)
+  if (!url.startsWith('/healthz')) {
+    const ip = getClientIP(req)
+    if (isBanned(ip)) {
+      return send(res, 403, { ok: false, error: 'Access denied. IP address temporarily banned due to suspicious activity.' })
+    }
+    if (!checkRateLimit(req)) {
+      return send(res, 429, { ok: false, error: 'Too Many Requests' })
+    }
+  }
+
+  if ((method === 'GET' || method === 'HEAD') && url === '/healthz') {
     return send(res, 200, { ok: true })
   }
-  if (method === 'GET' && url === '/healthz/db') {
+  if ((method === 'GET' || method === 'HEAD') && url === '/healthz/db') {
     const isConnected = await checkDbConnection()
     if (isConnected) {
       return send(res, 200, { ok: true, db: 'connected' })
@@ -94,6 +112,11 @@ const server = http.createServer(async (req, res) => {
     return
   }
   if (method === 'POST' && url === '/codeaudit/upload') {
+    // Strict Rate Limiting for Uploads
+    if (!checkRateLimit(req, true)) {
+      return send(res, 429, { ok: false, error: 'Upload limit exceeded. Please wait.' })
+    }
+
     // Authenticate request
     const authReq = req as AuthenticatedRequest
     const isAuthenticated = await authenticate(authReq, res)
@@ -146,6 +169,53 @@ const server = http.createServer(async (req, res) => {
           }
         }
         if (!fileData) return send(res, 400, { ok: false })
+
+        // 1. Validate Magic Bytes (Must be ZIP)
+        if (!isZipFile(fileData)) {
+          console.warn('[Security] Rejected upload: Invalid Magic Bytes (Not a ZIP)')
+          return send(res, 400, { ok: false, error: 'Invalid file format. Only ZIP files are allowed.' })
+        }
+
+        // 2. VirusTotal Scan (Optional)
+        const vtResult = await checkVirusTotal(fileData, process.env.VIRUSTOTAL_API_KEY)
+        
+        // Audit Log for Scan
+        const clientIP = getClientIP(req)
+        if (vtResult.safe) {
+            // Log clean scan (optional, maybe only on verbose)
+            dbQuery(
+                `INSERT INTO securetag.security_event(id, tenant_id, event_type, file_hash, file_name, provider, status, reason, ip_address, user_agent) 
+                 VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+                [uuidv4(), tenantId, 'file_scan', crypto.createHash('sha256').update(fileData).digest('hex'), fileName, 'virustotal', 'clean', 'Passed security check', clientIP, req.headers['user-agent']]
+            ).catch(console.error)
+        } else {
+             // Log BLOCK event
+             const eventId = uuidv4()
+             await dbQuery(
+                `INSERT INTO securetag.security_event(id, tenant_id, event_type, file_hash, file_name, provider, status, reason, ip_address, user_agent) 
+                 VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+                [eventId, tenantId, 'file_blocked', crypto.createHash('sha256').update(fileData).digest('hex'), fileName, 'virustotal', 'malicious', vtResult.reason, clientIP, req.headers['user-agent']]
+            )
+            
+            // Ban Entities (IP, API Key, Tenant)
+            const reason = `Uploaded malicious file: ${fileName} (Event: ${eventId})`
+            await banEntity('ip', clientIP, reason)
+            
+            // Also ban API Key if configured
+            const apiKey = req.headers['x-api-key'] as string
+            if (apiKey) {
+                const keyHash = crypto.createHash('sha256').update(apiKey).digest('hex')
+                await banEntity('api_key', keyHash, reason)
+            }
+
+            // Also ban Tenant if configured
+            if (tenantId) {
+                await banEntity('tenant', tenantId, reason)
+            }
+            
+            return send(res, 400, { ok: false, error: `Security check failed: ${vtResult.reason}` })
+        }
+
         const taskId = uuidv4()
         const upDir = uploads
         const wkDir = path.join(work, taskId)

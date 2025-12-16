@@ -26,10 +26,15 @@ Se ha completado la extracción de datos crudos (chunks) de fuentes estructurada
     *   Modelo `securetag-v1` (Llama 3.1 8B) entrenado en RunPod.
     *   Validación cualitativa exitosa.
 
-### 🚀 Tarea Actual: En espera / Soporte
-**Objetivo**: El modelo ya está entrenado. Ahora debes apoyar la integración si es necesario o esperar nuevas directrices para una v2 del modelo.
+### 🚀 Tarea Actual: Extracción de Exploits (Fase 10)
+**Objetivo**: Enriquecer el dataset de entrenamiento con código real de exploits.
 
-**Estado**: ⏸️ **Standby**
+*   **Tarea 10.3: Data Gen - Exploit-DB** [ ]
+    *   Descargar base de datos pública de exploit-db.com (CSV/Git).
+    *   Extraer código de exploits verificados.
+    *   Generar pares de entrenamiento (Vulnerabilidad -> Exploit PoC).
+
+**Estado**: 🟢 **Activo**
 
 **Posibles Tareas Futuras (v2)**:
 *   Expandir dataset con más fuentes Tier 1.

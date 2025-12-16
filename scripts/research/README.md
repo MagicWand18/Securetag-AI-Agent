@@ -52,9 +52,17 @@ El núcleo del sistema. Utiliza GPT-5.1 para generar reglas Semgrep precisas a p
     *   Reglas validadas en `../../data/rules/synthetic/`.
     *   Logs de estado en `temp/skipped_cves.json` y `temp/failed_cves.json`.
 
+### 7. Restauración de Reglas (`restore_from_temp.py`)
+Utilidad para recuperar reglas desde el directorio `temp/` en caso de borrado accidental o para procesar lotes fallidos.
+*   **Comando:** `python3 restore_from_temp.py`
+*   **Funcionalidad:**
+    *   Copia reglas `.yaml` desde `scripts/research/temp/` a `data/rules/synthetic/`.
+    *   **Validación y Parcheo Automático:** Antes de copiar, verifica que la regla sea válida y le inyecta metadatos faltantes (CWE, OWASP, etc.) usando heurística inteligente.
+    *   **Seguridad:** NO sobrescribe reglas que ya existan en el destino para evitar perder cambios manuales.
+
 ---
 
-## � Frecuencia de Ejecución
+## 🕒 Frecuencia de Ejecución
 
 1.  **`analyze_rules.py` (Mensual):** Ejecutar periódicamente para evaluar la salud del inventario y detectar nuevas áreas de riesgo no cubiertas.
 2.  **`cve_monitor.py` (Diario/Semanal):** Ejecutar regularmente para capturar nuevas vulnerabilidades publicadas en NVD y CISA KEV.

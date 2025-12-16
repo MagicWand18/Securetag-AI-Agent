@@ -36,5 +36,15 @@ ENV QUEUE_DIR=/var/securetag/${TENANT_ID}/queue/tasks
 ENV RESULTS_DIR=/var/securetag/${TENANT_ID}/results
 ENV APP_HOST=securetag-app
 ENV APP_PORT=8080
+
+# Security: Run as non-root user
+RUN groupadd -r securetag && useradd -r -g securetag -u 1001 securetag \
+    && mkdir -p /var/securetag \
+    && chown -R securetag:securetag /var/securetag \
+    && chown -R securetag:securetag /app \
+    && chown -R securetag:securetag /opt/securetag
+
+USER securetag
+
 HEALTHCHECK --interval=30s --timeout=10s --start-period=20s CMD semgrep --version >/dev/null 2>&1 || exit 1
 CMD ["node","dist/worker/entrypoint.js"]

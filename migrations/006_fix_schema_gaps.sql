@@ -1,3 +1,6 @@
+--liquibase formatted sql
+--changeset securetag:006_fix_schema_gaps splitStatements:false
+
 -- Add missing columns expected by the worker
 ALTER TABLE securetag.tenant ADD COLUMN IF NOT EXISTS plan TEXT DEFAULT 'free';
 ALTER TABLE securetag.task ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();

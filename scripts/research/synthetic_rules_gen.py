@@ -156,7 +156,19 @@ def generate_rule(cve_id: str, description: str, vulnerable_code: str, feedback:
     3. Mensaje: Debe explicar por qué es peligroso citando el CVE y el contexto de explotación.
     4. Severidad: ERROR
     5. Patrón: Debe hacer match con el código vulnerable proporcionado, pero ser lo suficientemente genérico para variantes similares.
-    6. Metadata: Incluye 'cve': '{cve_id}' y 'source': 'CISA_KEV' si aplica.
+    6. Metadata: DEBE incluir los siguientes campos OBLIGATORIOS:
+       - cwe: "CWE-XXX: Nombre del CWE" (Identifica el CWE más apropiado)
+       - owasp: "AXX:2021 - Nombre de Categoría OWASP" (Identifica la categoría OWASP Top 10)
+       - category: "security"
+       - technology:
+         - javascript
+         - typescript
+         - nodejs
+       - likelihood: "HIGH" | "MEDIUM" | "LOW"
+       - impact: "HIGH" | "MEDIUM" | "LOW"
+       - confidence: "HIGH" | "MEDIUM" | "LOW"
+       - references:
+         - "https://nvd.nist.gov/vuln/detail/{cve_id}"
     
     RESTRICCIONES TÉCNICAS (MUY IMPORTANTE PARA EVITAR WARNINGS):
     - NO uses 'pattern-sources' ni 'pattern-sinks' a menos que especifiques 'mode: taint'. Por defecto usa 'mode: search' (implícito) y usa 'patterns' o 'pattern-either'.

@@ -35,46 +35,41 @@ Eres el **Agente Server**. Tu misión es modernizar y robustecer el backend de S
 
 ## 📋 Tareas Asignadas
 
-## 📋 Tareas Asignadas
+### ✅ Tareas Completadas (Histórico)
+*   **Fase 1 (Cimientos)**: Migración DB-Only, Health Checks, Gating.
+*   **Fase 5 (Multi-tenancy)**: Autenticación, Middleware, Aislamiento.
+*   **Fase 8 (Beta 2)**:
+    *   **Tarea 8.4**: Business Features (Alias de Proyecto, Historial, Retest).
+    *   **Tarea 8.5**: Documentación API (Swagger UI en `/docs`).
+    *   **Tarea 8.6**: Resiliencia de DB & Migraciones (Liquibase).
 
-## 📋 Tareas Asignadas
+### 🚀 Tarea Actual: Progress Tracking & Context (Prioridad Doble)
 
-### ✅ Tareas Completadas
-*   **Tarea 1.1: Migración a Database-Only** (Completado)
-*   **Tarea 1.2: Health Checks y Gating** (Completado)
-*   **Tarea 1.3: Autenticación y Multi-tenancy** (Completado)
-*   **Tarea 8.4: Funcionalidades de Negocio (Alias, Retest, Historial)** (Completado)
-    *   Proyectos con alias implementados.
-    *   Endpoints de historial y listado.
-    *   Lógica de retest (diffing) activa.
+**1. Tarea 12.1: Progress Tracking (API Contract)** [ ]
+*   **Responsabilidad**: Definir el contrato de API para que el Worker pueda reportar progreso.
+*   **Acciones**:
+    *   Actualizar DDL: Agregar columnas `progress_percent` (INT) y `eta_seconds` (INT) a tabla `task`.
+    *   Endpoint `GET /codeaudit/:id`: Exponer nuevos campos.
+    *   Endpoint `PUT /internal/task/:id/progress`: Crear endpoint interno para que el Worker actualice estado granular (sin exponerlo a cliente público).
 
-### 🔴 Track 5: Beta 2 - SAST Engine & Optimization
-*   **Tarea 8.2: Optimizaciones de Backend** [ ]
-    *   **Contexto**: Migración a Redis y Cuotas.
-    *   **Estado**: ⏸️ Standby (Prioridad media).
+**2. Tarea 10.1: Contexto Seguro (Validación Upload)** [ ]
+*   **Objetivo**: Asegurar que los metadatos enviados al subir archivos no contengan inyecciones.
+*   **Acciones**:
+    *   Definir esquemas Zod estrictos para `project_alias`, `profile`.
+    *   Integrar middleware de validación en `POST /codeaudit/upload`.
 
-*   **Tarea 8.5: Documentación API (Swagger)** [x]
-    *   **Contexto**: Documentación interactiva para Frontend/Devs.
-    *   **Acción**:
-        *   Integrar `swagger-ui-express` (o `swagger-ui-dist`).
-        *   Definir especificación OpenAPI.
-        *   Desplegar en `securetag-app`.
+**Estado**: 🟢 **Activo**
 
-### 🚀 Tarea Actual: Tarea 8.5 - Documentación API (Swagger)
-**Objetivo**: Implementar Swagger UI alojado en el contenedor `securetag-app`.
+### 🔮 Backlog & Futuro
+**Fase 10: Soporte LLM**
 
-**Pasos**:
-1.  **Dependencias**: `npm install swagger-ui-express yamljs @types/swagger-ui-express`.
-2.  **Spec**: Crear `src/server/docs/openapi.yaml` completo.
-3.  **Código**: En `src/server/index.ts`, montar `/docs` usando el middleware.
-4.  **Docker**: Asegurar que `openapi.yaml` se copia en la imagen Docker (`COPY src/server/docs ./src/server/docs`).
+**Fase 12: Enterprise Features (Monetización)**
+*   **Tarea 12.1**: Progress Tracking (`progress` y `eta` en API).
+*   **Tarea 12.2**: AI Double-Check (Param y gestión de cuotas).
+*   **Tarea 12.3**: Custom Rules (Param de generación automática).
 
-**Estado**: ✅ **Completado**
-
-**Criterios de éxito**:
-*   Endpoints protegidos rechazan solicitudes sin credenciales (401).
-*   Solicitudes con credenciales válidas acceden solo a datos del tenant correspondiente.
-*   Migración de BD creada y aplicada.
+**Fase 8: Optimizaciones**
+*   **Tarea 8.2**: Backend Optimizations (Redis, Cuotas) -> ⏸️ **Standby**.
 
 ## 🔗 Dependencias
 *   **Agente Infra**: La base de datos `securetag-db` corre vía `docker-compose.yml`.

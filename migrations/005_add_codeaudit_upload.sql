@@ -1,3 +1,6 @@
+--liquibase formatted sql
+--changeset securetag:005_add_codeaudit_upload
+
 CREATE TABLE IF NOT EXISTS securetag.codeaudit_upload (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id TEXT NOT NULL REFERENCES securetag.tenant(id),

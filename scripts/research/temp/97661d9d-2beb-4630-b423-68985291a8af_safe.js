@@ -1,58 +1,56 @@
 const http = require('http');
-const { spawn } = require('node:child_process');
+const { execFile } = require('node:child_process');
 
-// Lista blanca de comandos permitidos
-const ALLOWED_COMMANDS = new Set(['ls', 'pwd', 'whoami']);
+// Versión segura: en lugar de ejecutar comandos arbitrarios,
+// se limita a un conjunto de acciones permitidas y se usan
+// APIs que no pasan por el shell.
 
-// Servidor HTTP que ejecuta solo comandos predefinidos de forma segura
+const ALLOWED_COMMANDS = {
+  list: {
+    cmd: 'ls',
+    args: ['-la']
+  },
+  date: {
+    cmd: 'date',
+    args: []
+  }
+};
+
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
 
   if (url.pathname === '/run') {
-    const userCmd = url.searchParams.get('cmd') || 'ls';
+    const action = url.searchParams.get('action') || 'list';
 
-    // Validación estricta: solo se permiten comandos de una lista blanca
-    if (!ALLOWED_COMMANDS.has(userCmd)) {
+    // Validación estricta: solo se permiten acciones predefinidas.
+    const config = ALLOWED_COMMANDS[action];
+    if (!config) {
       res.statusCode = 400;
-      return res.end('Invalid command');
+      res.setHeader('Content-Type', 'text/plain');
+      return res.end('Acción no permitida');
     }
 
-    // Uso de spawn con argumentos controlados, sin concatenar input del usuario
-    const child = spawn(userCmd, [], { shell: false });
-
-    let output = '';
-    let errorOutput = '';
-
-    child.stdout.on('data', (data) => {
-      output += data.toString();
-    });
-
-    child.stderr.on('data', (data) => {
-      errorOutput += data.toString();
-    });
-
-    child.on('error', (err) => {
-      // Manejo de errores genérico, sin exponer detalles internos al usuario
-      console.error('Safe command execution error:', err.message);
-      res.statusCode = 500;
-      res.end('Internal server error');
-    });
-
-    child.on('close', (code) => {
-      if (code !== 0) {
-        console.warn(`Command exited with code ${code}`);
+    // Uso de execFile sin shell y sin concatenar entrada del usuario.
+    execFile(config.cmd, config.args, (error, stdout, stderr) => {
+      if (error) {
+        // Manejo de errores sin exponer detalles internos al cliente.
+        console.error('Command execution error:', error.message);
+        res.statusCode = 500;
+        res.setHeader('Content-Type', 'text/plain');
+        return res.end('Error interno');
       }
 
       res.statusCode = 200;
       res.setHeader('Content-Type', 'text/plain');
-      res.end(output || (errorOutput || 'No output'));
+      res.end(stdout || stderr || 'Comando ejecutado');
     });
   } else {
     res.statusCode = 404;
+    res.setHeader('Content-Type', 'text/plain');
     res.end('Not found');
   }
 });
 
 server.listen(3000, () => {
-  console.log('Safe server listening on http://localhost:3000');
+  console.log('Servidor seguro escuchando en http://localhost:3000');
 });

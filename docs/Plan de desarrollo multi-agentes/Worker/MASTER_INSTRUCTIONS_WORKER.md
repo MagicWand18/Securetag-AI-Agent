@@ -38,15 +38,35 @@ Eres el **Agente Worker**. Has completado exitosamente la refactorización a una
 *   **Tarea 2.4: Integración con LLM Remoto** (Completado)
 *   **Tarea 8.1: Motor SAST Propio** (Completado Externamente)
 
+### 💼 Fase 12: Enterprise Features (Implementación Lógica)
+*   **Tarea 12.1: Progress Tracking** [ ]
+    *   Calcular avance basado en herramientas ejecutadas vs totales.
+    *   Actualizar BD con %, ETA y estado granular.
+*   **Tarea 12.2: AI Double-Check (External)** [ ]
+    *   Implementar cliente multi-provider (OpenAI, Claude, Gemini).
+    *   Lógica de "Fallback" (si falla OpenAI -> prueba Claude).
+    *   Solo enviar hallazgos Critical/High según configuración.
+*   **Tarea 12.3: Custom Rules Engine** [ ]
+    *   Pipeline: Analizar Stack -> Prompt Engineering -> Generar Regla Semgrep -> Test -> Validar.
+    *   Guardar reglas exitosas en librería del tenant.
+
+### 🚀 Tarea Actual: Contexto Seguro para LLM (Prioridad Máxima)
+**Origen**: `docs/Plan de desarrollo multi-agentes/Security/PLAN_Contexto_LLM_Seguro.md`
+
+*   **Tarea 10.1: Contexto Seguro para LLM** [ ]
+    *   **Worker (Recolector)**:
+        *   Implementar paso de "Reconocimiento" en `TaskExecutor`.
+        *   Detectar stack (`package.json`, etc.) e infraestructura.
+        *   Generar `context.json` y pasarlo al `LLMClient`.
+    *   **LLMClient**:
+        *   Inyectar contexto en el System Prompt.
+        *   Implementar sanitización de inputs (evitar Prompt Injection).
+
+**Estado**: 🟢 **Activo**
+
 ### 🔴 Track 5: Beta 2 - SAST Engine & Optimization
 *   **Tarea 8.2: Optimizaciones de Backend** [ ]
-    *   **Acción**:
-        *   Adaptar worker para consumir de Redis (si aplica).
-
-### 🚀 Tarea Actual: En espera / Mantenimiento
-**Objetivo**: El Worker está completamente operativo, incluyendo la capacidad SAST local. Mantenerse a la espera de nuevas instrucciones para optimizaciones (Redis) cuando la infraestructura esté lista.
-
-**Estado**: ⏸️ **Standby**
+    *   **Acción**: Adaptar worker para consumir de Redis (si aplica).
 
 **Posibles Tareas Futuras**:
 *   Adaptación para consumir de Redis (Tarea 8.2).

@@ -1438,5 +1438,85 @@
     "id": "40967487-139b-4811-81d9-c9767a92aa5a",
     "reason": "La detecci\u00f3n de la eliminaci\u00f3n de un deployment en Kubernetes es un evento operacional/infraestructura (auditor\u00eda de cluster) y no un patr\u00f3n de c\u00f3digo inseguro en la aplicaci\u00f3n. Requiere monitorizar acciones en el entorno de ejecuci\u00f3n (API de Kubernetes, logs de auditor\u00eda, SIEM), no se puede inferir de forma confiable solo analizando el c\u00f3digo fuente JS/TS/Node.",
     "approach": "DAST"
+  },
+  {
+    "id": "CVE-2025-14174",
+    "reason": "No. Es un bug de memoria en un componente compilado (ANGLE/Chromium en C/C++). No se puede detectar de forma confiable analizando solo el c\u00f3digo fuente JS/TS/Node.js de la aplicaci\u00f3n; la mitigaci\u00f3n pasa por actualizar el navegador/engine afectado.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2010-3765",
+    "reason": "La vulnerabilidad es un bug de memoria en el motor de renderizado/CSS de Firefox/SeaMonkey/Thunderbird (C++), explotable a trav\u00e9s de JavaScript, pero reside en el navegador, no en el c\u00f3digo JS de la aplicaci\u00f3n. No puede detectarse de forma confiable analizando solo el c\u00f3digo fuente JS/TS/Node.js, sino identificando la versi\u00f3n vulnerable del navegador/librer\u00eda.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2025-6554",
+    "reason": "No. Es un bug de memoria (type confusion) en el motor V8 de Chromium, implementado en C++, explotable a trav\u00e9s de HTML/JS pero localizado en el componente compilado del navegador. No se puede detectar de forma confiable analizando solo el c\u00f3digo fuente JS/TS/Node.js de la aplicaci\u00f3n; la mitigaci\u00f3n pasa por actualizar el navegador/engine (SCA/gesti\u00f3n de dependencias de plataforma), no por cambiar el c\u00f3digo propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2023-36846",
+    "reason": "La vulnerabilidad se debe a una falta de autenticaci\u00f3n en un endpoint espec\u00edfico (user.php) de un producto concreto (Juniper Junos OS / J-Web) y a c\u00f3mo ese endpoint gestiona la subida de ficheros. No es un problema gen\u00e9rico de patrones de uso de APIs en c\u00f3digo JavaScript/TypeScript/Node.js, sino una vulnerabilidad concreta de un software de terceros que se mitiga actualizando dicho producto o su configuraci\u00f3n. Por tanto, entra en la categor\u00eda de vulnerabilidad en un componente externo y no puede detectarse de forma confiable solo analizando el c\u00f3digo fuente de una aplicaci\u00f3n Node.js propia.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2023-34362",
+    "reason": "La CVE-2023-34362 es una vulnerabilidad espec\u00edfica del producto Progress MOVEit Transfer (componente tercero cerrado). No se trata de un patr\u00f3n gen\u00e9rico de uso inseguro en tu propio c\u00f3digo JavaScript/TypeScript/Node.js, sino de un fallo interno en la implementaci\u00f3n del producto que se mitiga actualizando la versi\u00f3n. Por tanto, entra en el criterio de exclusi\u00f3n de vulnerabilidad en librer\u00eda/producto de terceros que se soluciona v\u00eda actualizaci\u00f3n (SCA), no mediante cambios en tu c\u00f3digo ni an\u00e1lisis est\u00e1tico del mismo.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2016-0752",
+    "reason": "CVE-2016-0752 es una vulnerabilidad espec\u00edfica del framework Ruby on Rails (Action View). En un proyecto JavaScript/TypeScript/Node.js, el problema se manifestar\u00eda \u00fanicamente como dependencia vulnerable de un componente externo an\u00e1logo, no como patr\u00f3n de c\u00f3digo propio detectable de forma gen\u00e9rica. Adem\u00e1s, esta CVE concreta se resuelve actualizando la librer\u00eda/framework afectado, por lo que encaja en el criterio de exclusi\u00f3n de SCA.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2020-11978",
+    "reason": "Error API: Connection error.",
+    "approach": "Manual"
+  },
+  {
+    "id": "CVE-2020-13927",
+    "reason": "Error API: Connection error.",
+    "approach": "Manual"
+  },
+  {
+    "id": "CVE-2025-57819",
+    "reason": "Error API: Connection error.",
+    "approach": "Manual"
+  },
+  {
+    "id": "CVE-2024-42009",
+    "reason": "Error API: Connection error.",
+    "approach": "Manual"
+  },
+  {
+    "id": "CVE-2023-36847",
+    "reason": "La vulnerabilidad se debe a una falta de autenticaci\u00f3n en un endpoint espec\u00edfico (installAppPackage.php) de un producto concreto (Juniper Junos OS / J-Web), y est\u00e1 ligada al comportamiento y configuraci\u00f3n de ese sistema, no a patrones gen\u00e9ricos de uso de APIs en c\u00f3digo JavaScript/TypeScript/Node.js. Adem\u00e1s, implica contexto de despliegue y componentes externos (PHP/J-Web), por lo que no puede detectarse de forma confiable analizando \u00fanicamente el c\u00f3digo fuente de una aplicaci\u00f3n Node.js.",
+    "approach": "DAST"
+  },
+  {
+    "id": "CVE-2024-6670",
+    "reason": "La CVE-2024-6670 es una vulnerabilidad espec\u00edfica del producto Progress WhatsUp Gold (componente tercero cerrado). En un proyecto JavaScript/TypeScript/Node.js solo podr\u00edas detectarla como dependencia vulnerable mediante an\u00e1lisis de componentes (SCA) o revisi\u00f3n de la plataforma donde corre, no inspeccionando tu propio c\u00f3digo fuente. No es un patr\u00f3n gen\u00e9rico de uso de APIs en tu c\u00f3digo, sino un fallo interno del producto que se corrige actualizando esa soluci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2024-11182",
+    "reason": "La CVE-2024-11182 afecta a MDaemon Email Server (producto/tercero) y se explota mediante la interpretaci\u00f3n/renderizado de HTML de correos, algo que no puede inferirse de forma confiable analizando \u00fanicamente el c\u00f3digo fuente de una app JavaScript/TypeScript/Node.js sin el contexto del componente vulnerable. En la pr\u00e1ctica se aborda actualizando el producto afectado y/o validando el comportamiento en ejecuci\u00f3n.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2024-37383",
+    "reason": "CVE-2024-37383 es una XSS en RoundCube (producto/librer\u00eda de terceros) relacionada con el sanitizado/parsing de atributos SVG (animate). En una app Node.js propia solo ser\u00eda detectable de forma confiable si incluyera exactamente el c\u00f3digo vulnerable del sanitizador/parser; en la pr\u00e1ctica se mitiga actualizando RoundCube, por lo que corresponde a SCA m\u00e1s que a patrones inseguros en el c\u00f3digo propio.",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2009-1151",
+    "reason": "CVE-2009-1151 describe un fallo en un script de instalaci\u00f3n que, mediante un POST manipulado, logra inyectar c\u00f3digo PHP en un archivo de configuraci\u00f3n generado. Esto es espec\u00edfico de un componente/stack PHP y de su l\u00f3gica de generaci\u00f3n de configuraci\u00f3n; en una aplicaci\u00f3n JavaScript/TypeScript/Node.js no se puede identificar de forma confiable solo con SAST del c\u00f3digo propio, y normalmente se mitiga actualizando/eliminando el componente vulnerable (enfoque SCA) o verificando el comportamiento en ejecuci\u00f3n (DAST).",
+    "approach": "SCA"
+  },
+  {
+    "id": "CVE-2016-3976",
+    "reason": "CVE-2016-3976 es una vulnerabilidad espec\u00edfica de SAP NetWeaver AS Java (CrashFileDownloadServlet) y su l\u00f3gica interna de manejo de rutas. En una aplicaci\u00f3n JavaScript/TypeScript/Node.js no es posible detectarla de forma confiable solo con SAST del c\u00f3digo propio, porque el problema reside en un componente/servidor de terceros y se mitiga principalmente actualizando/parcheando ese producto, no cambiando l\u00f3gica de la app Node.",
+    "approach": "SCA"
   }
 ]
