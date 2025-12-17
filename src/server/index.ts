@@ -151,6 +151,9 @@ const server = http.createServer(async (req, res) => {
         let profile = ''
         let projectAlias = ''
         let userContext: any = null
+        let doubleCheck = false
+        let doubleCheckLevel = 'standard'
+
         for (const p of parts) {
           const idx = p.indexOf('\r\n\r\n')
           if (idx === -1) continue
@@ -168,6 +171,15 @@ const server = http.createServer(async (req, res) => {
           } else if (header.includes('name="project_alias"')) {
             const endIdx = content.lastIndexOf('\r\n')
             projectAlias = content.slice(0, endIdx >= 0 ? endIdx : undefined).trim()
+          } else if (header.includes('name="double_check"')) {
+            const endIdx = content.lastIndexOf('\r\n')
+            const val = content.slice(0, endIdx >= 0 ? endIdx : undefined).trim().toLowerCase()
+            doubleCheck = val === 'true' || val === '1'
+            console.log(`[DEBUG] Found double_check: ${val} -> ${doubleCheck}`)
+          } else if (header.includes('name="double_check_level"')) {
+            const endIdx = content.lastIndexOf('\r\n')
+            doubleCheckLevel = content.slice(0, endIdx >= 0 ? endIdx : undefined).trim().toLowerCase()
+            console.log(`[DEBUG] Found double_check_level: ${doubleCheckLevel}`)
           } else if (header.includes('name="user_context"')) {
             const endIdx = content.lastIndexOf('\r\n')
             const rawJson = content.slice(0, endIdx >= 0 ? endIdx : undefined).trim()
@@ -182,6 +194,36 @@ const server = http.createServer(async (req, res) => {
         if (!fileData) return send(res, 400, { ok: false })
 
         // 0. Validate Metadata (Zod Security Check)
+        // Check Credit Balance for Double Check
+        if (doubleCheck) {
+            const levelCosts: Record<string, number> = { 'standard': 1, 'pro': 2, 'max': 3 }
+            const cost = levelCosts[doubleCheckLevel] || 1
+            
+            // Validate Level Enum via Zod (Optional but good practice)
+            const levelCheck = UploadMetadataSchema.pick({ double_check_level: true }).safeParse({ double_check_level: doubleCheckLevel })
+            if (!levelCheck.success) {
+                 return send(res, 400, { ok: false, error: `Invalid double_check_level: ${levelCheck.error.issues[0].message}` })
+            }
+            
+            // Validate double_check value (critical, high, all, true)
+            // If true/1, default to 'all' or handled by logic? Let's normalize.
+            // MASTER INSTRUCTIONS say: enum: critical, high, all.
+            // If user sends 'true', we treat as 'all'? Or reject? Let's be permissive and map true -> all for backward compat if needed,
+            // or strictly follow schema. Zod schema allows true/false/critical...
+            
+            // Check DB Balance
+            try {
+                const creditQ = await dbQuery<any>('SELECT credits_balance FROM securetag.tenant WHERE id=$1', [tenantId])
+                const balance = creditQ.rows[0]?.credits_balance || 0
+                if (balance < cost) {
+                    return send(res, 402, { ok: false, error: `Insufficient credits. Required: ${cost}, Available: ${balance}. Please upgrade or disable double_check.` })
+                }
+            } catch (err) {
+                console.error('Error checking credits:', err)
+                return send(res, 503, { ok: false, error: 'Failed to verify credit balance' })
+            }
+        }
+
         if (projectAlias) {
           const result = UploadMetadataSchema.pick({ project_alias: true }).safeParse({ project_alias: projectAlias })
           if (!result.success) {
@@ -290,8 +332,15 @@ const server = http.createServer(async (req, res) => {
         }
 
         try {
-          await dbQuery('INSERT INTO securetag.task(id, tenant_id, type, status, payload_json, retries, priority, created_at, project_id, previous_task_id, is_retest) VALUES($1,$2,$3,$4,$5,$6,$7, now(), $8, $9, $10)',
-            [taskId, tenantId, 'codeaudit', 'queued', JSON.stringify({ zipPath, workDir: wkDir, profile, previousTaskId, userContext, apiKeyHash }), 0, 0, projectId, previousTaskId, isRetest])
+          // Normalize doubleCheck for config
+          let dcConfig = null
+          if (doubleCheck) {
+              const scope = (doubleCheck === true) ? 'all' : String(doubleCheck)
+              dcConfig = { enabled: true, level: doubleCheckLevel, scope }
+          }
+          
+          await dbQuery('INSERT INTO securetag.task(id, tenant_id, type, status, payload_json, retries, priority, created_at, project_id, previous_task_id, is_retest, double_check_config) VALUES($1,$2,$3,$4,$5,$6,$7, now(), $8, $9, $10, $11)',
+            [taskId, tenantId, 'codeaudit', 'queued', JSON.stringify({ zipPath, workDir: wkDir, profile, previousTaskId, userContext, apiKeyHash }), 0, 0, projectId, previousTaskId, isRetest, dcConfig ? JSON.stringify(dcConfig) : null])
           await dbQuery('INSERT INTO securetag.codeaudit_upload(tenant_id, project_id, task_id, file_name, storage_path, size_bytes, created_at) VALUES($1,$2,$3,$4,$5,$6, now())', [tenantId, projectId, taskId, fileName, zipPath, size])
         } catch {
           return send(res, 503, { ok: false })
@@ -359,6 +408,45 @@ const server = http.createServer(async (req, res) => {
     })
     return
   }
+  
+  // Progress Tracking Endpoint (Internal/Worker)
+  if (method === 'POST' && url?.startsWith('/internal/tasks/') && url?.endsWith('/progress')) {
+    // Expected format: /internal/tasks/:id/progress
+    // Authenticate request (Worker only)
+    const authReq = req as AuthenticatedRequest
+    const isAuthenticated = await authenticate(authReq, res)
+    if (!isAuthenticated) return
+
+    const parts = url.split('/') // ["", "internal", "tasks", "UUID", "progress"]
+    const taskId = parts[3]
+
+    if (!taskId) return send(res, 400, { ok: false, error: 'Missing Task ID' })
+
+    const chunks: Buffer[] = []
+    req.on('data', c => chunks.push(Buffer.from(c)))
+    req.on('end', async () => {
+      try {
+        const raw = Buffer.concat(chunks).toString('utf8')
+        const body = raw ? JSON.parse(raw) : {}
+        const { progress, eta } = body
+
+        // Validate inputs
+        const progressInt = typeof progress === 'number' ? Math.max(0, Math.min(100, Math.floor(progress))) : 0
+        const etaInt = typeof eta === 'number' ? Math.floor(eta) : null
+
+        await dbQuery(
+          'UPDATE securetag.task SET progress_percent = $1, eta_seconds = $2 WHERE id = $3',
+          [progressInt, etaInt, taskId]
+        )
+
+        return send(res, 200, { ok: true })
+      } catch (e: any) {
+        return send(res, 400, { ok: false, error: String(e && e.message || e) })
+      }
+    })
+    return
+  }
+
   if (method === 'GET' && url?.startsWith('/scans/')) {
     // Authenticate request
     const authReq = req as AuthenticatedRequest

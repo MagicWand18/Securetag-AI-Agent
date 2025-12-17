@@ -78,8 +78,32 @@ if [ -n "${WORKER_API_KEY:-}" ]; then
     fi
     
     if [ -n "$TENANT_ID" ]; then
+        info "Configurando Tenant: $TENANT_ID"
+
+        # --- NUEVO (Credits System) ---
+        # Asignar 100 créditos iniciales para pruebas (Fase 2)
+        docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -c "
+            UPDATE securetag.tenant SET credits_balance = 100 WHERE id = '$TENANT_ID' AND credits_balance = 0;
+        "
+        info "Créditos iniciales asignados (100) al tenant: $TENANT_ID"
+
+        # --- NUEVO (Identity Refactor) ---
         info "Asociando Worker API Key al tenant: $TENANT_ID"
         
+        # --- NUEVO (Identity Refactor) ---
+        # Asegurar que existe un usuario "system-worker" para asignar esta llave
+        # Esto es necesario por la FK user_id en api_key
+        USER_EMAIL="worker@securetag.system"
+        docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -c "
+            INSERT INTO securetag.app_user (tenant_id, email, full_name, role)
+            VALUES ('$TENANT_ID', '$USER_EMAIL', 'System Worker', 'admin')
+            ON CONFLICT (email) DO NOTHING;
+        "
+        # Obtener el ID del usuario
+        USER_ID=$(docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT id FROM securetag.app_user WHERE email = '$USER_EMAIL';" | tr -d '[:space:]')
+        
+        info "Usuario de sistema configurado: $USER_ID"
+
         # Insertar o actualizar la API Key del worker
         # Usamos ON CONFLICT para hacer upsert basado en el hash (si es unique) o nombre
         # Como key_hash es UNIQUE en la tabla api_key:
@@ -87,10 +111,10 @@ if [ -n "${WORKER_API_KEY:-}" ]; then
         KEY_HASH=$(echo -n "$WORKER_API_KEY" | sha256sum | awk '{print $1}')
         
         docker compose exec -T "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -c "
-            INSERT INTO securetag.api_key (tenant_id, key_hash, name, scopes, is_active)
-            VALUES ('$TENANT_ID', '$KEY_HASH', 'Worker Key (Auto)', '[\"worker:read\", \"worker:write\"]', true)
+            INSERT INTO securetag.api_key (tenant_id, user_id, key_hash, name, scopes, is_active)
+            VALUES ('$TENANT_ID', '$USER_ID', '$KEY_HASH', 'Worker Key (Auto)', '[\"worker:read\", \"worker:write\"]', true)
             ON CONFLICT (key_hash) DO UPDATE 
-            SET last_used_at = now(), is_active = true;
+            SET last_used_at = now(), is_active = true, user_id = '$USER_ID';
         "
         info "✅ Worker API Key configurada exitosamente"
     else

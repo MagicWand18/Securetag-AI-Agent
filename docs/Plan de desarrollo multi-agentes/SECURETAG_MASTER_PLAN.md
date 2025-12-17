@@ -227,12 +227,12 @@ El sistema se compone de tres pilares principales que evolucionan en paralelo:
 
 **Objetivo**: Funcionalidades avanzadas para planes Pro/Enterprise y cobro por uso.
 
-*   **Tarea 12.1: Progress Tracking Intuitivo** (Server/Worker) [ ]
-    *   Endpoint `GET /codeaudit/:taskId` retorna `%` de avance y `ETA`.
-    *   Worker calcula progreso basado en herramientas restantes.
+*   **Tarea 12.1: Progress Tracking Intuitivo** (Server/Worker) ✅ (Ref: `EVIDENCE_Server_8`, `EVIDENCE_Worker_6`)
+    *   Endpoint y DB Schema en Server.
+    *   Cálculo de ETA dinámico y reporte granular en Worker.
 *   **Tarea 12.2: AI Double-Check (Second Opinion)** (Worker/Server) [ ]
     *   Param `double-check=critical|high|all`.
-    *   Envío de hallazgos a APIs externas (OpenAI/Claude/Gemini) con fallback.
+    *   Envío de hallazgos a APIs externas (OpenAI & Claude) con fallback.
     *   Registro de consumo (tokens) para facturación.
 *   **Tarea 12.3: Custom Rules on Demand** (Research/Worker) [ ]
     *   Param `custom-rules=true`.

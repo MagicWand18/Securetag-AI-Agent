@@ -49,4 +49,18 @@ export class WorkerClient {
       }
     }
   }
+
+  async reportProgress(taskId: string, progress: number, etaSeconds: number | null): Promise<void> {
+    try {
+      // Fire-and-forget logic, but we await to catch immediate networking errors without blocking logic too much
+      // We can use a shorter timeout for progress updates
+      await this.client.post(`/internal/tasks/${taskId}/progress`, 
+        { progress, eta: etaSeconds },
+        { timeout: 2000 } // 2s timeout for progress updates
+      )
+    } catch (err: any) {
+      // Log warning but do not throw - progress updates are non-critical
+      logger.warn(`Failed to report progress for task ${taskId}: ${err.message}`)
+    }
+  }
 }

@@ -220,7 +220,7 @@ export async function codeauditDetail(req: http.IncomingMessage, res: http.Serve
 
   let dbTask: any = null
   try {
-    const tq = await dbQuery<any>('SELECT id, status, started_at, finished_at FROM securetag.task WHERE id=$1 AND tenant_id=$2 AND type=$3 LIMIT 1', [id, tenantId, 'codeaudit'])
+    const tq = await dbQuery<any>('SELECT id, status, started_at, finished_at, progress_percent, eta_seconds FROM securetag.task WHERE id=$1 AND tenant_id=$2 AND type=$3 LIMIT 1', [id, tenantId, 'codeaudit'])
     dbTask = tq.rows.length ? tq.rows[0] : null
   } catch (e) { 
     console.error('Error fetching task:', e)
@@ -309,10 +309,23 @@ export async function codeauditDetail(req: http.IncomingMessage, res: http.Serve
             }
         })
 
-        send(res, 200, { ok: true, status: dbTask.status, taskId: id, result: { summary, findings: sanitizedFindings, diff } })
+        send(res, 200, { 
+          ok: true, 
+          status: dbTask.status, 
+          taskId: id, 
+          result: { summary, findings: sanitizedFindings, diff }, 
+          progress: `${dbTask.progress_percent || 0}%`, 
+          eta: dbTask.eta_seconds !== null ? `${dbTask.eta_seconds}s` : null
+        })
         return true
       }
-      send(res, 202, { ok: true, status: dbTask.status, taskId: id })
+      send(res, 202, { 
+        ok: true, 
+        status: dbTask.status, 
+        taskId: id, 
+        progress: `${dbTask.progress_percent || 0}%`, 
+        eta: dbTask.eta_seconds !== null ? `${dbTask.eta_seconds}s` : null
+      })
       return true
     }
     if (dbTask.status !== 'completed') {

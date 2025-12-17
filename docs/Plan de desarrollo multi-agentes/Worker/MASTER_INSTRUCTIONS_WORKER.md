@@ -38,6 +38,7 @@ Eres el **Agente Worker**. Has completado exitosamente la refactorización a una
 *   **Tarea 2.4: Integración con LLM Remoto** (Completado)
 *   **Tarea 8.1: Motor SAST Propio** (Completado Externamente)
 *   **Tarea 10.1: Contexto Seguro para LLM** (Completado - Worker/Logic)
+*   **Tarea 12.1: Progress Tracking (Logic)** (Completado - Cálculo Dinámico & ETA)
 
 ### 💼 Fase 12: Enterprise Features (Implementación Lógica)
 *   **Tarea 12.1: Progress Tracking** [ ]
@@ -51,19 +52,19 @@ Eres el **Agente Worker**. Has completado exitosamente la refactorización a una
     *   Pipeline: Analizar Stack -> Prompt Engineering -> Generar Regla Semgrep -> Test -> Validar.
     *   Guardar reglas exitosas en librería del tenant.
 
-### 🚀 Tarea Actual: Enterprise Features (Logic)
+### 🚀 Tarea Actual: Enterprise Intelligence (Logic)
 
-**Tarea 12.1: Progress Tracking (Worker Logic)** [ ]
-*   **Objetivo**: Calcular y reportar el progreso real del escaneo en tiempo real.
+**Tarea 12.2: AI Double-Check (Multi-Provider Logic)** [ ]
+*   **Objetivo**: Implementar verificación de hallazgos con múltiples LLMs externos.
 *   **Acciones**:
-    *   **Cálculo**: (Herramientas Ejecutadas / Total Herramientas) * 100.
-    *   **Reporte**: Llamar a `POST /internal/tasks/:id/progress` cada vez que una herramienta termina.
-    *   **Estimación**: Calcular ETA basado en tiempo promedio por herramienta.
+    *   **Cliente Multi-Provider**: Crear `ExternalAIClient` que soporte OpenAI y Claude (Anthropic).
+    *   **Lógica Fallback**: Intentar Provider A -> Si falla/timeout -> Provider B -> Si falla/timeout -> No descontar security credits
+    *   **Consumo**: Implementar `analyzeFinding` usando estos proveedores para hallazgos críticos/high si la tarea lo requiere (`double_check_config`).
+    *   **Cost Control**: Registrar tokens usados para facturación futura.
 
 **Estado**: 🟢 **Activo**
 
 ### 🔮 Próximos Pasos (Fase 12)
-*   **Tarea 12.2: AI Double Check** [ ]
 *   **Tarea 12.3: Custom Rules** [ ]
 
 ## 🔗 Dependencias

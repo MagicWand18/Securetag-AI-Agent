@@ -44,24 +44,23 @@ Eres el **Agente Server**. Tu misión es modernizar y robustecer el backend de S
     *   **Tarea 8.6**: Resiliencia de DB & Migraciones (Liquibase).
 *   **Fase 10 (Soporte)**:
     *   **Tarea 10.1**: Contexto Seguro (Validación Zod en `POST /upload`).
+*   **Fase 12 (Enterprise)**:
+    *   **Tarea 12.1**: Progress Tracking (DB Schema, API Internal & Public).
 
-### 🚀 Tarea Actual: Progress Tracking (Prioridad Alta)
+### 🚀 Tarea Actual: Enterprise Intelligence (Prioridad Alta)
 
-**Tarea 12.1: Progress Tracking (API Contract)** [ ]
-*   **Responsabilidad**: Definir el contrato de API y esquema de BD para reporte de progreso.
+**Tarea 12.2: AI Double-Check (External Providers)** [ ]
+*   **Responsabilidad**: Habilitar la infraestructura para "Segunda Opinión" de IA.
 *   **Acciones**:
-    *   **DB**: `ALTER TABLE task ADD COLUMN progress_percent INT DEFAULT 0`.
-    *   **DB**: `ALTER TABLE task ADD COLUMN eta_seconds INT`.
-    *   **API**: `POST /internal/tasks/:id/progress` (Body: `{ progress: 50, eta: 120, status: 'running' }`).
-    *   **API**: `GET /codeaudit/:id` (Include progress & ETA).
+    *   **API**: Aceptar param `double_check` (enum: `critical`, `high`, `all`) en `POST /codeaudit/upload`.
+    *   **DB**: Agregar columna `double_check_config` en tabla `task` (JSONB).
+    *   **Quota**: Implementar lógica para descontar "Security Credits" (ver Pricing Model).
+    *   **Env Variable**: Configurar API Keys para proveedores (OpenAI, Claude) en Secrets del Worker (Server solo pasa la config).
 
 **Estado**: 🟢 **Activo**
 
 ### 🔮 Backlog & Futuro
-**Fase 10: Soporte LLM**
-
 **Fase 12: Enterprise Features (Monetización)**
-*   **Tarea 12.1**: Progress Tracking (`progress` y `eta` en API).
 *   **Tarea 12.2**: AI Double-Check (Param y gestión de cuotas).
 *   **Tarea 12.3**: Custom Rules (Param de generación automática).
 

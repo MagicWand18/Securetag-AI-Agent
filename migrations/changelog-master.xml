@@ -16,5 +16,10 @@
   <include file="010_create_ip_reputation.sql" relativeToChangelogFile="true"/>
   <include file="011_expand_ban_scope.sql" relativeToChangelogFile="true"/>
   <include file="012_fix_ban_schema.sql" relativeToChangelogFile="true"/>
+  <include file="013_add_progress_tracking.sql" relativeToChangelogFile="true"/>
+  <include file="014_create_users_table.sql" relativeToChangelogFile="true"/>
+  <include file="015_link_apikey_to_user.sql" relativeToChangelogFile="true"/>
+  <include file="016_add_tenant_credits.sql" relativeToChangelogFile="true"/>
+  <include file="017_add_task_double_check.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

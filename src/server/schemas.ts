@@ -9,7 +9,14 @@ export const UserContextSchema = z.object({
   data_sensitivity: z.enum(["public", "internal", "confidential", "restricted", "pci_dss", "hipaa"]).optional(),
   exposure: z.enum(["internet_facing", "internal_network", "air_gapped"]).optional(),
   auth_mechanism: z.array(z.enum(["oauth2", "jwt", "session", "api_key", "none"])).optional(),
-  description: z.string().max(500, "Description is too long (max 500 chars)").optional()
+  description: z.string().max(500, "Description is too long (max 500 chars)").optional(),
+  
+  // Double Check preferences within UserContext (Optional override/hint)
+  double_check_preference: z.object({
+      enabled: z.boolean().optional(),
+      level: z.enum(["standard", "pro", "max"]).optional(),
+      scope: z.enum(["critical", "high", "all"]).optional()
+  }).optional()
 });
 
 /**
@@ -31,7 +38,10 @@ export const UploadMetadataSchema = z.object({
     .regex(/^[a-zA-Z0-9-]+$/, 'Profile name must only contain alphanumeric characters and hyphens')
     .optional(),
     
-  user_context: UserContextSchema.optional()
+  user_context: UserContextSchema.optional(),
+
+  double_check: z.enum(["critical", "high", "all", "true", "false", "1", "0"]).optional().default("false"),
+  double_check_level: z.enum(["standard", "pro", "max"]).optional().default("standard")
 });
 
 export type UploadMetadata = z.infer<typeof UploadMetadataSchema>;

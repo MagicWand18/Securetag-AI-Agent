@@ -1,3 +1,4 @@
+import { WorkerClient } from './WorkerClient.js'
 import { ExternalToolManager } from '../agent/tools/ExternalToolManager.js'
 import { dbQuery, ensureTenant, updateTaskState } from '../utils/db.js'
 import { banEntity } from '../server/security.js'
@@ -14,6 +15,7 @@ export class TaskExecutor {
     private heartbeatManager: HeartbeatManager
     private llmClient: LLMClient
     private contextAnalyzer: ContextAnalyzer
+    private workerClient: WorkerClient
     private taskTimeouts: Map<string, number> = new Map([
         ['codeaudit', 300000], // 5 minutes
         ['web', 60000]         // 1 minute
@@ -23,6 +25,7 @@ export class TaskExecutor {
         this.heartbeatManager = new HeartbeatManager(workerId)
         this.llmClient = new LLMClient()
         this.contextAnalyzer = new ContextAnalyzer()
+        this.workerClient = new WorkerClient()
     }
 
     async execute(job: any): Promise<any> {
@@ -124,6 +127,11 @@ export class TaskExecutor {
     }
 
     private async executeSemgrep(job: any, tenant: string, started: number, heartbeat: () => void): Promise<any> {
+        const taskId = job.id || job.taskId
+        
+        // --- PHASE 1: PREPARATION (0-10%) ---
+        await this.workerClient.reportProgress(taskId, 5, null)
+        
         const av = await ExternalToolManager.isAvailable('semgrep')
         if (!av) throw new Error('semgrep not available')
 
@@ -144,6 +152,8 @@ export class TaskExecutor {
         logger.info(`Analyzing context for ${workDir}`)
         const projectContext = await this.contextAnalyzer.analyze(workDir)
         logger.info(`Context detected: ${JSON.stringify(projectContext.stack)}`)
+
+        await this.workerClient.reportProgress(taskId, 10, null)
 
         // Validate User Context Safety (Guardrail)
         let safeUserContext = job.userContext
@@ -189,6 +199,7 @@ export class TaskExecutor {
             }
         }
 
+        // --- PHASE 2: SAST EXECUTION (10-30%) ---
         // Use local rules
         const rulesPath = '/opt/securetag/rules'
         const args = ['scan', '--json', '--quiet', '--config', rulesPath, '--exclude', '__MACOSX/**', '--exclude', '**/._*', '--exclude', '**/.DS_Store', '--exclude', '.pre-commit-config.yaml', '--exclude', '.git', workDir]
@@ -196,9 +207,11 @@ export class TaskExecutor {
         const result = await ExternalToolManager.execute('semgrep', args, { timeout: 300000 })
         const finished = Date.now()
 
+        await this.workerClient.reportProgress(taskId, 30, null)
+
         // DB Operations
         const tenantId = await ensureTenant(tenant)
-        const taskId = job.id || job.taskId
+        // const taskId = job.id || job.taskId // Already defined above
 
         await this.ensureTaskExists(taskId, tenantId, 'codeaudit', job)
 
@@ -218,9 +231,43 @@ export class TaskExecutor {
         try {
             const payload = result.stdout ? JSON.parse(result.stdout) : null
             const items: any[] = payload && Array.isArray(payload.results) ? payload.results : []
+            const totalItems = items.length
+
+            // --- PHASE 3: COGNITIVE ANALYSIS (30-90%) ---
+            // Calculate progress per item: 60% / totalItems
+            // We'll track time to estimate ETA
+            const analysisStart = Date.now()
+            let analysisProcessed = 0
+            
+            // Helper to report progress periodically
+            const reportAnalysisProgress = async () => {
+                const now = Date.now()
+                const elapsed = now - analysisStart
+                const avgTimePerItem = analysisProcessed > 0 ? elapsed / analysisProcessed : 0
+                const remainingItems = totalItems - analysisProcessed
+                const etaMs = avgTimePerItem * remainingItems
+                const etaSec = Math.ceil(etaMs / 1000)
+
+                // Map current item index to 30-90% range
+                // progress = 30 + ( (processed / total) * 60 )
+                const percent = 30 + Math.floor((analysisProcessed / totalItems) * 60)
+                
+                await this.workerClient.reportProgress(taskId, percent, etaSec)
+            }
+
+            // Calculate dynamic report interval to avoid flooding
+            // We want roughly 40 updates (every 10%) regardless of totalItems
+            // Min interval is 1 (for small projects)
+            const reportInterval = Math.max(1, Math.floor(totalItems * 0.1))
 
             for (let i = 0; i < items.length; i++) {
                 heartbeat()
+                
+                // Report progress dynamically based on total volume
+                if (i === 0 || i % reportInterval === 0) {
+                    await reportAnalysisProgress()
+                }
+
                 const it: any = items[i]
                 const sevRaw = (it.extra && it.extra.severity) || ''
                 const sevUpper = sevRaw.toUpperCase()
@@ -280,16 +327,23 @@ export class TaskExecutor {
                 await dbQuery('INSERT INTO securetag.finding(tenant_id, task_id, source_tool, rule_id, rule_name, severity, category, cwe, cve, file_path, line, fingerprint, evidence_ref, created_at, analysis_json) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13, now(), $14)',
                     [tenantId, taskId, 'semgrep', ruleId, ruleName, sev, 'code', cwe, cve, filePath, line, fingerprint, `${semgrepFile}#${i}`, analysis ? JSON.stringify(analysis) : null])
                 findingsCount++
+                analysisProcessed++
             }
         } catch (err) {
             logger.error(`Failed to parse semgrep results: ${err}`)
         }
+
+        // --- PHASE 4: COMPLETION (90-100%) ---
+        await this.workerClient.reportProgress(taskId, 95, 0)
 
         await dbQuery('INSERT INTO securetag.scan_result(tenant_id, task_id, summary_json, storage_path, created_at) VALUES($1,$2,$3,$4, now()) ON CONFLICT (task_id) DO UPDATE SET summary_json=EXCLUDED.summary_json, storage_path=EXCLUDED.storage_path',
             [tenantId, taskId, JSON.stringify({ findingsCount, severity: summary }), semgrepFile])
 
         // Update task state to completed
         await updateTaskState(taskId, 'completed')
+        
+        // Final 100% update (Server will likely do this too when status=completed, but good to be explicit)
+        await this.workerClient.reportProgress(taskId, 100, 0)
 
         return {
             ok: result.exitCode === 0,

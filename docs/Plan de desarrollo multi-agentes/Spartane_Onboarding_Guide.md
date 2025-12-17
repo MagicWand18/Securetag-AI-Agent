@@ -136,12 +136,26 @@ curl -X GET "http://143.198.61.64:8080/codeaudit/550e8400-e29b-41d4-a716-4466554
 *   `completed`: Análisis finalizado (incluye resultados).
 *   `failed`: Ocurrió un error (ver campo `error`).
 
+**Response (En Progreso - NUEVO en Beta 2):**
+Ahora puede visualizar el avance real de su auditoría en tiempo real.
+```json
+{
+  "ok": true,
+  "status": "running",
+  "taskId": "550e8400-...",
+  "progress": "45%",    // Avance porcentual real
+  "eta": "120s"         // Tiempo estimado restante (calculado dinámicamente)
+}
+```
+
 **Response (Completado - Ejemplo Estándar):**
 ```json
 {
   "ok": true,
   "status": "completed",
-  "taskId": "550e8400-e29b-41d4-a716-446655440000",
+  "taskId": "550e8400-...",
+  "progress": "100%",
+  "eta": "0s",
   "result": {
     "summary": {
       "severity": {
