@@ -23,6 +23,7 @@ Su instancia dedicada de SecureTag AI opera bajo una arquitectura segura y aisla
 *   **Analysis Engine**: Orquesta herramientas de escaneo profundo (SAST) con mecanismos de **"Resilient Scanning"** (Heartbeat) para manejar grandes repositorios sin interrupciones.
 *   **Custom Rule Engine**: Motor de reglas personalizado y optimizado para el stack de Spartane (Vue 3, TypeScript, Pinia), capaz de detectar vulnerabilidades específicas que herramientas genéricas ignoran.
 *   **AI Security Core**: Nuestro modelo cognitivo (`securetag-v1`) alojado en infraestructura GPU privada, entrenado para entender vulnerabilidades complejas.
+    *   **Context-Aware Analysis (NUEVO)**: El sistema ahora "entiende" la arquitectura de su proyecto (lenguajes, frameworks, librerías) antes de auditar, permitiendo una precisión quirúrgica y reduciendo falsos positivos al comprender el contexto real de ejecución.
 *   **Tenant Isolation**: Sus datos (`spartane`) están lógicamente aislados y protegidos.
 
 ---
@@ -52,9 +53,12 @@ En SecureTag, aplicamos la seguridad que predicamos ("Dogfooding"). Su instancia
         *   **IP Address**: Bloqueo de la dirección de origen.
         *   **Credenciales (API Key)**: Inhabilitación automática de la llave utilizada en el ataque.
         *   **Cuenta (Tenant)**: En casos graves, suspensión preventiva de la cuenta completa.
-    *   **Rate Limiting**: El exceso de peticiones o violaciones repetidas de seguridad también conllevará bloqueos temporales para proteger la integridad de la plataforma.
+        *   **Rate Limiting**: El exceso de peticiones o violaciones repetidas de seguridad también conllevará bloqueos temporales para proteger la integridad de la plataforma.
+5.  **Auditoría de Inteligencia Artificial (AI Guardrails)**:
+    *   **Protección contra Manipulación**: SecureTag implementa "Guardrails" de IA que analizan cualquier contexto proporcionado por el usuario para detectar intentos de *Prompt Injection* o *Jailbreaking*.
+    *   **Registro Forense**: Cada intento de manipulación es bloqueado y registrado automáticamente en un log de auditoría inmutable (`security_events`), permitiendo un análisis detallado de los vectores de ataque intentados contra la plataforma.
+    *   **Respuesta Activa**: Al confirmar un intento de ataque mediante IA, el sistema **inhabilita automáticamente** la API Key involucrada por un periodo de seguridad (default: 24 horas), previniendo nuevos intentos y notificando al equipo de seguridad.
 
----
 
 ## ⚙️ Guía Técnica de Integración
 
@@ -84,7 +88,13 @@ curl -X POST "http://143.198.61.64:8080/codeaudit/upload" \
   -F "profile=auto"
 ```
 
-*   **`project_alias`** (Opcional pero recomendado): Un nombre legible para su proyecto (ej: `backend-core`, `frontend-app`). Si no existe, se crea automáticamente. Si existe, el nuevo escaneo se vincula al historial y se compara con versiones anteriores (**Retest automático**).
+*   **`project_alias`** (Opcional pero recomendado): Un nombre legible para su proyecto.
+    *   *Formato*: Alfanumérico, guiones y guiones bajos (`a-z`, `0-9`, `-`, `_`).
+    *   *Longitud*: 3 a 50 caracteres.
+    *   *Ejemplos válidos*: `backend-core`, `api_v2`, `frontend-2025`.
+*   **`profile`** (Opcional): Perfil de escaneo (default: `auto`).
+    *   *Formato*: Alfanumérico y guiones únicamente.
+    *   *Ejemplos válidos*: `auto`.
 
 **Response (Error de Seguridad - Bloqueo de Amenaza):**
 Si nuestro sistema de inteligencia de amenazas detecta contenido malicioso en el archivo subido, la solicitud será rechazada inmediatamente:

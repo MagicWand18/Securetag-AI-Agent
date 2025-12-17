@@ -42,21 +42,18 @@ Eres el **Agente Server**. Tu misión es modernizar y robustecer el backend de S
     *   **Tarea 8.4**: Business Features (Alias de Proyecto, Historial, Retest).
     *   **Tarea 8.5**: Documentación API (Swagger UI en `/docs`).
     *   **Tarea 8.6**: Resiliencia de DB & Migraciones (Liquibase).
+*   **Fase 10 (Soporte)**:
+    *   **Tarea 10.1**: Contexto Seguro (Validación Zod en `POST /upload`).
 
-### 🚀 Tarea Actual: Progress Tracking & Context (Prioridad Doble)
+### 🚀 Tarea Actual: Progress Tracking (Prioridad Alta)
 
-**1. Tarea 12.1: Progress Tracking (API Contract)** [ ]
-*   **Responsabilidad**: Definir el contrato de API para que el Worker pueda reportar progreso.
+**Tarea 12.1: Progress Tracking (API Contract)** [ ]
+*   **Responsabilidad**: Definir el contrato de API y esquema de BD para reporte de progreso.
 *   **Acciones**:
-    *   Actualizar DDL: Agregar columnas `progress_percent` (INT) y `eta_seconds` (INT) a tabla `task`.
-    *   Endpoint `GET /codeaudit/:id`: Exponer nuevos campos.
-    *   Endpoint `PUT /internal/task/:id/progress`: Crear endpoint interno para que el Worker actualice estado granular (sin exponerlo a cliente público).
-
-**2. Tarea 10.1: Contexto Seguro (Validación Upload)** [ ]
-*   **Objetivo**: Asegurar que los metadatos enviados al subir archivos no contengan inyecciones.
-*   **Acciones**:
-    *   Definir esquemas Zod estrictos para `project_alias`, `profile`.
-    *   Integrar middleware de validación en `POST /codeaudit/upload`.
+    *   **DB**: `ALTER TABLE task ADD COLUMN progress_percent INT DEFAULT 0`.
+    *   **DB**: `ALTER TABLE task ADD COLUMN eta_seconds INT`.
+    *   **API**: `POST /internal/tasks/:id/progress` (Body: `{ progress: 50, eta: 120, status: 'running' }`).
+    *   **API**: `GET /codeaudit/:id` (Include progress & ETA).
 
 **Estado**: 🟢 **Activo**
 

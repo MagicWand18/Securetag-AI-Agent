@@ -48,7 +48,7 @@
 *   **Tarea 11.2: Core Flow (Happy Path)** ✅ (Ref: `EVIDENCE_QA_01`)
 *   **Tarea 11.3: Security Promises** ✅ (Ref: `EVIDENCE_QA_01`)
 *   **Tarea 11.4: New Features (Beta 2)** ✅ (Ref: `EVIDENCE_QA_02`)
-*   **Tarea 11.5: Validación Reglas Sintéticas** [ ] (Alias de Tarea 10.4)
+*   **Tarea 11.5: Validación Reglas Sintéticas** ✅ (Ref: `EVIDENCE_QA_03`)
 
 ---
 
@@ -210,10 +210,16 @@ El sistema se compone de tres pilares principales que evolucionan en paralelo:
 
 ## 🔮 Fase 10: Futuro y Backlog
 
-*   **Tarea 10.1: Contexto Seguro para LLM**: (Worker/Server) Inyectar contexto de proyecto (stack, arquitectura) y prevenir Prompt Injection (Sanitización). Origen: `PLAN_Contexto_LLM_Seguro.md`.
+*   **Tarea 10.1: Contexto Seguro (Server/Worker)**:
+    *   **Server**: Validación Zod en Upload ✅ (Ref: `EVIDENCE_Server_7`).
+    *   **Worker**: Stack Detection, Context Injection (XML) & Anti-Prompt Injection Guardrails ✅ (Ref: `EVIDENCE_Worker_5`).
+    *   **Extras Implementados**: Baneo automático de API Keys por inyección detectada, Validaciones de seguridad con IA.
 *   **Tarea 10.2: Análisis de Flujo Avanzado**: Cross-file Taint Analysis híbrido.
 *   **Tarea 10.3: Data Gen - Exploit-DB (Finetuning)**: Descargar y procesar todos los exploits públicos de exploit-db.com para dataset de entrenamiento.
-*   **Tarea 10.4: Validación de Reglas Sintéticas**: Validar formato y metadata de reglas generadas en `data/rules/synthetic` contra estándar (Spartane Pack). (Agente QA/Research).
+*   **Tarea 10.5: Sistema de Reputación "Strike-Based Ban"** (Futuro)
+    *   **Objetivo**: Evitar baneos inmediatos por falsos positivos o errores menores.
+    *   **Lógica**: Acumular "Strikes" en ventana de tiempo (ej. 3 strikes en 24h = Ban temporal).
+    *   **Tablas**: `security_strike` (tenant_id, reason, timestamp).
 
 ---
 

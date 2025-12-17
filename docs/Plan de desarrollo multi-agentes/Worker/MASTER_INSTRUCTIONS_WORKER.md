@@ -37,6 +37,7 @@ Eres el **Agente Worker**. Has completado exitosamente la refactorización a una
 *   **Tarea 2.2: Estados Avanzados y Heartbeats** (Completado)
 *   **Tarea 2.4: Integración con LLM Remoto** (Completado)
 *   **Tarea 8.1: Motor SAST Propio** (Completado Externamente)
+*   **Tarea 10.1: Contexto Seguro para LLM** (Completado - Worker/Logic)
 
 ### 💼 Fase 12: Enterprise Features (Implementación Lógica)
 *   **Tarea 12.1: Progress Tracking** [ ]
@@ -50,27 +51,20 @@ Eres el **Agente Worker**. Has completado exitosamente la refactorización a una
     *   Pipeline: Analizar Stack -> Prompt Engineering -> Generar Regla Semgrep -> Test -> Validar.
     *   Guardar reglas exitosas en librería del tenant.
 
-### 🚀 Tarea Actual: Contexto Seguro para LLM (Prioridad Máxima)
-**Origen**: `docs/Plan de desarrollo multi-agentes/Security/PLAN_Contexto_LLM_Seguro.md`
+### 🚀 Tarea Actual: Enterprise Features (Logic)
 
-*   **Tarea 10.1: Contexto Seguro para LLM** [ ]
-    *   **Worker (Recolector)**:
-        *   Implementar paso de "Reconocimiento" en `TaskExecutor`.
-        *   Detectar stack (`package.json`, etc.) e infraestructura.
-        *   Generar `context.json` y pasarlo al `LLMClient`.
-    *   **LLMClient**:
-        *   Inyectar contexto en el System Prompt.
-        *   Implementar sanitización de inputs (evitar Prompt Injection).
+**Tarea 12.1: Progress Tracking (Worker Logic)** [ ]
+*   **Objetivo**: Calcular y reportar el progreso real del escaneo en tiempo real.
+*   **Acciones**:
+    *   **Cálculo**: (Herramientas Ejecutadas / Total Herramientas) * 100.
+    *   **Reporte**: Llamar a `POST /internal/tasks/:id/progress` cada vez que una herramienta termina.
+    *   **Estimación**: Calcular ETA basado en tiempo promedio por herramienta.
 
 **Estado**: 🟢 **Activo**
 
-### 🔴 Track 5: Beta 2 - SAST Engine & Optimization
-*   **Tarea 8.2: Optimizaciones de Backend** [ ]
-    *   **Acción**: Adaptar worker para consumir de Redis (si aplica).
-
-**Posibles Tareas Futuras**:
-*   Adaptación para consumir de Redis (Tarea 8.2).
-*   Soportar autenticación JWT/API Key.
+### 🔮 Próximos Pasos (Fase 12)
+*   **Tarea 12.2: AI Double Check** [ ]
+*   **Tarea 12.3: Custom Rules** [ ]
 
 ## 🔗 Dependencias
 *   **Agente Server**: Necesitas que la API exponga los endpoints de cola (`/queue/next`, `/queue/result`).

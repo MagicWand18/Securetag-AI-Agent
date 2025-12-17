@@ -68,7 +68,7 @@ export class MCPClientManager {
         },
         {
           capabilities: {
-            tools: {},
+            sampling: {},
           },
         }
       );

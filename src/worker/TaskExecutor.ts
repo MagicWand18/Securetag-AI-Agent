@@ -1,7 +1,9 @@
 import { ExternalToolManager } from '../agent/tools/ExternalToolManager.js'
 import { dbQuery, ensureTenant, updateTaskState } from '../utils/db.js'
+import { banEntity } from '../server/security.js'
 import { HeartbeatManager } from './HeartbeatManager.js'
 import { LLMClient } from './LLMClient.js'
+import { ContextAnalyzer } from './ContextAnalyzer.js'
 import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
@@ -11,6 +13,7 @@ import { logger } from '../utils/logger.js'
 export class TaskExecutor {
     private heartbeatManager: HeartbeatManager
     private llmClient: LLMClient
+    private contextAnalyzer: ContextAnalyzer
     private taskTimeouts: Map<string, number> = new Map([
         ['codeaudit', 300000], // 5 minutes
         ['web', 60000]         // 1 minute
@@ -19,6 +22,7 @@ export class TaskExecutor {
     constructor(workerId?: string) {
         this.heartbeatManager = new HeartbeatManager(workerId)
         this.llmClient = new LLMClient()
+        this.contextAnalyzer = new ContextAnalyzer()
     }
 
     async execute(job: any): Promise<any> {
@@ -136,6 +140,55 @@ export class TaskExecutor {
             p.on('error', reject)
         })
 
+        // Analyze Context (Stack & Structure)
+        logger.info(`Analyzing context for ${workDir}`)
+        const projectContext = await this.contextAnalyzer.analyze(workDir)
+        logger.info(`Context detected: ${JSON.stringify(projectContext.stack)}`)
+
+        // Validate User Context Safety (Guardrail)
+        let safeUserContext = job.userContext
+        if (safeUserContext && safeUserContext.description) {
+            logger.info('Validating user context safety...')
+            const guardrailResult = await this.llmClient.validateContextSafety(safeUserContext)
+            
+            // Log security event for audit
+            try {
+                const tenantId = await ensureTenant(tenant)
+                await dbQuery(
+                    `INSERT INTO securetag.security_event 
+                    (id, tenant_id, event_type, status, reason, details, created_at)
+                    VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
+                    [
+                        crypto.randomUUID(),
+                        tenantId,
+                        'CONTEXT_GUARDRAIL_CHECK',
+                        guardrailResult.safe ? 'SAFE' : 'UNSAFE',
+                        guardrailResult.reason || 'No reason provided',
+                        JSON.stringify({
+                            input: safeUserContext.description,
+                            raw_output: guardrailResult.rawOutput
+                        })
+                    ]
+                )
+            } catch (dbErr) {
+                logger.error('Failed to log security event for guardrail check', dbErr)
+            }
+
+            if (!guardrailResult.safe) {
+                logger.warn('User context contains potential prompt injection. Dropping context.')
+                
+                // Ban API Key if available
+                if (job.apiKeyHash) {
+                    logger.warn(`Banning API Key Hash: ${job.apiKeyHash} due to Prompt Injection`)
+                    await banEntity('api_key', job.apiKeyHash, `Prompt Injection Detected: ${guardrailResult.reason}`)
+                }
+
+                safeUserContext = null // Discard unsafe context
+            } else {
+                logger.info('User context validated as safe.')
+            }
+        }
+
         // Use local rules
         const rulesPath = '/opt/securetag/rules'
         const args = ['scan', '--json', '--quiet', '--config', rulesPath, '--exclude', '__MACOSX/**', '--exclude', '**/._*', '--exclude', '**/.DS_Store', '--exclude', '.pre-commit-config.yaml', '--exclude', '.git', workDir]
@@ -215,7 +268,7 @@ export class TaskExecutor {
                         code_snippet: codeSnippet,
                         severity: sev,
                         autofix_suggestion: autofix
-                    })
+                    }, projectContext, safeUserContext)
                     console.log(`DEBUG: Analysis result for ${ruleId}:`, analysis ? 'SUCCESS' : 'NULL')
                 } catch (err: any) {
                     logger.error(`Failed to analyze finding ${fingerprint}`, err)

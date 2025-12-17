@@ -10,6 +10,7 @@ import validator from 'validator'
 import { authenticate, AuthenticatedRequest } from '../middleware/auth.js'
 import { addSecurityHeaders, checkRateLimit, banEntity, getClientIP, isBanned } from './security.js'
 import { isZipFile, checkVirusTotal } from './validation.js'
+import { UploadMetadataSchema, UserContextSchema } from './schemas.js'
 
 const port = parseInt(process.env.PORT || '8080', 10)
 
@@ -149,6 +150,7 @@ const server = http.createServer(async (req, res) => {
         let fileData: Buffer | null = null
         let profile = ''
         let projectAlias = ''
+        let userContext: any = null
         for (const p of parts) {
           const idx = p.indexOf('\r\n\r\n')
           if (idx === -1) continue
@@ -166,9 +168,39 @@ const server = http.createServer(async (req, res) => {
           } else if (header.includes('name="project_alias"')) {
             const endIdx = content.lastIndexOf('\r\n')
             projectAlias = content.slice(0, endIdx >= 0 ? endIdx : undefined).trim()
+          } else if (header.includes('name="user_context"')) {
+            const endIdx = content.lastIndexOf('\r\n')
+            const rawJson = content.slice(0, endIdx >= 0 ? endIdx : undefined).trim()
+            try {
+              userContext = JSON.parse(rawJson)
+            } catch (e) {
+              // Invalid JSON, ignore or fail? Let's ignore for now or maybe fail in validation
+              console.warn('Invalid user_context JSON', e)
+            }
           }
         }
         if (!fileData) return send(res, 400, { ok: false })
+
+        // 0. Validate Metadata (Zod Security Check)
+        if (projectAlias) {
+          const result = UploadMetadataSchema.pick({ project_alias: true }).safeParse({ project_alias: projectAlias })
+          if (!result.success) {
+            return send(res, 400, { ok: false, error: `Invalid project_alias: ${result.error.issues[0].message}` })
+          }
+        }
+        if (profile) {
+          const result = UploadMetadataSchema.pick({ profile: true }).safeParse({ profile })
+          if (!result.success) {
+            return send(res, 400, { ok: false, error: `Invalid profile: ${result.error.issues[0].message}` })
+          }
+        }
+        if (userContext) {
+            const result = UserContextSchema.safeParse(userContext)
+            if (!result.success) {
+                return send(res, 400, { ok: false, error: `Invalid user_context: ${result.error.issues[0].message}` })
+            }
+            userContext = result.data // Use validated data
+        }
 
         // 1. Validate Magic Bytes (Must be ZIP)
         if (!isZipFile(fileData)) {
@@ -228,6 +260,10 @@ const server = http.createServer(async (req, res) => {
         let previousTaskId: string | null = null
         let isRetest = false
 
+        // Extract API Key Hash for Worker context (Propagate Identity)
+        const apiKey = req.headers['x-api-key'] as string
+        const apiKeyHash = apiKey ? crypto.createHash('sha256').update(apiKey).digest('hex') : undefined
+
         if (projectAlias) {
           try {
             // Upsert project
@@ -255,7 +291,7 @@ const server = http.createServer(async (req, res) => {
 
         try {
           await dbQuery('INSERT INTO securetag.task(id, tenant_id, type, status, payload_json, retries, priority, created_at, project_id, previous_task_id, is_retest) VALUES($1,$2,$3,$4,$5,$6,$7, now(), $8, $9, $10)',
-            [taskId, tenantId, 'codeaudit', 'queued', JSON.stringify({ zipPath, workDir: wkDir, profile, previousTaskId }), 0, 0, projectId, previousTaskId, isRetest])
+            [taskId, tenantId, 'codeaudit', 'queued', JSON.stringify({ zipPath, workDir: wkDir, profile, previousTaskId, userContext, apiKeyHash }), 0, 0, projectId, previousTaskId, isRetest])
           await dbQuery('INSERT INTO securetag.codeaudit_upload(tenant_id, project_id, task_id, file_name, storage_path, size_bytes, created_at) VALUES($1,$2,$3,$4,$5,$6, now())', [tenantId, projectId, taskId, fileName, zipPath, size])
         } catch {
           return send(res, 503, { ok: false })
