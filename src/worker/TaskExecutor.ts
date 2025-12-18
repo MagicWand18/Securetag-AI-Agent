@@ -6,6 +6,7 @@ import { HeartbeatManager } from './HeartbeatManager.js'
 import { LLMClient } from './LLMClient.js'
 import { ContextAnalyzer } from './ContextAnalyzer.js'
 import { ExternalAIService } from './services/ExternalAIService.js'
+import { CustomRuleGenerator } from './services/CustomRuleGenerator.js'
 import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
@@ -131,6 +132,7 @@ export class TaskExecutor {
 
     private async executeSemgrep(job: any, tenant: string, started: number, heartbeat: () => void): Promise<any> {
         const taskId = job.id || job.taskId
+        const tenantId = await ensureTenant(tenant)
         
         // --- PHASE 1: PREPARATION (0-10%) ---
         await this.workerClient.reportProgress(taskId, 5, null)
@@ -166,7 +168,7 @@ export class TaskExecutor {
             
             // Log security event for audit
             try {
-                const tenantId = await ensureTenant(tenant)
+                // tenantId already resolved
                 await dbQuery(
                     `INSERT INTO securetag.security_event 
                     (id, tenant_id, event_type, status, reason, details, created_at)
@@ -202,10 +204,48 @@ export class TaskExecutor {
             }
         }
 
+        // --- CUSTOM RULES ENGINE ---
+        let customRulesArgs: string[] = [];
+        let customRulesStats: any = null;
+
+        if (job.custom_rules) {
+            logger.info('Custom Rules Engine activated.');
+            await this.workerClient.reportProgress(taskId, 15, null);
+            
+            const qty = job.custom_rules_qty || 3;
+            const modelConfig = job.custom_rule_model || 'standard';
+            // Use a temp dir outside of source code
+            const customRulesBase = path.join(path.dirname(workDir), `custom_rules_${taskId}`);
+            if (!fs.existsSync(customRulesBase)) fs.mkdirSync(customRulesBase, { recursive: true });
+
+            const customRuleGenerator = new CustomRuleGenerator();
+            const generationResult = await customRuleGenerator.generateRules(tenantId, projectContext, qty, customRulesBase, modelConfig);
+            const generatedRules = generationResult.rules;
+            customRulesStats = generationResult.stats;
+
+            if (generatedRules.length > 0) {
+                // Save to server
+                for (const rule of generatedRules) {
+                    await this.workerClient.saveCustomRule({
+                        tenant_id: tenantId,
+                        rule_content: rule.rule_content,
+                        stack_context: JSON.stringify({ stack: rule.stack_context }),
+                        ai_metadata: JSON.stringify(rule.ai_metadata)
+                    });
+                }
+                
+                // Add to Semgrep args
+                // CustomRuleGenerator creates .custom_rules_gen inside the passed dir
+                const rulesDir = path.join(customRulesBase, '.custom_rules_gen');
+                customRulesArgs = ['--config', rulesDir];
+                logger.info(`Added ${generatedRules.length} custom rules to scan.`);
+            }
+        }
+
         // --- PHASE 2: SAST EXECUTION (10-30%) ---
         // Use local rules
         const rulesPath = '/opt/securetag/rules'
-        const args = ['scan', '--json', '--quiet', '--config', rulesPath, '--exclude', '__MACOSX/**', '--exclude', '**/._*', '--exclude', '**/.DS_Store', '--exclude', '.pre-commit-config.yaml', '--exclude', '.git', workDir]
+        const args = ['scan', '--json', '--quiet', '--config', rulesPath, ...customRulesArgs, '--exclude', '__MACOSX/**', '--exclude', '**/._*', '--exclude', '**/.DS_Store', '--exclude', '.pre-commit-config.yaml', '--exclude', '.git', workDir]
 
         const result = await ExternalToolManager.execute('semgrep', args, { timeout: 300000 })
         const finished = Date.now()
@@ -213,7 +253,7 @@ export class TaskExecutor {
         await this.workerClient.reportProgress(taskId, 30, null)
 
         // DB Operations
-        const tenantId = await ensureTenant(tenant)
+        // tenantId already resolved
         // const taskId = job.id || job.taskId // Already defined above
 
         await this.ensureTaskExists(taskId, tenantId, 'codeaudit', job)
@@ -445,7 +485,7 @@ export class TaskExecutor {
         await this.workerClient.reportProgress(taskId, 95, 0)
 
         await dbQuery('INSERT INTO securetag.scan_result(tenant_id, task_id, summary_json, storage_path, created_at) VALUES($1,$2,$3,$4, now()) ON CONFLICT (task_id) DO UPDATE SET summary_json=EXCLUDED.summary_json, storage_path=EXCLUDED.storage_path',
-            [tenantId, taskId, JSON.stringify({ findingsCount, severity: summary }), semgrepFile])
+            [tenantId, taskId, JSON.stringify({ findingsCount, severity: summary, custom_rules: customRulesStats }), semgrepFile])
 
         // Update task state to completed
         await updateTaskState(taskId, 'completed')

@@ -73,4 +73,38 @@ export class OpenAIProvider implements AIProvider {
             throw error;
         }
     }
+
+    async generateContent(systemPrompt: string, userPrompt: string, jsonMode: boolean = false): Promise<string> {
+        try {
+            const isReasoningModel = this.modelName.startsWith('o1') || 
+                                   this.modelName.startsWith('o3') || 
+                                   this.modelName.includes('gpt-5');
+            
+            const temperature = isReasoningModel ? 1 : 0.2;
+
+            const completion = await this.client.chat.completions.create({
+                model: this.modelName,
+                messages: [
+                    {
+                        role: 'system',
+                        content: systemPrompt
+                    },
+                    {
+                        role: 'user',
+                        content: userPrompt
+                    }
+                ],
+                temperature: temperature,
+                response_format: jsonMode ? { type: 'json_object' } : undefined
+            });
+
+            const content = completion.choices[0].message.content;
+            if (!content) throw new Error('Empty response from OpenAI');
+
+            return content;
+        } catch (error: any) {
+            logger.error(`OpenAI generation failed: ${error.message}`);
+            throw error;
+        }
+    }
 }

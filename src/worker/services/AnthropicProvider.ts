@@ -70,4 +70,29 @@ export class AnthropicProvider implements AIProvider {
             throw error;
         }
     }
+
+    async generateContent(systemPrompt: string, userPrompt: string, jsonMode: boolean = false): Promise<string> {
+        try {
+            const message = await this.client.messages.create({
+                model: this.modelName,
+                max_tokens: 4096,
+                system: systemPrompt,
+                messages: [
+                    {
+                        role: 'user',
+                        content: userPrompt
+                    }
+                ]
+            });
+
+            const textBlock = message.content[0];
+            if (textBlock.type !== 'text') throw new Error('Unexpected response type from Claude');
+            
+            return textBlock.text;
+
+        } catch (error: any) {
+            logger.error(`Anthropic generation failed: ${error.message}`);
+            throw error;
+        }
+    }
 }

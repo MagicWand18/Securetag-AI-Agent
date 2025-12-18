@@ -10,6 +10,7 @@ export interface ProjectContext {
     }
     structure: string
     critical_files: string[]
+    dependencies: string[]
 }
 
 export class ContextAnalyzer {
@@ -22,21 +23,52 @@ export class ContextAnalyzer {
                 infrastructure: []
             },
             structure: '',
-            critical_files: []
+            critical_files: [],
+            dependencies: []
         }
 
         try {
+            // Find true root (if zip extracted to a single subdir)
+            const projectRoot = this.findProjectRoot(workDir);
+            logger.info(`Analyzing project root: ${projectRoot} (base: ${workDir})`);
+
             // 1. Analyze File Structure & Tree
-            context.structure = this.generateFileTree(workDir)
+            context.structure = this.generateFileTree(projectRoot)
 
             // 2. Detect Stack based on key files
-            await this.detectStack(workDir, context)
+            await this.detectStack(projectRoot, context)
 
         } catch (error: any) {
             logger.error(`Context analysis failed: ${error.message}`)
         }
 
         return context
+    }
+
+    private findProjectRoot(baseDir: string): string {
+        // Check if baseDir has config files
+        if (this.hasConfigFiles(baseDir)) return baseDir;
+
+        // If not, check if it has only one directory
+        try {
+            const items = fs.readdirSync(baseDir).filter(f => !f.startsWith('.') && f !== '__MACOSX');
+            if (items.length === 1) {
+                const subDir = path.join(baseDir, items[0]);
+                if (fs.statSync(subDir).isDirectory()) {
+                    // Check if subdir has config files
+                    if (this.hasConfigFiles(subDir)) return subDir;
+                    // Or just return it as a guess
+                    return subDir;
+                }
+            }
+        } catch (e) {}
+        
+        return baseDir;
+    }
+
+    private hasConfigFiles(dir: string): boolean {
+        const configs = ['package.json', 'pom.xml', 'requirements.txt', 'go.mod', 'composer.json', 'Gemfile', 'mix.exs', 'build.gradle'];
+        return configs.some(c => fs.existsSync(path.join(dir, c)));
     }
 
     private generateFileTree(dir: string, prefix = '', depth = 0, maxDepth = 3): string {
@@ -77,6 +109,11 @@ export class ContextAnalyzer {
                 const pkg = JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf-8'))
                 const deps = { ...pkg.dependencies, ...pkg.devDependencies }
                 
+                // Extract dependencies
+                if (deps) {
+                    context.dependencies.push(...Object.keys(deps))
+                }
+
                 if (deps['express']) context.stack.frameworks.push('Express')
                 if (deps['nestjs'] || deps['@nestjs/core']) context.stack.frameworks.push('NestJS')
                 if (deps['vue']) context.stack.frameworks.push('Vue.js')
@@ -93,18 +130,28 @@ export class ContextAnalyzer {
         // Python
         if (fs.existsSync(path.join(dir, 'requirements.txt')) || fs.existsSync(path.join(dir, 'Pipfile')) || fs.existsSync(path.join(dir, 'pyproject.toml'))) {
             context.stack.languages.push('Python')
-            if (fs.existsSync(path.join(dir, 'requirements.txt'))) context.critical_files.push('requirements.txt')
-            
-            // Simple content check for frameworks
-            try {
-                const reqs = fs.existsSync(path.join(dir, 'requirements.txt')) 
-                    ? fs.readFileSync(path.join(dir, 'requirements.txt'), 'utf-8').toLowerCase()
-                    : ''
-                
-                if (reqs.includes('django')) context.stack.frameworks.push('Django')
-                if (reqs.includes('flask')) context.stack.frameworks.push('Flask')
-                if (reqs.includes('fastapi')) context.stack.frameworks.push('FastAPI')
-            } catch (e) {}
+            if (fs.existsSync(path.join(dir, 'requirements.txt'))) {
+                context.critical_files.push('requirements.txt')
+                try {
+                    const reqsContent = fs.readFileSync(path.join(dir, 'requirements.txt'), 'utf-8')
+                    const reqs = reqsContent.toLowerCase()
+                    
+                    // Extract dependencies from requirements.txt
+                    const lines = reqsContent.split('\n')
+                    for (const line of lines) {
+                        const trimmed = line.trim()
+                        if (trimmed && !trimmed.startsWith('#')) {
+                            // Simple parsing: split by common operators
+                            const pkg = trimmed.split(/[=<>~;]/)[0].trim()
+                            if (pkg) context.dependencies.push(pkg)
+                        }
+                    }
+
+                    if (reqs.includes('django')) context.stack.frameworks.push('Django')
+                    if (reqs.includes('flask')) context.stack.frameworks.push('Flask')
+                    if (reqs.includes('fastapi')) context.stack.frameworks.push('FastAPI')
+                } catch (e) {}
+            }
         }
 
         // Java
@@ -124,6 +171,7 @@ export class ContextAnalyzer {
             context.critical_files.push('composer.json')
             try {
                 const composer = fs.readFileSync(path.join(dir, 'composer.json'), 'utf-8')
+                // Basic extraction could be added here similar to Node
                 if (composer.includes('laravel/framework')) context.stack.frameworks.push('Laravel')
                 if (composer.includes('symfony/framework-bundle')) context.stack.frameworks.push('Symfony')
             } catch (e) {}

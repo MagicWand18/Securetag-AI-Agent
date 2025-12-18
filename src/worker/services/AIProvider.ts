@@ -11,4 +11,5 @@ export interface AIProvider {
     name: string;
     modelName: string;
     analyzeFinding(finding: any, projectContext: any, promptTemplate: string): Promise<AIAnalysisResult>;
+    generateContent(systemPrompt: string, userPrompt: string, jsonMode?: boolean): Promise<string>;
 }

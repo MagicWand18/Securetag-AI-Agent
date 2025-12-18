@@ -21,5 +21,6 @@
   <include file="015_link_apikey_to_user.sql" relativeToChangelogFile="true"/>
   <include file="016_add_tenant_credits.sql" relativeToChangelogFile="true"/>
   <include file="017_add_task_double_check.sql" relativeToChangelogFile="true"/>
+  <include file="018_create_custom_rule_library.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

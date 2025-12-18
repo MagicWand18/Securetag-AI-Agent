@@ -63,4 +63,12 @@ export class WorkerClient {
       logger.warn(`Failed to report progress for task ${taskId}: ${err.message}`)
     }
   }
+
+  async saveCustomRule(rule: any): Promise<void> {
+    try {
+      await this.client.post('/internal/rules', rule)
+    } catch (err: any) {
+      logger.error(`Failed to save custom rule: ${err.message}`)
+    }
+  }
 }

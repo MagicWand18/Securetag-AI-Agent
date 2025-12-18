@@ -10,6 +10,10 @@
 *   **API**: `POST /codeaudit/upload` acepta nuevos parámetros:
     *   `custom_rules`: boolean (true para activar).
     *   `custom_rules_qty`: integer (min 1, default 3, max 10).
+    *   `custom_rule_model`: string (opcional: 'standard', 'pro', 'max'). Default: 'standard'.
+*   **Validación de Acceso**:
+    *   Verificar si el plan del tenant permite `custom_rules` (Solo Standard y Premium).
+    *   Verificar si el modelo solicitado está permitido para el plan del tenant.
 *   **Base de Datos**:
     *   Tabla `custom_rule_library`: Almacena las reglas generadas exitosamente.
         *   `id`: UUID
@@ -25,6 +29,7 @@ Nueva clase `CustomRuleGenerator` (migración de `synthetic_rules_gen.py` a TS) 
 1.  **Stack Analysis**: Usa `ContextAnalyzer` para determinar el stack exacto (ej. "Node.js + Express + Mongoose"), ver contenido de archivos package.json, requirements.txt, etc.
 2.  **Feasibility Check**: (Opcional) Validar si vale la pena generar reglas para este stack.
 3.  **Generation Loop**: Ciclo de generación basado en `custom_rules_qty`.
+    *   **AI Integration**: Reutilización de `AIProvider` (OpenAI/Anthropic) para soportar múltiples modelos.
     *   Gen Code (Vulnerable/Safe).
     *   Gen Rule (Semgrep YAML).
     *   Validate (Ejecutar Semgrep).
@@ -50,7 +55,7 @@ El acceso a modelos de IA dependerá del Plan del Tenant (usando la lógica de `
 | Feature | Free | Standard (Paga) | Premium (Paga++) |
 | :--- | :--- | :--- | :--- |
 | **Custom Rules** | ❌ No disponible | ✅ Disponible | ✅ Disponible |
-| **Modelos Disponibles** | N/A | • Securetag v1 (Finetuned)<br>• External Standard (GPT-4o-mini) | • Securetag v1<br>• External Standard<br>• External Pro (GPT-4o)<br>• External Max (o1/Claude Opus) |
+| **Modelos Disponibles** | N/A | • External Standard (GPT-5-mini o haiku 4.5) | • External Standard (GPT-5-mini o haiku 4.5)• External Pro (GPT-5.2 o sonnet 4.5)• External Max (GPT-5.2 pro o opus 4.5) |
 | **Deep Code Vision** | ❌ No (Snippet) | ❌ No (Snippet) | ✅ Sí (50 líneas) |
 
 ### 2.2 Estructura de Costos (Security Credits)
@@ -89,7 +94,7 @@ Usuario Premium pide **4 reglas** usando modelo **Pro**.
 
 ### Fase 1: Server Side (Infraestructura)
 **Responsable**: 🤖 **Agente Server**
-**Estado**: [ ] Pendiente
+**Estado**: [x] Completado (18/12/2025)
 
 1.  **DB Migration**: Crear tabla `custom_rule_library`.
 2.  **API Update**: Modificar `UserContextSchema` (zod) para aceptar `custom_rules` y `custom_rules_qty`.
@@ -98,14 +103,17 @@ Usuario Premium pide **4 reglas** usando modelo **Pro**.
 
 ### Fase 2: Worker Logic (Cerebro & Migración)
 **Responsable**: 👷 **Agente Worker**
-**Estado**: [ ] Pendiente (Bloqueado por Fase 1)
+**Estado**: [x] Completado (18/12/2025)
 
 1.  **Porting Logic**: Traducir `synthetic_rules_gen.py` a TypeScript (`src/worker/services/RuleGenerator.ts`).
-    *   `ContextAnalyzer`: Mejorar para leer `package.json` y dependencias (Stack Analysis).
+    *   `ContextAnalyzer`: Mejorar para leer `package.json`, `requirements.txt`, `Gemfile`, etc. y dependencias (Stack Analysis).
     *   `generateVulnerableCode()` & `generateSemgrepRule()`.
     *   `validateRule()` (wrapper `child_process`).
 2.  **Credits Integration**: Actualizar `CreditsManager` para el cobro en dos fases (Processing Fee + Success Fee).
 3.  **Integration**: Conectar en `TaskExecutor.ts`.
+4.  **AI Providers Refactor**: Soporte genérico para OpenAI y Anthropic en generación de contenido.
+5.  **Persistencia**: Conexión con `/internal/rules` para guardar reglas generadas.
+6.  **Dynamic Model Selection**: Implementar selección de modelo basada en `custom_rule_model` (standard/pro/max) y validar permisos de tier en el Worker si el Server no lo ha filtrado.
 
 ### Fase 3: Automated Research (Mantenimiento)
 **Responsable**: 🤖 **Server** (Scheduler) y 👷 **Worker** (Ejecución)
@@ -118,11 +126,11 @@ Usuario Premium pide **4 reglas** usando modelo **Pro**.
 
 ## ⚠️ Riesgos y Mitigación
 *   **Riesgo**: Semgrep Validation Loop infinito o muy lento.
-    *   *Mitigación*: Timeout estricto de 30s por regla y Max Retries = 3.
+    *   *Mitigación*: Timeout estricto de 30s por regla y Max Retries = 3. (**Implementado**)
 *   **Riesgo**: Generación de reglas basura (Falsos Positivos).
-    *   *Mitigación*: El proceso de validación (Paso 2) es crítico. Si detecta el código seguro como vulnerable, la regla se descarta automáticamente.
+    *   *Mitigación*: El proceso de validación (Paso 2) es crítico. Si detecta el código seguro como vulnerable, la regla se descarta automáticamente. (**Implementado**)
 *   **Riesgo**: Costo de API OpenAI se dispara.
-    *   *Mitigación*: El cobro por "Intento" mitiga esto. Además, rate limits por tenant.
+    *   *Mitigación*: El cobro por "Intento" mitiga esto. Además, rate limits por tenant. (**Implementado**)
 
 ---
 

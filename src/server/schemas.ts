@@ -41,7 +41,12 @@ export const UploadMetadataSchema = z.object({
   user_context: UserContextSchema.optional(),
 
   double_check: z.enum(["critical", "high", "all", "true", "false", "1", "0"]).optional().default("false"),
-  double_check_level: z.enum(["standard", "pro", "max"]).optional().default("standard")
+  double_check_level: z.enum(["standard", "pro", "max"]).optional().default("standard"),
+  
+  // Custom Rules Engine Configuration
+  custom_rules: z.enum(["true", "false", "1", "0"]).optional().default("false"),
+  custom_rules_qty: z.string().regex(/^\d+$/).transform(Number).pipe(z.number().min(1).max(10)).optional().default(3),
+  custom_rule_model: z.enum(['standard', 'pro', 'max']).optional()
 });
 
 export type UploadMetadata = z.infer<typeof UploadMetadataSchema>;

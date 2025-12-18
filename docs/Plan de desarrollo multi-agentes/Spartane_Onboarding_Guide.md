@@ -21,7 +21,7 @@ Su instancia dedicada de SecureTag AI opera bajo una arquitectura segura y aisla
 
 *   **SecureTag API**: Puerta de entrada segura para recibir su código y entregar resultados.
 *   **Analysis Engine**: Orquesta herramientas de escaneo profundo (SAST) con mecanismos de **"Resilient Scanning"** (Heartbeat) para manejar grandes repositorios sin interrupciones.
-*   **Custom Rule Engine**: Motor de reglas personalizado y optimizado para el stack de Spartane (Vue 3, TypeScript, Pinia), capaz de detectar vulnerabilidades específicas que herramientas genéricas ignoran.
+*   **Generative Custom Rule Engine (NUEVO)**: Motor dinámico que crea reglas de seguridad "on-demand" específicas para su stack tecnológico exacto (librerías, versiones, frameworks) utilizando IA generativa y validación automática.
 *   **AI Security Core**: Nuestro modelo cognitivo (`securetag-v1`) alojado en infraestructura GPU privada, entrenado para entender vulnerabilidades complejas.
     *   **Context-Aware Analysis (NUEVO)**: El sistema ahora "entiende" la arquitectura de su proyecto (lenguajes, frameworks, librerías) antes de auditar.
     *   **Deep Code Vision**: A diferencia de herramientas estándar que analizan fragmentos aislados, SecureTag inyecta una **ventana de contexto extendida** al motor cognitivo. Esto permite a la IA "ver" el código circundante (importaciones, validaciones previas, manejo de errores) para distinguir con precisión humana entre una vulnerabilidad real y un falso positivo, tal como lo haría un auditor senior.
@@ -86,7 +86,10 @@ curl -X POST "http://143.198.61.64:8080/codeaudit/upload" \
   -H "X-API-Key: SU_API_KEY_AQUI" \
   -F "file=@./mi-proyecto.zip" \
   -F "project_alias=backend-core" \
-  -F "profile=auto"
+  -F "profile=auto" \
+  -F "custom_rules=true" \
+  -F "custom_rules_qty=3" \
+  -F "custom_rule_model=standard"
 ```
 
 *   **`project_alias`** (Opcional pero recomendado): Un nombre legible para su proyecto.
@@ -100,6 +103,14 @@ curl -X POST "http://143.198.61.64:8080/codeaudit/upload" \
     *   *Valores*: `critical` (hallazgos críticos), `high` (hallazgos altos y críticos), `medium` (hallazgos medianos, altos y críticos), `low` (hallazgos bajos, medianos, altos y críticos), `all` (todos los hallazgos igual que low). Default: `false`.
 *   **`double_check_level`** (Opcional): Define la profundidad y el costo del análisis por hallazgo.
     *   *Valores*: `standard` (1 crédito), `pro` (2 créditos), `max` (3 créditos). Default: `standard`.
+*   **`custom_rules`** (Opcional): Activa la generación de reglas personalizadas SAST específicas para su stack.
+    *   *Valores*: `true`, `false`. Default: `false`.
+    *   *Requisito*: Disponible para planes Standard y Premium.
+*   **`custom_rules_qty`** (Opcional): Cantidad de reglas personalizadas a intentar generar.
+    *   *Valores*: Entero entre 1 y 10. Default: `3`.
+*   **`custom_rule_model`** (Opcional): Potencia del modelo de IA utilizado para la generación de reglas.
+    *   *Valores*: `standard` (Rápido), `pro` (Complejo), `max` (Profundo/Casos Borde). Default: `standard`.
+    *   *Requisito*: Modelos `pro` y `max` exclusivos para plan Premium. (Ver sección *Generative Custom Rules* para costos).
 
 **Response (Error de Seguridad - Bloqueo de Amenaza):**
 Si nuestro sistema de inteligencia de amenazas detecta contenido malicioso en el archivo subido, la solicitud será rechazada inmediatamente:
@@ -283,6 +294,34 @@ En el JSON de resultados, busque el campo `double_check` dentro de `analysis_jso
 ```
 
 Esta estructura permite a sus ingenieros de seguridad priorizar esfuerzos basándose en el consenso de múltiples inteligencias.
+
+---
+
+### 🧬 Enterprise Intelligence: Generative Custom Rules (NUEVO)
+
+Esta funcionalidad permite que SecureTag "aprenda" de su código. Analizamos su `package.json`, `pom.xml`, etc., para identificar librerías específicas y generamos reglas de detección SAST exclusivas para su proyecto en tiempo real.
+
+**Niveles de Acceso y Modelos:**
+
+| Feature | Standard (Paga) | Premium (Paga++) |
+| :--- | :--- | :--- |
+| **Acceso** | ✅ Disponible | ✅ Disponible |
+| **Modelos** | `standard` | `standard`, `pro`, `max`|
+
+**Estructura de Costos (Créditos):**
+
+El cobro es dinámico y se divide en dos fases para garantizar valor:
+
+1.  **Processing Fee**: **1 Crédito** por regla solicitada (cubre el intento de generación).
+2.  **Success Fee**: Se cobra **SOLO si la regla es válida, compila y funciona**.
+
+| Modelo | Success Fee | Descripción |
+| :--- | :---: | :--- |
+| **Standard** | **+2 Créditos** | Reglas rápidas para vulnerabilidades comunes. |
+| **Pro** | **+4 Créditos** | Lógica compleja y frameworks modernos. |
+| **Max** | **+9 Créditos** | Razonamiento profundo para casos de borde y Business Logic. |
+
+*> **Ejemplo**: Si solicita 3 reglas con modelo Standard y se generan 2 exitosamente: (3 * 1 Processing) + (2 * 2 Success) = 7 Créditos.*
 
 ---
 

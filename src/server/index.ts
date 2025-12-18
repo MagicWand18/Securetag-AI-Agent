@@ -153,6 +153,9 @@ const server = http.createServer(async (req, res) => {
         let userContext: any = null
         let doubleCheck: string | boolean = false
         let doubleCheckLevel = 'standard'
+        let customRules: boolean = false
+        let customRulesQty: number = 3
+        let customRulesModel: string = 'standard'
 
         for (const p of parts) {
           const idx = p.indexOf('\r\n\r\n')
@@ -181,6 +184,22 @@ const server = http.createServer(async (req, res) => {
             const endIdx = content.lastIndexOf('\r\n')
             doubleCheckLevel = content.slice(0, endIdx >= 0 ? endIdx : undefined).trim().toLowerCase()
             console.log(`[DEBUG] Found double_check_level: ${doubleCheckLevel}`)
+          } else if (header.includes('name="custom_rules"')) {
+            const endIdx = content.lastIndexOf('\r\n')
+            const val = content.slice(0, endIdx >= 0 ? endIdx : undefined).trim().toLowerCase()
+            customRules = (val === 'true' || val === '1')
+            console.log(`[DEBUG] Found custom_rules: ${val} -> ${customRules}`)
+          } else if (header.includes('name="custom_rules_qty"')) {
+            const endIdx = content.lastIndexOf('\r\n')
+            const val = content.slice(0, endIdx >= 0 ? endIdx : undefined).trim()
+            const parsed = parseInt(val, 10)
+            if (!isNaN(parsed)) customRulesQty = parsed
+            console.log(`[DEBUG] Found custom_rules_qty: ${val} -> ${customRulesQty}`)
+          } else if (header.includes('name="custom_rule_model"')) {
+            const endIdx = content.lastIndexOf('\r\n')
+            const val = content.slice(0, endIdx >= 0 ? endIdx : undefined).trim().toLowerCase()
+            if (['standard', 'pro', 'max'].includes(val)) customRulesModel = val
+            console.log(`[DEBUG] Found custom_rule_model: ${val} -> ${customRulesModel}`)
           } else if (header.includes('name="user_context"')) {
             const endIdx = content.lastIndexOf('\r\n')
             const rawJson = content.slice(0, endIdx >= 0 ? endIdx : undefined).trim()
@@ -243,6 +262,41 @@ const server = http.createServer(async (req, res) => {
                 return send(res, 400, { ok: false, error: `Invalid user_context: ${result.error.issues[0].message}` })
             }
             userContext = result.data // Use validated data
+        }
+
+        // Validate Custom Rules Config
+        if (customRules) {
+            const crCheck = UploadMetadataSchema.pick({ custom_rules_qty: true }).safeParse({ custom_rules_qty: String(customRulesQty) })
+            if (!crCheck.success) {
+                return send(res, 400, { ok: false, error: `Invalid custom_rules_qty: ${crCheck.error.issues[0].message}` })
+            }
+            
+            // Check Credit Balance (Processing Fee = 1 * Qty)
+            // Note: Actual deduction happens in Worker, this is just a pre-check to fail fast
+            const processingFee = customRulesQty * 1
+            try {
+                const tenantQ = await dbQuery<any>('SELECT credits_balance, plan FROM securetag.tenant WHERE id=$1', [tenantId])
+                const tenantRow = tenantQ.rows[0] || {}
+                const balance = tenantRow.credits_balance || 0
+                const plan = tenantRow.plan || 'free'
+
+                // 1. Check Tier Permissions
+                if (plan === 'free') {
+                   return send(res, 403, { ok: false, error: 'Custom Rules are not available for Free tier.' })
+                }
+
+                // 2. Check Model Access
+                if ((customRulesModel === 'max' || customRulesModel === 'pro') && plan !== 'premium') {
+                   return send(res, 403, { ok: false, error: 'Pro and Max models are only available for Premium tier.' })
+                }
+
+                if (balance < processingFee) {
+                    return send(res, 402, { ok: false, error: `Insufficient credits for Custom Rules. Required: ${processingFee}, Available: ${balance}.` })
+                }
+            } catch (err) {
+                console.error('Error checking credits/plan:', err)
+                return send(res, 503, { ok: false, error: 'Failed to verify tenant status' })
+            }
         }
 
         // 1. Validate Magic Bytes (Must be ZIP)
@@ -339,9 +393,14 @@ const server = http.createServer(async (req, res) => {
               const scope = (doubleCheck === true) ? 'all' : String(doubleCheck)
               dcConfig = { enabled: true, level: doubleCheckLevel, scope }
           }
+
+          let crConfig = null
+          if (customRules) {
+              crConfig = { enabled: true, qty: customRulesQty }
+          }
           
-          await dbQuery('INSERT INTO securetag.task(id, tenant_id, type, status, payload_json, retries, priority, created_at, project_id, previous_task_id, is_retest, double_check_config) VALUES($1,$2,$3,$4,$5,$6,$7, now(), $8, $9, $10, $11)',
-            [taskId, tenantId, 'codeaudit', 'queued', JSON.stringify({ zipPath, workDir: wkDir, profile, previousTaskId, userContext, apiKeyHash }), 0, 0, projectId, previousTaskId, isRetest, dcConfig ? JSON.stringify(dcConfig) : null])
+          await dbQuery('INSERT INTO securetag.task(id, tenant_id, type, status, payload_json, retries, priority, created_at, project_id, previous_task_id, is_retest, double_check_config, custom_rules_config) VALUES($1,$2,$3,$4,$5,$6,$7, now(), $8, $9, $10, $11, $12)',
+            [taskId, tenantId, 'codeaudit', 'queued', JSON.stringify({ zipPath, workDir: wkDir, profile, previousTaskId, userContext, apiKeyHash }), 0, 0, projectId, previousTaskId, isRetest, dcConfig ? JSON.stringify(dcConfig) : null, crConfig ? JSON.stringify(crConfig) : null])
           await dbQuery('INSERT INTO securetag.codeaudit_upload(tenant_id, project_id, task_id, file_name, storage_path, size_bytes, created_at) VALUES($1,$2,$3,$4,$5,$6, now())', [tenantId, projectId, taskId, fileName, zipPath, size])
         } catch {
           return send(res, 503, { ok: false })
@@ -361,11 +420,34 @@ const server = http.createServer(async (req, res) => {
 
     try {
       const tenantId = authReq.tenantId!
-      const q = await dbQuery<any>('SELECT id, type, payload_json, double_check_config FROM securetag.task WHERE tenant_id=$1 AND status=$2 ORDER BY created_at LIMIT 1', [tenantId, 'queued'])
+      const q = await dbQuery<any>('SELECT id, type, payload_json, double_check_config, custom_rules_config FROM securetag.task WHERE tenant_id=$1 AND status=$2 ORDER BY created_at LIMIT 1', [tenantId, 'queued'])
       if (!q.rows.length) return send(res, 204, { ok: true })
       const t = q.rows[0]
       await dbQuery('UPDATE securetag.task SET status=$1, started_at=now() WHERE id=$2', ['running', t.id])
-      const obj = { id: t.id, type: t.type, status: 'running', retries: 0, startedAt: Date.now(), double_check_config: t.double_check_config, ...t.payload_json }
+      
+      // Flatten custom_rules_config into the job object for Worker compatibility
+      let customRulesProps = {};
+      if (t.custom_rules_config) {
+          try {
+              const crc = typeof t.custom_rules_config === 'string' ? JSON.parse(t.custom_rules_config) : t.custom_rules_config;
+              customRulesProps = {
+                  custom_rules: crc.enabled,
+                  custom_rules_qty: crc.qty,
+                  custom_rule_model: crc.model
+              };
+          } catch (e) {}
+      }
+
+      const obj = { 
+          id: t.id, 
+          type: t.type, 
+          status: 'running', 
+          retries: 0, 
+          startedAt: Date.now(), 
+          double_check_config: t.double_check_config, 
+          ...customRulesProps,
+          ...t.payload_json 
+      }
       return send(res, 200, { ok: true, task: obj })
     } catch {
       return send(res, 503, { ok: false })
@@ -410,6 +492,32 @@ const server = http.createServer(async (req, res) => {
     return
   }
   
+  // Custom Rules Internal Endpoint
+  if (method === 'POST' && url === '/internal/rules') {
+      const authReq = req as AuthenticatedRequest
+      const isAuthenticated = await authenticate(authReq, res)
+      if (!isAuthenticated) return
+
+      const chunks: Buffer[] = []
+      req.on('data', c => chunks.push(Buffer.from(c)))
+      req.on('end', async () => {
+          try {
+              const body = JSON.parse(Buffer.concat(chunks).toString('utf8'))
+              
+              if (!body.rule_content) return send(res, 400, { ok: false, error: 'Missing rule_content' })
+              
+              await dbQuery(
+                  'INSERT INTO securetag.custom_rule_library(tenant_id, rule_content, stack_context, ai_metadata) VALUES($1, $2, $3, $4)',
+                  [authReq.tenantId, body.rule_content, JSON.stringify(body.stack_context || {}), JSON.stringify(body.ai_metadata || {})]
+              )
+              return send(res, 201, { ok: true })
+          } catch (e: any) {
+              return send(res, 400, { ok: false, error: String(e.message || e) })
+          }
+      })
+      return
+  }
+
   // Progress Tracking Endpoint (Internal/Worker)
   if (method === 'POST' && url?.startsWith('/internal/tasks/') && url?.endsWith('/progress')) {
     // Expected format: /internal/tasks/:id/progress
