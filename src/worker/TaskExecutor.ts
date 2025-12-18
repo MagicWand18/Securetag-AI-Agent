@@ -7,6 +7,7 @@ import { LLMClient } from './LLMClient.js'
 import { ContextAnalyzer } from './ContextAnalyzer.js'
 import { ExternalAIService } from './services/ExternalAIService.js'
 import { CustomRuleGenerator } from './services/CustomRuleGenerator.js'
+import { ResearchOrchestrator } from './services/research/ResearchOrchestrator.js'
 import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
@@ -21,7 +22,8 @@ export class TaskExecutor {
     private externalAIService: ExternalAIService
     private taskTimeouts: Map<string, number> = new Map([
         ['codeaudit', 300000], // 5 minutes
-        ['web', 60000]         // 1 minute
+        ['web', 60000],        // 1 minute
+        ['research', 14400000]  // 4 hours (Research Pipeline)
     ])
 
     constructor(workerId?: string) {
@@ -49,6 +51,8 @@ export class TaskExecutor {
                 async (heartbeat) => {
                     if (job.type === 'codeaudit') {
                         return await this.executeSemgrep(job, tenant, started, heartbeat)
+                    } else if (job.type === 'research') {
+                        return await this.executeResearch(job, tenant, started)
                     } else {
                         return await this.executeHttpx(job, tenant, started)
                     }
@@ -82,6 +86,27 @@ export class TaskExecutor {
                 error: err.message,
                 durationMs: Date.now() - started
             }
+        }
+    }
+
+    private async executeResearch(job: any, tenant: string, started: number): Promise<any> {
+        logger.info('Starting Automated Research Pipeline...')
+        
+        const apiKey = process.env.OPENAI_API_KEY
+        if (!apiKey) {
+            throw new Error('OPENAI_API_KEY is required for research tasks')
+        }
+
+        const orchestrator = new ResearchOrchestrator(apiKey)
+        await orchestrator.runPipeline()
+
+        return {
+            ok: true,
+            status: 'completed',
+            taskId: job.id || job.taskId,
+            tenant,
+            data: { message: 'Research Pipeline Completed Successfully' },
+            durationMs: Date.now() - started
         }
     }
 

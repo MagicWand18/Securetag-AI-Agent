@@ -22,6 +22,7 @@ Su instancia dedicada de SecureTag AI opera bajo una arquitectura segura y aisla
 *   **SecureTag API**: Puerta de entrada segura para recibir su código y entregar resultados.
 *   **Analysis Engine**: Orquesta herramientas de escaneo profundo (SAST) con mecanismos de **"Resilient Scanning"** (Heartbeat) para manejar grandes repositorios sin interrupciones.
 *   **Generative Custom Rule Engine (NUEVO)**: Motor dinámico que crea reglas de seguridad "on-demand" específicas para su stack tecnológico exacto (librerías, versiones, frameworks) utilizando IA generativa y validación automática.
+*   **Automated Research Pipeline (NUEVO)**: Sistema autónomo de "Zero-Day Detection" que monitorea amenazas globales (CISA KEV, NVD, GitHub) en tiempo real, genera reglas de detección sintéticas y las despliega automáticamente en su instancia para      protegerlo contra nuevas vulnerabilidades antes de que sean ampliamente conocidas.
 *   **AI Security Core**: Nuestro modelo cognitivo (`securetag-v1`) alojado en infraestructura GPU privada, entrenado para entender vulnerabilidades complejas.
     *   **Context-Aware Analysis (NUEVO)**: El sistema ahora "entiende" la arquitectura de su proyecto (lenguajes, frameworks, librerías) antes de auditar.
     *   **Deep Code Vision**: A diferencia de herramientas estándar que analizan fragmentos aislados, SecureTag inyecta una **ventana de contexto extendida** al motor cognitivo. Esto permite a la IA "ver" el código circundante (importaciones, validaciones previas, manejo de errores) para distinguir con precisión humana entre una vulnerabilidad real y un falso positivo, tal como lo haría un auditor senior.
@@ -324,6 +325,14 @@ El cobro es dinámico y se divide en dos fases para garantizar valor:
 *> **Ejemplo**: Si solicita 3 reglas con modelo Standard y se generan 2 exitosamente: (3 * 1 Processing) + (2 * 2 Success) = 7 Créditos.*
 
 ---
+
+### 🛡️ Global Threat Intelligence (NUEVO)
+
+Su instancia de SecureTag ahora está conectada a nuestro **Automated Research Pipeline**.
+
+1.  **Monitoreo 24/7**: Rastreamos activamente catálogos de amenazas críticas como CISA KEV (Known Exploited Vulnerabilities) y GitHub Advisories.
+2.  **Generación Sintética**: Cuando surge una nueva vulnerabilidad (CVE), nuestra IA analiza el exploit, genera código de prueba y crea una regla de detección "Sintética".
+3.  **Protección Proactiva**: Estas reglas se incorporan automáticamente a su motor de análisis. Esto significa que SecureTag puede detectar vulnerabilidades "fresh" (de días u horas de antigüedad) en su código, incluso antes de que los escáneres tradicionales actualicen sus bases de datos.
 
 ### 📞 Soporte
 

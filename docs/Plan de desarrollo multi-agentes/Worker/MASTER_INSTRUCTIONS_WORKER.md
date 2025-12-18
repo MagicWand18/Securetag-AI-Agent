@@ -39,31 +39,23 @@ Eres el **Agente Worker**. Has completado exitosamente la refactorización a una
 *   **Tarea 8.1: Motor SAST Propio** (Completado Externamente)
 *   **Tarea 10.1: Contexto Seguro para LLM** (Completado - Worker/Logic)
 *   **Tarea 12.1: Progress Tracking (Logic)** (Completado - Cálculo Dinámico & ETA)
-*   **Tarea 12.2: AI Double-Check (Multi-Provider Logic)** (Completado - Providers, Fallback & Deep Context)
+*   **Tarea 12.2**: AI Double-Check (Multi-Provider Logic) (Completado - Providers, Fallback & Deep Context)
+*   **Tarea 12.3**: Custom Rules Engine (Completado - On-Demand & Automated Research Pipeline)
 
-### 💼 Fase 12: Enterprise Features (Implementación Lógica)
-*   **Tarea 12.1: Progress Tracking** [x]
-    *   Calcular avance basado en herramientas ejecutadas vs totales.
-    *   Actualizar BD con %, ETA y estado granular.
-*   **Tarea 12.2: AI Double-Check (External)** [x]
-    *   Implementar cliente multi-provider (OpenAI, Claude, Gemini).
-    *   Lógica de "Fallback" (si falla OpenAI -> prueba Claude).
-    *   Solo enviar hallazgos Critical/High según configuración.
-*   **Tarea 12.3: Custom Rules Engine** [ ]
-    *   Pipeline: Analizar Stack -> Prompt Engineering -> Generar Regla Semgrep -> Test -> Validar.
-    *   Guardar reglas exitosas en librería del tenant.
 
-### 🚀 Tarea Actual: Enterprise Intelligence (Logic)
 
-**Tarea 12.3: Custom Rules Engine (Discovery)** [ ]
-*   **Objetivo**: Implementar motor de descubrimiento y generación de reglas personalizadas.
+### 🚀 Tarea Actual: Enterprise Features (Monetización)
+
+**Tarea 12.4: Deep Code Vision Monetization** [ ]
+*   **Plan Detallado**: `docs/Plan de desarrollo multi-agentes/Worker/Deep_Code_Vision_Monetization_Plan.md`
+*   **Objetivo**: Restringir el contexto extendido (50 líneas) a usuarios Premium.
 *   **Acciones**:
-    *   Analizar stack tecnológico del proyecto.
-    *   Diseñar prompts para generar reglas Semgrep específicas.
-    *   Validar sintaxis de reglas generadas.
-    *   Guardar en librería de reglas del tenant.
+    *   **Logic**: Validar `plan` del tenant en `ContextExtractor`.
+    *   **Free/Standard**: Solo entregar snippet básico (1-3 líneas).
+    *   **Premium**: Entregar contexto completo (50 líneas).
+    *   **Integration**: Asegurar que esto aplique tanto para análisis local como para AI Double Check.
 
-**Estado**: 🟢 **Activo**
+**Estado**: 🟢 **Activo**.
 
 ### 🔮 Próximos Pasos (Fase 12)
 *   **Tarea 12.4: Deep Code Vision Monetization** [ ]

@@ -235,11 +235,11 @@ El sistema se compone de tres pilares principales que evolucionan en paralelo:
 *   **Tarea 12.2: AI Double-Check (Second Opinion)** (Worker/Server) ✅ (Ref: `EVIDENCE_Server_9`, `EVIDENCE_Worker_7`)
     *   Backend: Schema Identity, Credits Balance, Double Check Config.
     *   Worker: Multi-Provider (OpenAI/Anthropic), Fallback Logic, Deep Code Vision Context.
-*   **Tarea 12.3: Custom Rules on Demand** (Research/Worker) [ ]
-    *   Param `custom-rules=true`.
-    *   Generación automática de reglas Semgrep específicas para el stack del cliente.
-    *   Validación de efectividad antes de escanear.
-    *   Evitar cobro doble (cache de reglas generadas).
+*   **Tarea 12.3: Custom Rules on Demand** (Research/Worker) ✅ (Ref: `EVIDENCE_Server_10`, `EVIDENCE_Worker_8`, `EVIDENCE_Worker_9`)
+    *   **On-Demand**: Generación de reglas específicas para stacks detectados (`custom_rules=true`).
+    *   **Monetization**: Modelo de cobro "Processing Fee + Success Fee" y Tiers.
+    *   **Automated Research Pipeline**: Sistema autónomo (Scheduler + Worker) para monitorear NVD/CISA y generar reglas globales.
+    *   **Tech**: Migración de Python a TS (`CustomRuleGenerator`, `ThreatMonitor`, `ThreatEnricher`).
 *   **Tarea 12.4: Deep Code Vision Monetization** (Worker) [ ]
     *   **Objetivo**: Restringir el contexto extendido (50 líneas) a usuarios Premium.
     *   **Acción**: Validar `plan` del tenant en `ContextExtractor`.

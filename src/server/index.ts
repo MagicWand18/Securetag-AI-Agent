@@ -556,6 +556,34 @@ const server = http.createServer(async (req, res) => {
     return
   }
 
+  // Research Pipeline Trigger (Internal Scheduler)
+  if (method === 'POST' && url === '/internal/scheduler/trigger-research') {
+      // Basic Internal Auth (Check for header or localhost)
+      const internalSecret = process.env.INTERNAL_SECRET
+      const authHeader = req.headers['x-internal-secret']
+      const clientIp = getClientIP(req)
+      
+      const isLocalhost = clientIp === '127.0.0.1' || clientIp === '::1'
+      const isAuthorized = (internalSecret && authHeader === internalSecret) || (!internalSecret && isLocalhost)
+
+      if (!isAuthorized) {
+          return send(res, 403, { ok: false, error: 'Unauthorized access to internal scheduler' })
+      }
+
+      try {
+          const taskId = uuidv4()
+          // Queue Research Task for Admin Tenant
+          await dbQuery(
+              'INSERT INTO securetag.task(id, tenant_id, type, status, payload_json, retries, priority, created_at) VALUES($1,$2,$3,$4,$5,$6,$7, now())',
+              [taskId, 'admin', 'research', 'queued', '{}', 0, 0]
+          )
+          console.log(`[Scheduler] Manual research trigger enqueued: ${taskId}`)
+          return send(res, 200, { ok: true, taskId, message: 'Research pipeline triggered' })
+      } catch (e: any) {
+          return send(res, 500, { ok: false, error: e.message })
+      }
+  }
+
   if (method === 'GET' && url?.startsWith('/scans/')) {
     // Authenticate request
     const authReq = req as AuthenticatedRequest
@@ -633,6 +661,43 @@ const server = http.createServer(async (req, res) => {
   return send(res, 404, { ok: false })
 })
 
+// Internal Scheduler Logic
+function startInternalScheduler() {
+    if (process.env.ENABLE_RESEARCH_SCHEDULER !== 'true') return;
+
+    // Default interval: 7 days (Weekly)
+    // Can be overridden by env RESEARCH_INTERVAL_MS for testing
+    const DEFAULT_INTERVAL = 7 * 24 * 60 * 60 * 1000;
+    const INTERVAL = parseInt(process.env.RESEARCH_INTERVAL_MS || String(DEFAULT_INTERVAL), 10);
+
+    console.log(`⏰ [Scheduler] Research Pipeline Scheduler initialized. Interval: ${Math.round(INTERVAL / 1000 / 60)} minutes.`);
+    
+    const runTask = async () => {
+        console.log('⏰ [Scheduler] Auto-triggering Research Pipeline...');
+        try {
+            const taskId = uuidv4();
+            await dbQuery(
+                'INSERT INTO securetag.task(id, tenant_id, type, status, payload_json, retries, priority, created_at) VALUES($1,$2,$3,$4,$5,$6,$7, now())',
+                [taskId, 'admin', 'research', 'queued', '{}', 0, 0]
+            );
+            console.log(`✅ [Scheduler] Research task ${taskId} enqueued successfully.`);
+        } catch (e: any) {
+            console.error(`❌ [Scheduler] Failed to enqueue research task: ${e.message}`);
+        }
+    };
+
+    // Initial run check? Maybe not immediately to avoid boot spikes.
+    // Standard setInterval
+    setInterval(runTask, INTERVAL);
+    
+    // Dev Mode: If RESEARCH_RUN_ON_BOOT is true, run immediately
+    if (process.env.RESEARCH_RUN_ON_BOOT === 'true') {
+        console.log('🚀 [Scheduler] Running immediately due to RESEARCH_RUN_ON_BOOT=true');
+        runTask();
+    }
+}
+
 server.listen(port, () => {
   console.log(JSON.stringify({ event: 'server_start', port }))
+  startInternalScheduler();
 })

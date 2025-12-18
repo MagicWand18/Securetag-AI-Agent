@@ -38,6 +38,7 @@
     "cli-table3": "^0.6.5",
     "commander": "^14.0.1",
     "cookie": "^1.0.2",
+    "date-fns": "^4.1.0",
     "dotenv": "^17.2.2",
     "figlet": "^1.9.3",
     "gradient-string": "^3.0.0",

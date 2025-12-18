@@ -27,13 +27,13 @@ Toma los CVEs detectados y los enriquece con datos técnicos profundos necesario
 *   **Input:** `trending_cves.json`.
 *   **Output:** `trending_cves_enriched.json` (Data contextual lista para GPT).
 
-### 5. Filtrado de Reglas Sigma (`sigma_to_sast_candidates.py`)
+### 4. Filtrado de Reglas Sigma (`sigma_to_sast_candidates.py`)
 Analiza miles de reglas de detección de amenazas (Sigma Rules) y filtra aquellas relacionadas con aplicaciones web y frameworks (Django, Node.js, Spring, etc.) que pueden servir como inspiración para reglas SAST.
 *   **Comando:** `python3 sigma_to_sast_candidates.py`
 *   **Input:** Repositorio de reglas Sigma (`../../datasets/sources/yml/sigma_rules/rules`).
 *   **Output:** `sast_candidates_from_sigma.json` (Lista de candidatos de alta calidad).
 
-### 6. Generación de Reglas Sintéticas (`synthetic_rules_gen.py`)
+### 5. Generación de Reglas Sintéticas (`synthetic_rules_gen.py`)
 El núcleo del sistema. Utiliza GPT-5.1 para generar reglas Semgrep precisas a partir de múltiples fuentes de inteligencia (CVEs y Sigma).
 *   **Comando:** `python3 synthetic_rules_gen.py`
 *   **Input:** 
@@ -52,7 +52,7 @@ El núcleo del sistema. Utiliza GPT-5.1 para generar reglas Semgrep precisas a p
     *   Reglas validadas en `../../data/rules/synthetic/`.
     *   Logs de estado en `temp/skipped_cves.json` y `temp/failed_cves.json`.
 
-### 7. Restauración de Reglas (`restore_from_temp.py`)
+### 6. Restauración de Reglas (`restore_from_temp.py`)
 Utilidad para recuperar reglas desde el directorio `temp/` en caso de borrado accidental o para procesar lotes fallidos.
 *   **Comando:** `python3 restore_from_temp.py`
 *   **Funcionalidad:**
