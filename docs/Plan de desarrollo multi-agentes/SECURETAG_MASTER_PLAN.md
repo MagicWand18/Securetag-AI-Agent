@@ -220,6 +220,8 @@ El sistema se compone de tres pilares principales que evolucionan en paralelo:
     *   **Objetivo**: Evitar baneos inmediatos por falsos positivos o errores menores.
     *   **Lógica**: Acumular "Strikes" en ventana de tiempo (ej. 3 strikes en 24h = Ban temporal).
     *   **Tablas**: `security_strike` (tenant_id, reason, timestamp).
+*   **Tarea 10.6: User Identity Banning** (Server) (Futuro)
+    *   **Objetivo**: Baneo granular por `user_id` y revocación en cascada de API Keys.
 
 ---
 
@@ -230,15 +232,18 @@ El sistema se compone de tres pilares principales que evolucionan en paralelo:
 *   **Tarea 12.1: Progress Tracking Intuitivo** (Server/Worker) ✅ (Ref: `EVIDENCE_Server_8`, `EVIDENCE_Worker_6`)
     *   Endpoint y DB Schema en Server.
     *   Cálculo de ETA dinámico y reporte granular en Worker.
-*   **Tarea 12.2: AI Double-Check (Second Opinion)** (Worker/Server) [ ]
-    *   Param `double-check=critical|high|all`.
-    *   Envío de hallazgos a APIs externas (OpenAI & Claude) con fallback.
-    *   Registro de consumo (tokens) para facturación.
+*   **Tarea 12.2: AI Double-Check (Second Opinion)** (Worker/Server) ✅ (Ref: `EVIDENCE_Server_9`, `EVIDENCE_Worker_7`)
+    *   Backend: Schema Identity, Credits Balance, Double Check Config.
+    *   Worker: Multi-Provider (OpenAI/Anthropic), Fallback Logic, Deep Code Vision Context.
 *   **Tarea 12.3: Custom Rules on Demand** (Research/Worker) [ ]
     *   Param `custom-rules=true`.
     *   Generación automática de reglas Semgrep específicas para el stack del cliente.
     *   Validación de efectividad antes de escanear.
     *   Evitar cobro doble (cache de reglas generadas).
+*   **Tarea 12.4: Deep Code Vision Monetization** (Worker) [ ]
+    *   **Objetivo**: Restringir el contexto extendido (50 líneas) a usuarios Premium.
+    *   **Acción**: Validar `plan` del tenant en `ContextExtractor`.
+    *   **Ref**: `Deep_Code_Vision_Monetization_Plan.md`.
 
 
 ---

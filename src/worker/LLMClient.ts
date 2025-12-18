@@ -316,7 +316,7 @@ Formato:
         return this.parseResponse(content)
     }
 
-    private buildPrompt(finding: any, context?: ProjectContext, userContext?: any): string {
+    public buildPrompt(finding: any, context?: ProjectContext, userContext?: any): string {
         let contextSection = ''
         if (context) {
             contextSection = `

@@ -137,22 +137,22 @@ AI_MODEL_ANTHROPIC_MAX=claude-opus-4-5
 1.  Crear migración SQL `016_add_tenant_credits.sql`.
 2.  Actualizar `init-db.sh` para asignar créditos iniciales (ej. 100) al tenant `production` para pruebas.
 
-### Fase 3: AI Double Check Backend - ⚠️ PARCIAL (API Ready, Worker Pending)
+### Fase 3: AI Double Check Backend - ✅ COMPLETADO
 1.  Crear migración SQL `017_add_task_double_check.sql` - ✅ COMPLETADO
-2.  Implementar servicio `AIService` en Node.js (Worker): - ⏳ PENDIENTE (Corresponde al Agente Worker)
+2.  Implementar servicio `AIService` en Node.js (Worker): - ✅ COMPLETADO
     *   **Worker Architecture**:
         *   Crear `src/worker/services/AIProvider.ts`: Interfaz y clientes (OpenAI, Anthropic).
         *   Crear `src/worker/services/CreditsManager.ts`: Manejo de consumo y validación de saldo.
         *   Actualizar `src/worker/TaskExecutor.ts`: Integrar el paso de Double Check tras el análisis SAST.
     *   **Lógica de Negocio**:
         *   Leer `double_check_config` de la tarea.
-        *   Filtrar hallazgos por nivel (crítico/alto).
+        *   Filtrar hallazgos por nivel (crítico/alto/scope personalizado).
         *   **Reutilización de Prompt**: Usar exactamente el mismo prompt y contexto que se envía a RunPod (modelo propio), pero dirigido a los proveedores externos.
         *   Ejecutar inferencia con fallback.
         *   Actualizar hallazgos con resultado de IA (Campo `analysis_double_check`).
         *   Descontar créditos por hallazgo procesado.
 3.  Actualizar endpoint `POST /codeaudit/upload`: - ✅ COMPLETADO
-    *   Aceptar param `double_check=true`.
+    *   Aceptar param `double_check=true` o scopes (`all`, `critical`, etc.).
     *   Validar créditos disponibles.
 
 ### Fase 4: Baneo y Seguridad - ⏳ PENDIENTE
@@ -170,3 +170,28 @@ Dado que estamos en Beta 2 con datos "locales", podemos aplicar una estrategia d
     *   Todas las API Keys huérfanas existentes se asignarán a este usuario "System Owner".
     *   Esto asegura que nadie pierda acceso tras la actualización.
 
+---
+
+## 6. Plan de Ejecución Detallado (Worker Implementation)
+
+Este plan desglosa la implementación técnica de la Fase 3 en el Worker.
+
+### Paso 1: Preparación del Entorno - ✅ COMPLETADO
+- [x] Agregar dependencia `openai` al `package.json`.
+- [x] Verificar y configurar variables de entorno para modelos y keys (OpenAI/Anthropic).
+
+### Paso 2: Arquitectura de Servicios (src/worker/services/) - ✅ COMPLETADO
+- [x] **`AIProvider.ts`**: Interfaz común para proveedores.
+- [x] **`OpenAIProvider.ts`**: Implementación del cliente OpenAI.
+- [x] **`AnthropicProvider.ts`**: Implementación del cliente Anthropic (Claude).
+- [x] **`CreditsManager.ts`**: Gestión de saldo y transacciones en BD.
+- [x] **`ExternalAIService.ts`**: Orquestador con lógica de fallback (OpenAI -> Claude).
+
+### Paso 3: Integración en TaskExecutor - ✅ COMPLETADO
+- [x] Modificar `executeSemgrep` en `TaskExecutor.ts`.
+- [x] Implementar lógica de selección de hallazgos (Critical/High).
+- [x] Invocar `ExternalAIService` para "Double Check".
+- [x] Persistir resultados en `finding.analysis_double_check`.
+
+### Paso 4: Verificación - ✅ COMPLETADO
+- [x] Crear script `test_double_check_logic.ts` para validar fallback y consumo de créditos (mock).

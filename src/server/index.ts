@@ -151,7 +151,7 @@ const server = http.createServer(async (req, res) => {
         let profile = ''
         let projectAlias = ''
         let userContext: any = null
-        let doubleCheck = false
+        let doubleCheck: string | boolean = false
         let doubleCheckLevel = 'standard'
 
         for (const p of parts) {
@@ -174,7 +174,8 @@ const server = http.createServer(async (req, res) => {
           } else if (header.includes('name="double_check"')) {
             const endIdx = content.lastIndexOf('\r\n')
             const val = content.slice(0, endIdx >= 0 ? endIdx : undefined).trim().toLowerCase()
-            doubleCheck = val === 'true' || val === '1'
+            if (val === 'true' || val === '1') doubleCheck = true
+            else if (['all', 'critical', 'high', 'medium', 'low'].includes(val)) doubleCheck = val
             console.log(`[DEBUG] Found double_check: ${val} -> ${doubleCheck}`)
           } else if (header.includes('name="double_check_level"')) {
             const endIdx = content.lastIndexOf('\r\n')
@@ -360,11 +361,11 @@ const server = http.createServer(async (req, res) => {
 
     try {
       const tenantId = authReq.tenantId!
-      const q = await dbQuery<any>('SELECT id, type, payload_json FROM securetag.task WHERE tenant_id=$1 AND status=$2 ORDER BY created_at LIMIT 1', [tenantId, 'queued'])
+      const q = await dbQuery<any>('SELECT id, type, payload_json, double_check_config FROM securetag.task WHERE tenant_id=$1 AND status=$2 ORDER BY created_at LIMIT 1', [tenantId, 'queued'])
       if (!q.rows.length) return send(res, 204, { ok: true })
       const t = q.rows[0]
       await dbQuery('UPDATE securetag.task SET status=$1, started_at=now() WHERE id=$2', ['running', t.id])
-      const obj = { id: t.id, type: t.type, status: 'running', retries: 0, startedAt: Date.now(), ...t.payload_json }
+      const obj = { id: t.id, type: t.type, status: 'running', retries: 0, startedAt: Date.now(), double_check_config: t.double_check_config, ...t.payload_json }
       return send(res, 200, { ok: true, task: obj })
     } catch {
       return send(res, 503, { ok: false })

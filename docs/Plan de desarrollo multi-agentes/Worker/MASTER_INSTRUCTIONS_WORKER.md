@@ -39,12 +39,13 @@ Eres el **Agente Worker**. Has completado exitosamente la refactorización a una
 *   **Tarea 8.1: Motor SAST Propio** (Completado Externamente)
 *   **Tarea 10.1: Contexto Seguro para LLM** (Completado - Worker/Logic)
 *   **Tarea 12.1: Progress Tracking (Logic)** (Completado - Cálculo Dinámico & ETA)
+*   **Tarea 12.2: AI Double-Check (Multi-Provider Logic)** (Completado - Providers, Fallback & Deep Context)
 
 ### 💼 Fase 12: Enterprise Features (Implementación Lógica)
-*   **Tarea 12.1: Progress Tracking** [ ]
+*   **Tarea 12.1: Progress Tracking** [x]
     *   Calcular avance basado en herramientas ejecutadas vs totales.
     *   Actualizar BD con %, ETA y estado granular.
-*   **Tarea 12.2: AI Double-Check (External)** [ ]
+*   **Tarea 12.2: AI Double-Check (External)** [x]
     *   Implementar cliente multi-provider (OpenAI, Claude, Gemini).
     *   Lógica de "Fallback" (si falla OpenAI -> prueba Claude).
     *   Solo enviar hallazgos Critical/High según configuración.
@@ -54,18 +55,18 @@ Eres el **Agente Worker**. Has completado exitosamente la refactorización a una
 
 ### 🚀 Tarea Actual: Enterprise Intelligence (Logic)
 
-**Tarea 12.2: AI Double-Check (Multi-Provider Logic)** [ ]
-*   **Objetivo**: Implementar verificación de hallazgos con múltiples LLMs externos.
+**Tarea 12.3: Custom Rules Engine (Discovery)** [ ]
+*   **Objetivo**: Implementar motor de descubrimiento y generación de reglas personalizadas.
 *   **Acciones**:
-    *   **Cliente Multi-Provider**: Crear `ExternalAIClient` que soporte OpenAI y Claude (Anthropic).
-    *   **Lógica Fallback**: Intentar Provider A -> Si falla/timeout -> Provider B -> Si falla/timeout -> No descontar security credits
-    *   **Consumo**: Implementar `analyzeFinding` usando estos proveedores para hallazgos críticos/high si la tarea lo requiere (`double_check_config`).
-    *   **Cost Control**: Registrar tokens usados para facturación futura.
+    *   Analizar stack tecnológico del proyecto.
+    *   Diseñar prompts para generar reglas Semgrep específicas.
+    *   Validar sintaxis de reglas generadas.
+    *   Guardar en librería de reglas del tenant.
 
 **Estado**: 🟢 **Activo**
 
 ### 🔮 Próximos Pasos (Fase 12)
-*   **Tarea 12.3: Custom Rules** [ ]
+*   **Tarea 12.4: Deep Code Vision Monetization** [ ]
 
 ## 🔗 Dependencias
 *   **Agente Server**: Necesitas que la API exponga los endpoints de cola (`/queue/next`, `/queue/result`).

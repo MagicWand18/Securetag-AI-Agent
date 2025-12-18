@@ -27,10 +27,10 @@ export async function ensureTenant(name: string): Promise<string> {
   return id
 }
 
-export async function dbQuery<T = any>(text: string, params: any[] = []): Promise<{ rows: T[] }> {
+export async function dbQuery<T = any>(text: string, params: any[] = []): Promise<{ rows: T[], rowCount: number | null }> {
   const p = getPool()
   const r = await p.query(text, params)
-  return { rows: r.rows as T[] }
+  return { rows: r.rows as T[], rowCount: r.rowCount }
 }
 
 export async function updateTaskState(taskId: string, state: string): Promise<void> {

@@ -23,7 +23,8 @@ Su instancia dedicada de SecureTag AI opera bajo una arquitectura segura y aisla
 *   **Analysis Engine**: Orquesta herramientas de escaneo profundo (SAST) con mecanismos de **"Resilient Scanning"** (Heartbeat) para manejar grandes repositorios sin interrupciones.
 *   **Custom Rule Engine**: Motor de reglas personalizado y optimizado para el stack de Spartane (Vue 3, TypeScript, Pinia), capaz de detectar vulnerabilidades específicas que herramientas genéricas ignoran.
 *   **AI Security Core**: Nuestro modelo cognitivo (`securetag-v1`) alojado en infraestructura GPU privada, entrenado para entender vulnerabilidades complejas.
-    *   **Context-Aware Analysis (NUEVO)**: El sistema ahora "entiende" la arquitectura de su proyecto (lenguajes, frameworks, librerías) antes de auditar, permitiendo una precisión quirúrgica y reduciendo falsos positivos al comprender el contexto real de ejecución.
+    *   **Context-Aware Analysis (NUEVO)**: El sistema ahora "entiende" la arquitectura de su proyecto (lenguajes, frameworks, librerías) antes de auditar.
+    *   **Deep Code Vision**: A diferencia de herramientas estándar que analizan fragmentos aislados, SecureTag inyecta una **ventana de contexto extendida** al motor cognitivo. Esto permite a la IA "ver" el código circundante (importaciones, validaciones previas, manejo de errores) para distinguir con precisión humana entre una vulnerabilidad real y un falso positivo, tal como lo haría un auditor senior.
 *   **Tenant Isolation**: Sus datos (`spartane`) están lógicamente aislados y protegidos.
 
 ---
@@ -95,6 +96,10 @@ curl -X POST "http://143.198.61.64:8080/codeaudit/upload" \
 *   **`profile`** (Opcional): Perfil de escaneo (default: `auto`).
     *   *Formato*: Alfanumérico y guiones únicamente.
     *   *Ejemplos válidos*: `auto`.
+*   **`double_check`** (Opcional): Activa la validación de "Segunda Opinión" con Inteligencia Artificial Externa.
+    *   *Valores*: `critical` (hallazgos críticos), `high` (hallazgos altos y críticos), `medium` (hallazgos medianos, altos y críticos), `low` (hallazgos bajos, medianos, altos y críticos), `all` (todos los hallazgos igual que low). Default: `false`.
+*   **`double_check_level`** (Opcional): Define la profundidad y el costo del análisis por hallazgo.
+    *   *Valores*: `standard` (1 crédito), `pro` (2 créditos), `max` (3 créditos). Default: `standard`.
 
 **Response (Error de Seguridad - Bloqueo de Amenaza):**
 Si nuestro sistema de inteligencia de amenazas detecta contenido malicioso en el archivo subido, la solicitud será rechazada inmediatamente:
@@ -239,6 +244,45 @@ El campo clave es `analysis_json` dentro de cada hallazgo. Este contiene la eval
 *   **reasoning**: Explicación técnica detallada de por qué es (o no es) una vulnerabilidad en **su contexto específico**.
 *   **recommendation**: Pasos concretos o código sugerido para remediar el fallo.
 *   **severity_adjustment** (NUEVO): Ajuste contextual de la severidad. La IA puede elevar un hallazgo `info` a `high` si detecta que afecta lógica crítica de negocio, o reducirlo si está en código muerto. **Priorice este campo sobre la severidad estática.**
+
+---
+
+### 🧠 Enterprise Intelligence: AI Double Check
+
+Para clientes con suscripción Enterprise, ofrecemos la funcionalidad de **"Segunda Opinión"**, que somete los hallazgos críticos a un panel de IAs externas de clase mundial para reducir falsos positivos con una precisión sin precedentes.
+
+**Características Clave:**
+*   **Análisis Híbrido**: Combina la velocidad de nuestro modelo local con la profundidad de razonamiento de modelos SOTA (State-of-the-Art).
+*   **Resiliencia Automática**: Si un proveedor falla, el sistema conmuta automáticamente a otro sin interrupción.
+*   **Transparencia**: Los resultados de la segunda opinión se adjuntan claramente en el reporte, permitiendo contrastar el veredicto local vs. externo.
+
+**Niveles de Servicio y Costos:**
+
+| Nivel | Costo por Hallazgo | Capacidad del Modelo | Uso Recomendado |
+| :--- | :---: | :--- | :--- |
+| **Standard** | **1 Crédito** | Modelos de Alta Eficiencia (Fast Reasoning) | Revisiones diarias, CI/CD continuo. |
+| **Pro** | **2 Créditos** | Modelos de Razonamiento Avanzado | Auditorías de seguridad, *Pre-release*. |
+| **Max** | **3 Créditos** | **SOTA (State of the Art)**. Máximo razonamiento lógico y contexto. | Infraestructura crítica, Pagos, Datos PII. |
+
+*> **Nota**: Los "Security Credits" se descuentan automáticamente de su saldo organizacional únicamente cuando el análisis se completa exitosamente.*
+
+**Cómo Interpretar el Reporte de Double Check:**
+
+En el JSON de resultados, busque el campo `double_check` dentro de `analysis_json`:
+
+```json
+"analysis_json": {
+  "triage": "True Positive",
+  "reasoning": "Explicación del modelo local...",
+  "double_check": {
+    "triage": "Needs Review",
+    "reasoning": "El modelo externo sugiere revisar el flujo de datos ya que no se confirma la inyección...",
+    "severity_adjustment": "medium"
+  }
+}
+```
+
+Esta estructura permite a sus ingenieros de seguridad priorizar esfuerzos basándose en el consenso de múltiples inteligencias.
 
 ---
 

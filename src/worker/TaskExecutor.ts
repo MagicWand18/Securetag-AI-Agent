@@ -5,6 +5,7 @@ import { banEntity } from '../server/security.js'
 import { HeartbeatManager } from './HeartbeatManager.js'
 import { LLMClient } from './LLMClient.js'
 import { ContextAnalyzer } from './ContextAnalyzer.js'
+import { ExternalAIService } from './services/ExternalAIService.js'
 import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
@@ -16,6 +17,7 @@ export class TaskExecutor {
     private llmClient: LLMClient
     private contextAnalyzer: ContextAnalyzer
     private workerClient: WorkerClient
+    private externalAIService: ExternalAIService
     private taskTimeouts: Map<string, number> = new Map([
         ['codeaudit', 300000], // 5 minutes
         ['web', 60000]         // 1 minute
@@ -26,6 +28,7 @@ export class TaskExecutor {
         this.llmClient = new LLMClient()
         this.contextAnalyzer = new ContextAnalyzer()
         this.workerClient = new WorkerClient()
+        this.externalAIService = new ExternalAIService()
     }
 
     async execute(job: any): Promise<any> {
@@ -293,6 +296,49 @@ export class TaskExecutor {
                 const line = (it.start && it.start.line) || null
                 const codeSnippet = (it.extra && it.extra.lines) || null
                 
+                // Enhanced Context Extraction (Scalable)
+                let extendedContext = codeSnippet
+                try {
+                    const fullAbsPath = path.join(workDir, filePath)
+                    if (fs.existsSync(fullAbsPath) && fs.statSync(fullAbsPath).isFile()) {
+                        const content = fs.readFileSync(fullAbsPath, 'utf8')
+                        const lines = content.split('\n')
+                        
+                        if (line) {
+                            // a. Include first 20 lines (Header)
+                            const headerLines = lines.slice(0, 20)
+                            
+                            // b. Include 15 lines before and after
+                            const lineIndex = line - 1
+                            const startContext = Math.max(0, lineIndex - 15)
+                            const endContext = Math.min(lines.length, lineIndex + 16) // +15 lines after (inclusive of line itself logic)
+                            
+                            const beforeLines = lines.slice(startContext, lineIndex)
+                            const targetLine = lines[lineIndex]
+                            const afterLines = lines.slice(lineIndex + 1, endContext)
+
+                            extendedContext = `
+                                [CONTEXTO: Primeras 20 líneas del archivo (Imports/Configuración)]
+                                ${headerLines.join('\n')}
+                                ...
+                                [CONTEXTO: 15 líneas ANTES del hallazgo]
+                                ${beforeLines.join('\n')}
+
+                                [HALLAZGO EN LÍNEA ${line}]
+                                ${targetLine}
+
+                                [CONTEXTO: 15 líneas DESPUÉS del hallazgo]
+                                ${afterLines.join('\n')}
+                                `
+                        } else {
+                            // If no line number, take first 100 lines
+                            extendedContext = `File: ${filePath} (First 100 lines)\n---\n${lines.slice(0, 100).join('\n')}\n---`
+                        }
+                    }
+                } catch (e) {
+                    // Ignore read errors, fallback to snippet
+                }
+
                 // Generate stable fingerprint using relative path and content
                 // We ignore semgrep's fingerprint as it may depend on absolute paths
                 const fpInput = `${ruleId}|${filePath}|${line}|${codeSnippet || ''}`
@@ -312,11 +358,73 @@ export class TaskExecutor {
                         rule_name: ruleName,
                         file_path: filePath,
                         line: line,
-                        code_snippet: codeSnippet,
+                        code_snippet: extendedContext || codeSnippet, // Use extended context
                         severity: sev,
                         autofix_suggestion: autofix
                     }, projectContext, safeUserContext)
                     console.log(`DEBUG: Analysis result for ${ruleId}:`, analysis ? 'SUCCESS' : 'NULL')
+
+                    // --- AI DOUBLE CHECK (ENTERPRISE) ---
+                    const dcConfig = job.double_check_config
+                    let shouldDoubleCheck = false
+
+                    if (dcConfig && dcConfig.enabled) {
+                        const scope = (dcConfig.scope || 'all').toLowerCase()
+                        const s = sev.toLowerCase()
+                        
+                        if (scope === 'all') {
+                            shouldDoubleCheck = true
+                        } else if (scope === 'critical') {
+                            shouldDoubleCheck = (s === 'critical')
+                        } else if (scope === 'high') {
+                            shouldDoubleCheck = (s === 'critical' || s === 'high')
+                        } else if (scope === 'medium') {
+                            shouldDoubleCheck = (s === 'critical' || s === 'high' || s === 'medium')
+                        } else if (scope === 'low') {
+                            shouldDoubleCheck = (s === 'critical' || s === 'high' || s === 'medium' || s === 'low')
+                        }
+                    }
+
+                    if (shouldDoubleCheck) {
+                        try {
+                            const dcResult = await this.externalAIService.performDoubleCheck(
+                                {
+                                    rule_id: ruleId,
+                                    rule_name: ruleName,
+                                    file_path: filePath,
+                                    line: line,
+                                    code_snippet: extendedContext || codeSnippet, // Use extended context
+                                    severity: sev,
+                                    autofix_suggestion: autofix
+                                },
+                                projectContext,
+                                this.llmClient.buildPrompt({
+                                    rule_id: ruleId,
+                                    rule_name: ruleName,
+                                    file_path: filePath,
+                                    line: line,
+                                    code_snippet: extendedContext || codeSnippet, // Use extended context
+                                    severity: sev,
+                                    autofix_suggestion: autofix
+                                }, projectContext, safeUserContext),
+                                tenantId,
+                                job.double_check_config
+                            )
+                            console.log(`DEBUG: Double Check execution finished. Result: ${dcResult ? 'YES' : 'NO'}`)
+
+                            if (dcResult) {
+                                if (!analysis) analysis = {}
+                                // Attach double check result to analysis object
+                                ;(analysis as any).double_check = dcResult
+                            }
+                        } catch (dcErr) {
+                            console.error('DEBUG: Double Check Exception:', dcErr)
+                            logger.error(`Double Check failed for ${ruleId}`, dcErr)
+                        }
+                    } else {
+                        console.log('DEBUG: Skipping Double Check (criteria not met)')
+                    }
+
                 } catch (err: any) {
                     logger.error(`Failed to analyze finding ${fingerprint}`, err)
                     console.error(`DEBUG: Analysis Exception for ${ruleId}:`, err)

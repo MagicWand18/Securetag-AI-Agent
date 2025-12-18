@@ -46,16 +46,19 @@ Eres el **Agente Server**. Tu misión es modernizar y robustecer el backend de S
     *   **Tarea 10.1**: Contexto Seguro (Validación Zod en `POST /upload`).
 *   **Fase 12 (Enterprise)**:
     *   **Tarea 12.1**: Progress Tracking (DB Schema, API Internal & Public).
+    *   **Tarea 12.2**: AI Double-Check (Identity, Credits, Double Check API).
 
 ### 🚀 Tarea Actual: Enterprise Intelligence (Prioridad Alta)
 
-**Tarea 12.2: AI Double-Check (External Providers)** [ ]
-*   **Responsabilidad**: Habilitar la infraestructura para "Segunda Opinión" de IA.
+### 🚀 Tarea Actual: Enterprise Intelligence (Prioridad Alta)
+
+**Tarea 12.3: Custom Rules - Fase 1 (Infraestructura)** [ ]
+*   **Plan Detallado**: `docs/Plan de desarrollo multi-agentes/Research/PLAN_CUSTOM_RULES_ENGINE.md`
+*   **Responsabilidad**: Preparar DB y API para soportar reglas custom.
 *   **Acciones**:
-    *   **API**: Aceptar param `double_check` (enum: `critical`, `high`, `all`) en `POST /codeaudit/upload`.
-    *   **DB**: Agregar columna `double_check_config` en tabla `task` (JSONB).
-    *   **Quota**: Implementar lógica para descontar "Security Credits" (ver Pricing Model).
-    *   **Env Variable**: Configurar API Keys para proveedores (OpenAI, Claude) en Secrets del Worker (Server solo pasa la config).
+    *   **DB**: Crear tabla `custom_rule_library`.
+    *   **API**: Actualizar Schema Zod para `custom_rules` y `custom_rules_qty`.
+    *   **Internal API**: Endpoint `POST /internal/rules` para que el Worker guarde reglas.
 
 **Estado**: 🟢 **Activo**
 

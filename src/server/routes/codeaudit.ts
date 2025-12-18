@@ -305,7 +305,8 @@ export async function codeauditDetail(req: http.IncomingMessage, res: http.Serve
                 file_path: cleanPath,
                 line: f.line,
                 analysis_json: f.analysis_json,
-                retest_status: f.retest_status
+                retest_status: f.retest_status,
+                double_check: f.analysis_json?.double_check
             }
         })
 
