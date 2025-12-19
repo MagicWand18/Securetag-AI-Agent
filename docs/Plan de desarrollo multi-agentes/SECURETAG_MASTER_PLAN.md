@@ -29,37 +29,12 @@
 | **Fase 7: Integración Final** | 1/1 | 0/1 | 100% ✅ |
 | **Fase 8: Beta 2 (SAST & Opt)** | 4/6 | 2/6 | 66% 🔄 |
 | **Fase 9: Hardening & Seguridad** | 4/4 | 0/4 | 100% ✅ |
-| **Fase 10: Future (LLM/Data)** | 0/4 | 4/4 | 0% 🔄 |
+| **Fase 10: Future (LLM/Data)** | 2/6 | 4/6 | 33% 🔄 |
 | **Fase 11: QA & Entrega** | 5/5 | 0/5 | 100% ✅ |
-| **Fase 12: Enterprise Features** | 0/3 | 3/3 | 0% 🔄 |
+| **Fase 12: Enterprise Features** | 4/4 | 0/4 | 100% ✅ |
 
-**Progreso Total**: 27/37 tareas completadas (73%)
+**Progreso Total**: 29/38 tareas completadas (76%)
 
----
-(Secciones intermedias...)
-
----
-
-## 🧪 Fase 11: QA & Entrega (Agente QA)
-
-**Objetivo**: Validación final ("Sanity Check") de todas las funcionalidades prometidas en la documentación de cliente (`Spartane_Onboarding_Guide.md`).
-
-*   **Tarea 11.1: Smoke Test & Auth** ✅ (Ref: `EVIDENCE_QA_01`)
-*   **Tarea 11.2: Core Flow (Happy Path)** ✅ (Ref: `EVIDENCE_QA_01`)
-*   **Tarea 11.3: Security Promises** ✅ (Ref: `EVIDENCE_QA_01`)
-*   **Tarea 11.4: New Features (Beta 2)** ✅ (Ref: `EVIDENCE_QA_02`)
-*   **Tarea 11.5: Validación Reglas Sintéticas** ✅ (Ref: `EVIDENCE_QA_03`)
-
----
-
-## 🚀 Fase 12: Enterprise Features (Monetización)
-
-*   **Tarea 12.1: Progress Tracking Intuitivo** (Server/Worker) [ ]
-*   **Tarea 12.2: AI Double-Check (Second Opinion)** (Worker/Server) [ ]
-*   **Tarea 12.3: Custom Rules on Demand** (Research/Worker) [ ]
-
-
----
 
 ## 1. Visión y Objetivos
 
@@ -220,8 +195,21 @@ El sistema se compone de tres pilares principales que evolucionan en paralelo:
     *   **Objetivo**: Evitar baneos inmediatos por falsos positivos o errores menores.
     *   **Lógica**: Acumular "Strikes" en ventana de tiempo (ej. 3 strikes en 24h = Ban temporal).
     *   **Tablas**: `security_strike` (tenant_id, reason, timestamp).
-*   **Tarea 10.6: User Identity Banning** (Server) (Futuro)
+*   **Tarea 10.6: User Identity Banning** (Server) ✅ (Ref: `EVIDENCE_Server_12`)
     *   **Objetivo**: Baneo granular por `user_id` y revocación en cascada de API Keys.
+    *   **Features**: Kill Switch, RBAC Middleware optimizado, Admin API.
+
+---
+
+## 🧪 Fase 11: QA & Entrega (Agente QA)
+
+**Objetivo**: Validación final ("Sanity Check") de todas las funcionalidades prometidas en la documentación de cliente (`Spartane_Onboarding_Guide.md`).
+
+*   **Tarea 11.1: Smoke Test & Auth** ✅ (Ref: `EVIDENCE_QA_01`)
+*   **Tarea 11.2: Core Flow (Happy Path)** ✅ (Ref: `EVIDENCE_QA_01`)
+*   **Tarea 11.3: Security Promises** ✅ (Ref: `EVIDENCE_QA_01`)
+*   **Tarea 11.4: New Features (Beta 2)** ✅ (Ref: `EVIDENCE_QA_02`)
+*   **Tarea 11.5: Validación Reglas Sintéticas** ✅ (Ref: `EVIDENCE_QA_03`)
 
 ---
 
@@ -240,7 +228,7 @@ El sistema se compone de tres pilares principales que evolucionan en paralelo:
     *   **Monetization**: Modelo de cobro "Processing Fee + Success Fee" y Tiers.
     *   **Automated Research Pipeline**: Sistema autónomo (Scheduler + Worker) para monitorear NVD/CISA y generar reglas globales.
     *   **Tech**: Migración de Python a TS (`CustomRuleGenerator`, `ThreatMonitor`, `ThreatEnricher`).
-*   **Tarea 12.4: Deep Code Vision Monetization** (Worker) [ ]
+*   **Tarea 12.4: Deep Code Vision Monetization** (Worker) ✅ (Ref: `EVIDENCE_Worker_10`)
     *   **Objetivo**: Restringir el contexto extendido (50 líneas) a usuarios Premium.
     *   **Acción**: Validar `plan` del tenant en `ContextExtractor`.
     *   **Ref**: `Deep_Code_Vision_Monetization_Plan.md`.

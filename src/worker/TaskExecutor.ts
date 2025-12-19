@@ -361,47 +361,54 @@ export class TaskExecutor {
                 const line = (it.start && it.start.line) || null
                 const codeSnippet = (it.extra && it.extra.lines) || null
                 
-                // Enhanced Context Extraction (Scalable)
-                let extendedContext = codeSnippet
-                try {
-                    const fullAbsPath = path.join(workDir, filePath)
-                    if (fs.existsSync(fullAbsPath) && fs.statSync(fullAbsPath).isFile()) {
-                        const content = fs.readFileSync(fullAbsPath, 'utf8')
-                        const lines = content.split('\n')
-                        
-                        if (line) {
-                            // a. Include first 20 lines (Header)
-                            const headerLines = lines.slice(0, 20)
+                // Enhanced Context Extraction (Monetized)
+                const enableDeepVision = job.features?.deep_code_vision === true;
+                let extendedContext = codeSnippet;
+
+                if (enableDeepVision) {
+                    try {
+                        const fullAbsPath = path.join(workDir, filePath);
+                        if (fs.existsSync(fullAbsPath) && fs.statSync(fullAbsPath).isFile()) {
+                            const content = fs.readFileSync(fullAbsPath, 'utf8');
+                            const lines = content.split('\n');
                             
-                            // b. Include 15 lines before and after
-                            const lineIndex = line - 1
-                            const startContext = Math.max(0, lineIndex - 15)
-                            const endContext = Math.min(lines.length, lineIndex + 16) // +15 lines after (inclusive of line itself logic)
-                            
-                            const beforeLines = lines.slice(startContext, lineIndex)
-                            const targetLine = lines[lineIndex]
-                            const afterLines = lines.slice(lineIndex + 1, endContext)
+                            if (line) {
+                                // a. Include first 20 lines (Header)
+                                const headerLines = lines.slice(0, 20);
+                                
+                                // b. Include 15 lines before and after
+                                const lineIndex = line - 1;
+                                const startContext = Math.max(0, lineIndex - 15);
+                                const endContext = Math.min(lines.length, lineIndex + 16); // +15 lines after (inclusive of line itself logic)
+                                
+                                const beforeLines = lines.slice(startContext, lineIndex);
+                                const targetLine = lines[lineIndex];
+                                const afterLines = lines.slice(lineIndex + 1, endContext);
 
-                            extendedContext = `
-                                [CONTEXTO: Primeras 20 líneas del archivo (Imports/Configuración)]
-                                ${headerLines.join('\n')}
-                                ...
-                                [CONTEXTO: 15 líneas ANTES del hallazgo]
-                                ${beforeLines.join('\n')}
+                                extendedContext = `
+                                    [CONTEXTO: Primeras 20 líneas del archivo (Imports/Configuración)]
+                                    ${headerLines.join('\n')}
+                                    ...
+                                    [CONTEXTO: 15 líneas ANTES del hallazgo]
+                                    ${beforeLines.join('\n')}
 
-                                [HALLAZGO EN LÍNEA ${line}]
-                                ${targetLine}
+                                    [HALLAZGO EN LÍNEA ${line}]
+                                    ${targetLine}
 
-                                [CONTEXTO: 15 líneas DESPUÉS del hallazgo]
-                                ${afterLines.join('\n')}
-                                `
-                        } else {
-                            // If no line number, take first 100 lines
-                            extendedContext = `File: ${filePath} (First 100 lines)\n---\n${lines.slice(0, 100).join('\n')}\n---`
+                                    [CONTEXTO: 15 líneas DESPUÉS del hallazgo]
+                                    ${afterLines.join('\n')}
+                                `;
+                            } else {
+                                // If no line number, take first 100 lines
+                                extendedContext = `File: ${filePath} (First 100 lines)\n---\n${lines.slice(0, 100).join('\n')}\n---`;
+                            }
                         }
+                    } catch (e) {
+                        // Ignore read errors, fallback to snippet
                     }
-                } catch (e) {
-                    // Ignore read errors, fallback to snippet
+                } else {
+                    // For non-premium users, context is just the snippet
+                    extendedContext = codeSnippet;
                 }
 
                 // Generate stable fingerprint using relative path and content
@@ -417,7 +424,7 @@ export class TaskExecutor {
                 let analysis = null
                 // Analyze ALL findings regardless of severity
                 try {
-                    console.log(`DEBUG: Starting analysis for finding ${ruleId}`)
+                    logger.info(`[Deep Vision Check] Enabled: ${enableDeepVision}. Context length: ${extendedContext?.length || codeSnippet?.length || 0}`);
                     analysis = await this.llmClient.analyzeFinding({
                         rule_id: ruleId,
                         rule_name: ruleName,
@@ -427,7 +434,6 @@ export class TaskExecutor {
                         severity: sev,
                         autofix_suggestion: autofix
                     }, projectContext, safeUserContext)
-                    console.log(`DEBUG: Analysis result for ${ruleId}:`, analysis ? 'SUCCESS' : 'NULL')
 
                     // --- AI DOUBLE CHECK (ENTERPRISE) ---
                     const dcConfig = job.double_check_config

@@ -11,6 +11,11 @@ const BAN_DURATION_HOURS = parseInt(process.env.SECURITY_BAN_DURATION_HOURS || '
 const BAN_PERMANENT = (process.env.SECURITY_BAN_PERMANENT_ENABLED === '1')
 const BAN_APIKEY = (process.env.SECURITY_BAN_APIKEY_ENABLED === '1')
 const BAN_TENANT = (process.env.SECURITY_BAN_TENANT_ENABLED === '1')
+const BAN_USER = true // Always enabled as it's a core feature now
+
+// Strike Configuration
+const STRIKE_THRESHOLD = parseInt(process.env.SECURITY_STRIKE_THRESHOLD || '3', 10)
+const STRIKE_WINDOW_MINUTES = parseInt(process.env.SECURITY_STRIKE_WINDOW_MINUTES || '60', 10)
 
 // Simple In-Memory Store
 const ipStore: Map<string, { count: number, resetTime: number }> = new Map()
@@ -20,6 +25,7 @@ const uploadStore: Map<string, { count: number, resetTime: number }> = new Map()
 const bannedIPs: Set<string> = new Set()
 const bannedApiKeys: Set<string> = new Set()
 const bannedTenants: Set<string> = new Set()
+const bannedUsers: Set<string> = new Set()
 
 // Sync banned entities from DB every minute
 async function syncBans() {
@@ -29,11 +35,13 @@ async function syncBans() {
     bannedIPs.clear()
     bannedApiKeys.clear()
     bannedTenants.clear()
+    bannedUsers.clear()
 
     result.rows.forEach(row => {
       if (row.type === 'ip') bannedIPs.add(row.value)
       else if (row.type === 'api_key') bannedApiKeys.add(row.value)
       else if (row.type === 'tenant') bannedTenants.add(row.value)
+      else if (row.type === 'user') bannedUsers.add(row.value)
     })
   } catch (e) {
     console.error('[Security] Failed to sync bans:', e)
@@ -61,10 +69,11 @@ export function getClientIP(req: http.IncomingMessage): string {
 }
 
 // Check if entity is banned
-export function isBanned(ip: string, apiKeyHash?: string, tenantId?: string): boolean {
+export function isBanned(ip: string, apiKeyHash?: string, tenantId?: string, userId?: string): boolean {
   if (bannedIPs.has(ip)) return true
   if (apiKeyHash && bannedApiKeys.has(apiKeyHash)) return true
   if (tenantId && bannedTenants.has(tenantId)) return true
+  if (userId && bannedUsers.has(userId)) return true
   return false
 }
 
@@ -102,9 +111,10 @@ export function checkRateLimit(req: http.IncomingMessage, isUpload = false): boo
   return true
 }
 
-export async function banEntity(type: 'ip' | 'api_key' | 'tenant', value: string, reason: string) {
+export async function banEntity(type: 'ip' | 'api_key' | 'tenant' | 'user', value: string, reason: string) {
     if (type === 'api_key' && !BAN_APIKEY) return
     if (type === 'tenant' && !BAN_TENANT) return
+    // Users are always bannable
 
     console.warn(`[Security] BANNING ${type.toUpperCase()}: ${value} Reason: ${reason}`)
     
@@ -112,6 +122,7 @@ export async function banEntity(type: 'ip' | 'api_key' | 'tenant', value: string
     if (type === 'ip') bannedIPs.add(value)
     if (type === 'api_key') bannedApiKeys.add(value)
     if (type === 'tenant') bannedTenants.add(value)
+    if (type === 'user') bannedUsers.add(value)
 
     const durationSQL = BAN_PERMANENT ? "NULL" : `now() + interval '${BAN_DURATION_HOURS} hours'`
     
@@ -129,6 +140,37 @@ export async function banEntity(type: 'ip' | 'api_key' | 'tenant', value: string
         )
     } catch (e) {
         console.error(`[Security] Failed to persist ${type} ban:`, e)
+    }
+}
+
+export async function addStrike(type: 'ip' | 'api_key' | 'tenant' | 'user', value: string, reason: string) {
+    // Check feature flags for non-mandatory types
+    if (type === 'api_key' && !BAN_APIKEY) return
+    if (type === 'tenant' && !BAN_TENANT) return
+
+    try {
+        // 1. Record the strike
+        await dbQuery(
+            'INSERT INTO securetag.security_strike (type, value, reason) VALUES ($1, $2, $3)',
+            [type, value, reason]
+        )
+
+        // 2. Check strike count in window
+        const result = await dbQuery<{ count: string }>(
+            `SELECT COUNT(*) as count 
+             FROM securetag.security_strike 
+             WHERE type = $1 AND value = $2 
+             AND created_at > now() - interval '${STRIKE_WINDOW_MINUTES} minutes'`,
+            [type, value]
+        )
+
+        const count = parseInt(result.rows[0].count, 10)
+
+        if (count >= STRIKE_THRESHOLD) {
+            await banEntity(type, value, `Strike limit exceeded (${count}/${STRIKE_THRESHOLD} in ${STRIKE_WINDOW_MINUTES}m). Last reason: ${reason}`)
+        }
+    } catch (e) {
+        console.error(`[Security] Failed to process strike for ${type}:${value}`, e)
     }
 }
 

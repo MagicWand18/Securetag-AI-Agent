@@ -48,6 +48,8 @@ Eres el **Agente Server**. Tu misión es modernizar y robustecer el backend de S
     *   **Tarea 12.1**: Progress Tracking (DB Schema, API Internal & Public).
     *   **Tarea 12.2**: AI Double-Check (Identity, Credits, Double Check API).
     *   **Tarea 12.3**: Custom Rules - Fase 1 (Infraestructura & Internal API).
+*   **Fase 10 (Future/Security)**:
+    *   **Tarea 10.6**: User Identity Banning & Revocation (Kill Switch).
     *   [x] **Tarea 12.3: Custom Rules - Fase 1 (Infraestructura)**
         *   **Plan Detallado**: `docs/Plan de desarrollo multi-agentes/Research/PLAN_CUSTOM_RULES_ENGINE.md`
         *   **Responsabilidad**: Preparar DB y API para soportar reglas custom.
@@ -56,14 +58,15 @@ Eres el **Agente Server**. Tu misión es modernizar y robustecer el backend de S
             *   **API**: Actualizar Schema Zod para `custom_rules` y `custom_rules_qty`.
             *   **Internal API**: Endpoint `POST /internal/rules` para que el Worker guarde reglas.
 
-### 🚀 Tarea Actual: Security Hardening (Prioridad Alta)
+### 🚀 Tarea Actual: Security Innovation (Future)
 
-**Tarea 10.6: User Identity Banning & Revocation** [ ]
-*   **Responsabilidad**: Implementar baneo granular y revocación en cascada.
+**Tarea 10.5: Strike-Based Ban System (Reputation)** [ ]
+*   **Objetivo**: Sistema inteligente de reputación para evitar baneos falsos positivos.
+*   **Lógica**: En lugar de baneo inmediato, acumular "strikes" (infracciones) en una ventana de tiempo (ej. 3 strikes en 1h).
 *   **Acciones**:
-    *   **DB**: Tablas para ban logs (`user_bans`, `revoked_keys`).
-    *   **Logic**: Middleware para rechazar usuarios baneados y revocar sus API Keys activas.
-    *   **API**: Endpoint de administración para banear/desbanear (`POST /admin/users/:id/ban`).
+    *   **DB**: Tabla `security_strike` (tenant_id, ip, incident_type, created_at).
+    *   **Middleware**: Al detectar ataque, registrar strike en lugar de bloquear (si es leve).
+    *   **Policy Engine**: Job o chequeo que calcule si `strikes > threshold` -> Aplicar Ban Temporal.
 
 **Estado**: 🟢 **Activo**
 

@@ -22,9 +22,9 @@ export class WorkerClient {
     })
   }
 
-  async fetchNextTask(): Promise<any | null> {
+  async fetchNextTask(tenantId: string): Promise<any | null> {
     try {
-      const res = await this.client.post('/queue/next')
+      const res = await this.client.post('/queue/next', { tenantId });
       if (res.status === 204) return null
       return res.data
     } catch (err: any) {

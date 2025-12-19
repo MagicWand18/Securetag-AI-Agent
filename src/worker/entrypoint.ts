@@ -48,7 +48,7 @@ async function run() {
 
   do {
     try {
-      const nextTask = await client.fetchNextTask()
+      const nextTask = await client.fetchNextTask(tenant);
 
       if (!nextTask || !nextTask.task) {
         if (!loopMode) {

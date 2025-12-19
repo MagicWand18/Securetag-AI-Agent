@@ -25,7 +25,7 @@ Su instancia dedicada de SecureTag AI opera bajo una arquitectura segura y aisla
 *   **Automated Research Pipeline (NUEVO)**: Sistema autónomo de "Zero-Day Detection" que monitorea amenazas globales (CISA KEV, NVD, GitHub) en tiempo real, genera reglas de detección sintéticas y las despliega automáticamente en su instancia para      protegerlo contra nuevas vulnerabilidades antes de que sean ampliamente conocidas.
 *   **AI Security Core**: Nuestro modelo cognitivo (`securetag-v1`) alojado en infraestructura GPU privada, entrenado para entender vulnerabilidades complejas.
     *   **Context-Aware Analysis (NUEVO)**: El sistema ahora "entiende" la arquitectura de su proyecto (lenguajes, frameworks, librerías) antes de auditar.
-    *   **Deep Code Vision**: A diferencia de herramientas estándar que analizan fragmentos aislados, SecureTag inyecta una **ventana de contexto extendida** al motor cognitivo. Esto permite a la IA "ver" el código circundante (importaciones, validaciones previas, manejo de errores) para distinguir con precisión humana entre una vulnerabilidad real y un falso positivo, tal como lo haría un auditor senior.
+    *   **Deep Code Vision (Función Premium)**: A diferencia de herramientas estándar que analizan fragmentos aislados, SecureTag inyecta una **ventana de contexto extendida** al motor cognitivo. Esto permite a la IA "ver" el código circundante (importaciones, validaciones previas, manejo de errores) para distinguir con precisión humana entre una vulnerabilidad real y un falso positivo, tal como lo haría un auditor senior. *Esta capacidad está disponible exclusivamente para clientes del plan Premium para garantizar el análisis más profundo.*
 *   **Tenant Isolation**: Sus datos (`spartane`) están lógicamente aislados y protegidos.
 
 ---
@@ -51,11 +51,14 @@ En SecureTag, aplicamos la seguridad que predicamos ("Dogfooding"). Su instancia
     *   **Escaneo de Reputación Global**: Antes de aceptar cualquier código, consultamos una red de inteligencia de amenazas global para asegurar que el archivo no contenga malware conocido, bloqueando automáticamente amenazas detectadas por múltiples fuentes de seguridad.
 4.  **Política de Protección Activa (Advanced Banning)**:
     *   **Tolerancia Cero**: Cualquier intento de subir archivos identificados como amenazas resultará en un **bloqueo automático** inmediato.
-    *   **Defensa en Profundidad**: El bloqueo se aplica en múltiples niveles para evitar evasión:
-        *   **IP Address**: Bloqueo de la dirección de origen.
-        *   **Credenciales (API Key)**: Inhabilitación automática de la llave utilizada en el ataque.
-        *   **Cuenta (Tenant)**: En casos graves, suspensión preventiva de la cuenta completa.
-        *   **Rate Limiting**: El exceso de peticiones o violaciones repetidas de seguridad también conllevará bloqueos temporales para proteger la integridad de la plataforma.
+    *   **Defensa en Profundidad**: El bloqueo se aplica en múltiples niveles siguiendo un modelo de **"Fail Fast"** para máxima eficiencia y protección contra DDoS:
+        1.  **IP Address**: Bloqueo de infraestructura en la puerta de entrada (Latencia cero).
+        2.  **Credenciales (API Key)**: Inhabilitación automática de la llave utilizada.
+        3.  **Cuenta (Tenant)**: Suspensión preventiva de la organización en casos graves.
+        4.  **Identidad de Usuario (User Ban & Strikes)**: Bloqueo granular del individuo, respaldado por un sistema de reputación inteligente.
+            *   **Strike System (NUEVO)**: Implementamos un mecanismo de "Three-Strikes" para reducir falsos positivos. Las infracciones menores se acumulan en una ventana de tiempo (ej. 1 hora) y el bloqueo solo se activa al superar el umbral definido, asegurando continuidad operativa sin sacrificar seguridad.
+            *   **Revocación en Cascada**: Al confirmarse una amenaza real, se invalidan inmediatamente todas las sesiones y credenciales activas del usuario.
+        *   **Rate Limiting**: El exceso de peticiones o violaciones repetidas de seguridad también conllevará bloqueos temporales.
 5.  **Auditoría de Inteligencia Artificial (AI Guardrails)**:
     *   **Protección contra Manipulación**: SecureTag implementa "Guardrails" de IA que analizan cualquier contexto proporcionado por el usuario para detectar intentos de *Prompt Injection* o *Jailbreaking*.
     *   **Registro Forense**: Cada intento de manipulación es bloqueado y registrado automáticamente en un log de auditoría inmutable (`security_events`), permitiendo un análisis detallado de los vectores de ataque intentados contra la plataforma.

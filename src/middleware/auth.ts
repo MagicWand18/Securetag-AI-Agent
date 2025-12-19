@@ -1,11 +1,13 @@
 import http from 'http'
 import { dbQuery } from '../utils/db.js'
 import crypto from 'crypto'
-import { isBanned, getClientIP } from '../server/security.js'
+import { isBanned, getClientIP, addStrike } from '../server/security.js'
 
 export interface AuthenticatedRequest extends http.IncomingMessage {
     tenantId?: string
     tenantName?: string
+    userId?: string
+    userRole?: string
 }
 
 /**
@@ -36,16 +38,21 @@ export async function authenticate(
     try {
         const keyHash = hashApiKey(apiKey)
 
-        // Query api_key table
+        // Query api_key table to get tenant AND user info
         const result = await dbQuery<any>(
-            `SELECT ak.id, ak.tenant_id, ak.expires_at, t.name as tenant_name
+            `SELECT ak.id, ak.tenant_id, ak.user_id, ak.expires_at, ak.is_active, t.name as tenant_name, u.role as user_role
        FROM securetag.api_key ak
        JOIN securetag.tenant t ON ak.tenant_id = t.id
+       LEFT JOIN securetag.app_user u ON ak.user_id = u.id
        WHERE ak.key_hash = $1`,
             [keyHash]
         )
 
         if (result.rows.length === 0) {
+            // Add strike to IP for invalid key attempt
+            const clientIP = getClientIP(req)
+            await addStrike('ip', clientIP, 'Invalid API Key attempt')
+
             res.statusCode = 401
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ ok: false, error: 'Invalid API key' }))
@@ -54,9 +61,20 @@ export async function authenticate(
 
         const apiKeyRecord = result.rows[0]
 
-        // Check for bans (API Key or Tenant)
+        // Check if key is active (Revocation check)
+        if (apiKeyRecord.is_active === false) {
+             const clientIP = getClientIP(req)
+             await addStrike('ip', clientIP, 'Revoked API Key usage attempt')
+
+             res.statusCode = 403
+             res.setHeader('Content-Type', 'application/json')
+             res.end(JSON.stringify({ ok: false, error: 'Access denied. API Key has been revoked.' }))
+             return false
+        }
+
+        // Check for bans (API Key, Tenant OR User)
         const clientIP = getClientIP(req)
-        if (isBanned(clientIP, keyHash, apiKeyRecord.tenant_id)) {
+        if (isBanned(clientIP, keyHash, apiKeyRecord.tenant_id, apiKeyRecord.user_id)) {
              res.statusCode = 403
              res.setHeader('Content-Type', 'application/json')
              res.end(JSON.stringify({ ok: false, error: 'Access denied. Banned due to security violations.' }))
@@ -74,6 +92,8 @@ export async function authenticate(
         // Attach tenant info to request
         req.tenantId = apiKeyRecord.tenant_id
         req.tenantName = apiKeyRecord.tenant_name
+        req.userId = apiKeyRecord.user_id
+        req.userRole = apiKeyRecord.user_role || 'member' // Default to member if not found
 
         // Update last_used_at (fire and forget)
         dbQuery(

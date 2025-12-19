@@ -9,29 +9,6 @@ Eres el **Agente Worker**. Has completado exitosamente la refactorización a una
 3.  **Data Generation**: Registrar meticulosamente cada interacción con herramientas (stdin, stdout, stderr) en la base de datos para futuros datasets de fine-tuning.
 4.  **Documentación**: Generar evidencia detallada de cada cambio.
 
-## ✅ Tareas Completadas (Iteración 1)
-*   [x] **Tarea 2.1: Resiliencia y Retries**
-    *   Implementación de `WorkerClient` con reintentos exponenciales.
-    *   Manejo de códigos 503 del servidor con backoff.
-    
-*   [x] **Tarea 2.2: Estados Avanzados y Heartbeats**
-    *   Implementación de heartbeats periódicos.
-    *   Soporte para estados `retrying`, `failed`, `timeout`.
-    *   Implementación de timeout configurable por tipo de tarea.
-
-*   [x] **Tarea 2.3: Logging para Fine-Tuning (Data Gen)**
-    *   Implementación de `TaskExecutor` que persiste logs en `tool_execution`.
-    *   Registro de stdout, stderr, exit code y métricas en PostgreSQL.
-*   [x] **Tarea 2.4: Integración con LLM Remoto**
-    *   Cliente `securetag-v1` implementado.
-    *   Análisis automático de hallazgos High/Critical.
-
-*   [x] **Tarea 8.1: Motor SAST Propio (Semgrep OSS)**
-    *   Implementación completada externamente y verificada.
-    *   El worker ya opera con reglas locales y sin dependencia de nube.
-
-## 📋 Tareas Asignadas
-
 ### ✅ Tareas Completadas
 *   **Tarea 2.1: Refactorización y Robustez** (Completado)
 *   **Tarea 2.2: Estados Avanzados y Heartbeats** (Completado)
@@ -41,24 +18,21 @@ Eres el **Agente Worker**. Has completado exitosamente la refactorización a una
 *   **Tarea 12.1: Progress Tracking (Logic)** (Completado - Cálculo Dinámico & ETA)
 *   **Tarea 12.2**: AI Double-Check (Multi-Provider Logic) (Completado - Providers, Fallback & Deep Context)
 *   **Tarea 12.3**: Custom Rules Engine (Completado - On-Demand & Automated Research Pipeline)
+*   **Tarea 12.4**: Deep Code Vision Monetization (Completado - Context Limits by Plan)
 
 
 
-### 🚀 Tarea Actual: Enterprise Features (Monetización)
+### 🚀 Tarea Actual: Future AI Capabilities (Data Gen)
 
-**Tarea 12.4: Deep Code Vision Monetization** [ ]
-*   **Plan Detallado**: `docs/Plan de desarrollo multi-agentes/Worker/Deep_Code_Vision_Monetization_Plan.md`
-*   **Objetivo**: Restringir el contexto extendido (50 líneas) a usuarios Premium.
+**Tarea 10.3: Exploit-DB Dataset Generation** [ ]
+*   **Objetivo**: Crear el dataset definitivo de exploits para Fine-Tuning de `securetag-v2`.
 *   **Acciones**:
-    *   **Logic**: Validar `plan` del tenant en `ContextExtractor`.
-    *   **Free/Standard**: Solo entregar snippet básico (1-3 líneas).
-    *   **Premium**: Entregar contexto completo (50 líneas).
-    *   **Integration**: Asegurar que esto aplique tanto para análisis local como para AI Double Check.
+    *   **Source**: Integrar cliente para descargar/scrapear `exploit-db.com` (o mirrors legales).
+    *   **Processing**: Limpiar y normalizar exploits (Python/C/Ruby scripts) en formato JSONL.
+    *   **Enrichment**: Usar modelos de IA (vía `ExternalAIService`) para explicar el exploit y generar "Fixed Version" sintética.
+    *   **Output**: `datasets/finetuning/exploit_db_enhanced.jsonl`.
 
-**Estado**: 🟢 **Activo**.
-
-### 🔮 Próximos Pasos (Fase 12)
-*   **Tarea 12.4: Deep Code Vision Monetization** [ ]
+**Estado**: 🟢 **Activo**
 
 ## 🔗 Dependencias
 *   **Agente Server**: Necesitas que la API exponga los endpoints de cola (`/queue/next`, `/queue/result`).

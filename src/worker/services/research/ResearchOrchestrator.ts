@@ -1,6 +1,6 @@
-import { ThreatMonitor } from './ThreatMonitor';
-import { ThreatEnricher } from './ThreatEnricher';
-import { SyntheticRuleGen } from './SyntheticRuleGen';
+import { ThreatMonitor } from './ThreatMonitor.js';
+import { ThreatEnricher } from './ThreatEnricher.js';
+import { SyntheticRuleGen } from './SyntheticRuleGen.js';
 
 export class ResearchOrchestrator {
   private monitor: ThreatMonitor;
