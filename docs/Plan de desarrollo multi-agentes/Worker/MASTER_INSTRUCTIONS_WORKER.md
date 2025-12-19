@@ -22,15 +22,14 @@ Eres el **Agente Worker**. Has completado exitosamente la refactorización a una
 
 
 
-### 🚀 Tarea Actual: Future AI Capabilities (Data Gen)
+### 🚀 Tarea Actual: Advanced Static Analysis
 
-**Tarea 10.3: Exploit-DB Dataset Generation** [ ]
-*   **Objetivo**: Crear el dataset definitivo de exploits para Fine-Tuning de `securetag-v2`.
+**Tarea 10.2: Cross-file Taint Analysis** [ ]
+*   **Objetivo**: Detectar vulnerabilidades complejas que atraviesan múltiples archivos.
 *   **Acciones**:
-    *   **Source**: Integrar cliente para descargar/scrapear `exploit-db.com` (o mirrors legales).
-    *   **Processing**: Limpiar y normalizar exploits (Python/C/Ruby scripts) en formato JSONL.
-    *   **Enrichment**: Usar modelos de IA (vía `ExternalAIService`) para explicar el exploit y generar "Fixed Version" sintética.
-    *   **Output**: `datasets/finetuning/exploit_db_enhanced.jsonl`.
+    *   **Data Flow**: Rastreo de variables entre archivos (ej. Controller -> Service -> DB).
+    *   **Hybrid Analysis**: Combinar AST Parsing (TypeScript) con Semgrep rules avanzadas (taint mode).
+    *   Output: Reducir Falsos Negativos en arquitecturas MVC.
 
 **Estado**: 🟢 **Activo**
 

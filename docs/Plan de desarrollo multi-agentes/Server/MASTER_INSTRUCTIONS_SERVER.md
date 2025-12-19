@@ -50,6 +50,7 @@ Eres el **Agente Server**. Tu misión es modernizar y robustecer el backend de S
     *   **Tarea 12.3**: Custom Rules - Fase 1 (Infraestructura & Internal API).
 *   **Fase 10 (Future/Security)**:
     *   **Tarea 10.6**: User Identity Banning & Revocation (Kill Switch).
+    *   **Tarea 10.5**: Strike-Based Ban System (Reputation).
     *   [x] **Tarea 12.3: Custom Rules - Fase 1 (Infraestructura)**
         *   **Plan Detallado**: `docs/Plan de desarrollo multi-agentes/Research/PLAN_CUSTOM_RULES_ENGINE.md`
         *   **Responsabilidad**: Preparar DB y API para soportar reglas custom.
@@ -58,15 +59,14 @@ Eres el **Agente Server**. Tu misión es modernizar y robustecer el backend de S
             *   **API**: Actualizar Schema Zod para `custom_rules` y `custom_rules_qty`.
             *   **Internal API**: Endpoint `POST /internal/rules` para que el Worker guarde reglas.
 
-### 🚀 Tarea Actual: Security Innovation (Future)
+### 🚀 Tarea Actual: Backend Optimization (Beta 2)
 
-**Tarea 10.5: Strike-Based Ban System (Reputation)** [ ]
-*   **Objetivo**: Sistema inteligente de reputación para evitar baneos falsos positivos.
-*   **Lógica**: En lugar de baneo inmediato, acumular "strikes" (infracciones) en una ventana de tiempo (ej. 3 strikes en 1h).
+**Tarea 8.2: Optimización y Escalabilidad** [ ]
+*   **Objetivo**: Preparar el backend para alta concurrencia.
 *   **Acciones**:
-    *   **DB**: Tabla `security_strike` (tenant_id, ip, incident_type, created_at).
-    *   **Middleware**: Al detectar ataque, registrar strike en lugar de bloquear (si es leve).
-    *   **Policy Engine**: Job o chequeo que calcule si `strikes > threshold` -> Aplicar Ban Temporal.
+    *   **Redis Queue**: Migrar cola de `task` (Polling PG) a BullMQ (Redis).
+    *   **Rate Assurace**: Implementar `express-rate-limit` con almacenamiento en Redis.
+    *   **Storage Quotas**: Validar límites de almacenamiento por Tenant antes de subir archivos.
 
 **Estado**: 🟢 **Activo**
 

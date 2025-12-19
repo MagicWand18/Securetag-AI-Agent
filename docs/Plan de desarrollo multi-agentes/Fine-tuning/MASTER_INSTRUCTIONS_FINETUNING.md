@@ -30,6 +30,7 @@ Se ha completado la extracción de datos crudos (chunks) de fuentes estructurada
 **Objetivo**: Enriquecer el dataset de entrenamiento con código real de exploits.
 
 *   **Tarea 10.3: Data Gen - Exploit-DB** [ ]
+    *   Definir estrategia de cual sera el formato final de los datos de entrenamiento (JSONL, Parquet) y la viabilidad de su uso para generar data sintetica   
     *   Descargar base de datos pública de exploit-db.com (CSV/Git).
     *   Extraer código de exploits verificados.
     *   Generar pares de entrenamiento (Vulnerabilidad -> Exploit PoC).

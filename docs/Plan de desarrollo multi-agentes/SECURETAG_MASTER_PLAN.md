@@ -28,12 +28,13 @@
 | **Fase 6: Producción** | 1/1 | 0/1 | 100% ✅ |
 | **Fase 7: Integración Final** | 1/1 | 0/1 | 100% ✅ |
 | **Fase 8: Beta 2 (SAST & Opt)** | 4/6 | 2/6 | 66% 🔄 |
-| **Fase 9: Hardening & Seguridad** | 4/4 | 0/4 | 100% ✅ |
-| **Fase 10: Future (LLM/Data)** | 2/6 | 4/6 | 33% 🔄 |
+| **Fase 9: Hardening & Seguridad** | 3/4 | 1/4 | 75% 🔄 |
+| **Fase 10: Future (LLM/Data)** | 4/5 | 1/5 | 80% 🔄 |
 | **Fase 11: QA & Entrega** | 5/5 | 0/5 | 100% ✅ |
 | **Fase 12: Enterprise Features** | 4/4 | 0/4 | 100% ✅ |
+| **Fase 13: Offensive AI (xpl01t)** | 0/3 | 3/3 | 0% 🔄 |
 
-**Progreso Total**: 29/38 tareas completadas (76%)
+**Progreso Total**: 32/39 tareas completadas (82%)
 
 
 ## 1. Visión y Objetivos
@@ -190,8 +191,11 @@ El sistema se compone de tres pilares principales que evolucionan en paralelo:
     *   **Worker**: Stack Detection, Context Injection (XML) & Anti-Prompt Injection Guardrails ✅ (Ref: `EVIDENCE_Worker_5`).
     *   **Extras Implementados**: Baneo automático de API Keys por inyección detectada, Validaciones de seguridad con IA.
 *   **Tarea 10.2: Análisis de Flujo Avanzado**: Cross-file Taint Analysis híbrido.
-*   **Tarea 10.3: Data Gen - Exploit-DB (Finetuning)**: Descargar y procesar todos los exploits públicos de exploit-db.com para dataset de entrenamiento.
-*   **Tarea 10.5: Sistema de Reputación "Strike-Based Ban"** (Futuro)
+*   **Tarea 10.3: Data Gen - Exploit-DB (Finetuning)** ✅ (Ref: `EVIDENCE_Finetuning_5`)
+    *   **Metodología**: Generación Determinista (Code-Only) sin alucinaciones.
+    *   **Resultado**: 12.7k exploits verificados, 38k pares Q&A.
+    *   **Nota**: Base para el futuro modelo `securetag-xpl01t` (Offensive).
+*   **Tarea 10.5: Sistema de Reputación "Strike-Based Ban"** (Server) ✅ (Ref: `EVIDENCE_Server_13`)
     *   **Objetivo**: Evitar baneos inmediatos por falsos positivos o errores menores.
     *   **Lógica**: Acumular "Strikes" en ventana de tiempo (ej. 3 strikes en 24h = Ban temporal).
     *   **Tablas**: `security_strike` (tenant_id, reason, timestamp).
@@ -233,8 +237,21 @@ El sistema se compone de tres pilares principales que evolucionan en paralelo:
     *   **Acción**: Validar `plan` del tenant en `ContextExtractor`.
     *   **Ref**: `Deep_Code_Vision_Monetization_Plan.md`.
 
-
 ---
+
+## 🏴‍☠️ Fase 13: Offensive AI (Project xpl01t) - [NUEVO]
+
+**Objetivo**: Crear un microservicio independiente especializado en Red Teaming y desarrollo de exploits (`securetag-xpl01t`).
+**Roadmap**: `docs/Plan de desarrollo multi-agentes/Fine-tuning/ROADMAP_Offensive_Model_Training.md`
+
+*   **Tarea 13.1: Entrenamiento Modelo Ofensivo** (Fine-tuning) [ ]
+    *   Fine-tuning Llama 3.1 8B con dataset Exploit-DB (Tarea 10.3).
+    *   Infraestructura Serverless dedicada en RunPod (`/xpl01t`).
+*   **Tarea 13.2: Expansión de Datos (Metasploit/Nuclei)** (Fine-tuning) [ ]
+    *   Integrar templates de Nuclei y módulos Ruby de Metasploit.
+*   **Tarea 13.3: Agente Red Team (Worker)** (Worker) [ ]
+    *   Integrar modelo `xpl01t` en flujo de auditoría.
+    *   Modo "Auto-Exploit" (Bajo autorización explícita).
 
 ## 🛠️ Anexos Técnicos
 
