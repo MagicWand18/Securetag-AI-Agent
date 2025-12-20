@@ -15,6 +15,23 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  securetag-redis:
+    image: redis:alpine
+    container_name: securetag-redis
+    command: redis-server --appendonly yes --requirepass securetagredis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis:/data
+    networks:
+      - securetag-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "securetagredis", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   securetag-app:
     build:
       context: .
@@ -38,6 +55,9 @@ services:
       RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-60000}
       RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-100}
       RATE_LIMIT_UPLOAD_MAX: ${RATE_LIMIT_UPLOAD_MAX:-5}
+      STORAGE_QUOTA_FREE_MB: ${STORAGE_QUOTA_FREE_MB:-100}
+      STORAGE_QUOTA_PREMIUM_MB: ${STORAGE_QUOTA_PREMIUM_MB:-1024}
+      STORAGE_QUOTA_ENTERPRISE_MB: ${STORAGE_QUOTA_ENTERPRISE_MB:-5120}
       SECURITY_BAN_DURATION_HOURS: ${SECURITY_BAN_DURATION_HOURS:-24}
       SECURITY_BAN_PERMANENT_ENABLED: ${SECURITY_BAN_PERMANENT_ENABLED:-0}
       SECURITY_BAN_APIKEY_ENABLED: ${SECURITY_BAN_APIKEY_ENABLED:-1}
@@ -47,6 +67,9 @@ services:
       ENABLE_RESEARCH_SCHEDULER: ${ENABLE_RESEARCH_SCHEDULER:-false}
       RESEARCH_INTERVAL_MS: ${RESEARCH_INTERVAL_MS:-604800000}
       RESEARCH_RUN_ON_BOOT: ${RESEARCH_RUN_ON_BOOT:-false}
+      REDIS_HOST: securetag-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: securetagredis
     volumes:
       - ./data:/var/securetag
     networks:
@@ -56,6 +79,8 @@ services:
         condition: service_healthy
       securetag-migrate:
         condition: service_completed_successfully
+      securetag-redis:
+        condition: service_healthy
 
   securetag-migrate:
     image: liquibase/liquibase:4.24
@@ -123,6 +148,13 @@ services:
       MODEL: ${MODEL:-securetag-v1}
       WORKER_API_KEY: ${WORKER_API_KEY}
       LOOP_MODE: "true"
+      USE_REDIS_WORKER: "true"
+      WORKER_ID: worker-1
+      REDIS_HOST: securetag-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: securetagredis
+      DB_DIR: /var/securetag/${TENANT_ID:-tenantA}/db
+      UPLOADS_DIR: /var/securetag/${TENANT_ID:-tenantA}/uploads
       TASK_TIMEOUT_CODEAUDIT: 540000
       SECURITY_BAN_DURATION_HOURS: ${SECURITY_BAN_DURATION_HOURS:-24}
       SECURITY_BAN_PERMANENT_ENABLED: ${SECURITY_BAN_PERMANENT_ENABLED:-0}
@@ -138,6 +170,8 @@ services:
       AI_MODEL_ANTHROPIC_STANDARD: ${AI_MODEL_ANTHROPIC_STANDARD:-claude-haiku-4-5}
       AI_MODEL_ANTHROPIC_PRO: ${AI_MODEL_ANTHROPIC_PRO:-claude-sonnet-4-5}
       AI_MODEL_ANTHROPIC_MAX: ${AI_MODEL_ANTHROPIC_MAX:-claude-opus-4-5}
+      RULES_DIR: /opt/securetag/rules/synthetic
+      TEMP_DIR: /var/securetag/temp/research
     volumes:
       - ./data:/var/securetag
       - ./data/rules:/opt/securetag/rules
@@ -146,6 +180,8 @@ services:
     depends_on:
       securetag-app:
         condition: service_started
+      securetag-redis:
+        condition: service_healthy  
 networks:
   securetag-net:
     name: securetag-net

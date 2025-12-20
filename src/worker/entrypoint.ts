@@ -2,6 +2,7 @@ import { WorkerClient } from './WorkerClient.js'
 import { TaskExecutor } from './TaskExecutor.js'
 import { logger } from '../utils/logger.js'
 import { ExternalToolManager } from '../agent/tools/ExternalToolManager.js'
+import { startWorker } from './consumer.js'
 import fs from 'fs'
 import path from 'path'
 import os from 'os'
@@ -39,13 +40,32 @@ async function run() {
   const executor = new TaskExecutor(workerId)
   const loopMode = process.env.LOOP_MODE === 'true'
   const tenant = process.env.TENANT_ID || 'default'
+  const useQueue = process.env.USE_QUEUE !== 'false' // Default to true for new architecture
 
-  logger.info(`Worker starting. ID: ${workerId}, Tenant: ${tenant}, LoopMode: ${loopMode}`)
+  logger.info(`Worker starting. ID: ${workerId}, Tenant: ${tenant}, LoopMode: ${loopMode}, QueueMode: ${useQueue}`)
   console.log('DEBUG: process.env.LOOP_MODE =', process.env.LOOP_MODE)
   console.log('DEBUG: loopMode variable =', loopMode)
   console.log('DEBUG: *** DOCKER WORKER IS ALIVE AND LOGGING ***')
 
+  if (useQueue && loopMode) {
+    logger.info('🚀 Starting Worker in Queue Mode (BullMQ)')
+    const worker = startWorker(executor, client)
+    
+    // Graceful shutdown
+    const shutdown = async () => {
+      logger.info('Shutting down worker...')
+      await worker.close()
+      process.exit(0)
+    }
+    
+    process.on('SIGTERM', shutdown)
+    process.on('SIGINT', shutdown)
+    
+    // Keep the process running
+    return
+  }
 
+  // Legacy Polling Loop
   do {
     try {
       const nextTask = await client.fetchNextTask(tenant);

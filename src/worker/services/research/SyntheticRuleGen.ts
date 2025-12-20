@@ -10,8 +10,10 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const BASE_DIR = path.resolve(__dirname, '../../../../'); 
-const RULES_DIR = path.join(BASE_DIR, 'data/rules/synthetic');
-const TEMP_DIR = path.join(BASE_DIR, 'scripts/research/temp');
+
+// Use environment variables for paths if available (Docker), otherwise fallback to local relative paths
+const RULES_DIR = process.env.RULES_DIR || path.join(BASE_DIR, 'data/rules/synthetic');
+const TEMP_DIR = process.env.TEMP_DIR || path.join(BASE_DIR, 'scripts/research/temp');
 
 // Asegurar existencia de directorios
 (async () => {

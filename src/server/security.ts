@@ -1,5 +1,6 @@
 import http from 'http'
 import { dbQuery } from '../utils/db.js'
+import { getRedisConnection } from '../utils/redis.js'
 
 // Rate Limit Configuration
 const WINDOW_MS = parseInt(process.env.RATE_LIMIT_WINDOW_MS || '60000', 10)
@@ -17,11 +18,7 @@ const BAN_USER = true // Always enabled as it's a core feature now
 const STRIKE_THRESHOLD = parseInt(process.env.SECURITY_STRIKE_THRESHOLD || '3', 10)
 const STRIKE_WINDOW_MINUTES = parseInt(process.env.SECURITY_STRIKE_WINDOW_MINUTES || '60', 10)
 
-// Simple In-Memory Store
-const ipStore: Map<string, { count: number, resetTime: number }> = new Map()
-const uploadStore: Map<string, { count: number, resetTime: number }> = new Map()
-
-// Local Cache for Bans
+// Local Cache for Bans (Synced with DB)
 const bannedIPs: Set<string> = new Set()
 const bannedApiKeys: Set<string> = new Set()
 const bannedTenants: Set<string> = new Set()
@@ -50,20 +47,6 @@ async function syncBans() {
 setInterval(syncBans, 60000)
 syncBans() // Initial sync
 
-function cleanupStore(store: Map<string, { count: number, resetTime: number }>) {
-  const now = Date.now()
-  for (const [ip, data] of store.entries()) {
-    if (now > data.resetTime) {
-      store.delete(ip)
-    }
-  }
-}
-
-setInterval(() => {
-  cleanupStore(ipStore)
-  cleanupStore(uploadStore)
-}, 5 * 60 * 1000)
-
 export function getClientIP(req: http.IncomingMessage): string {
   return (req.headers['x-forwarded-for'] as string || req.socket.remoteAddress || 'unknown').split(',')[0].trim()
 }
@@ -77,38 +60,51 @@ export function isBanned(ip: string, apiKeyHash?: string, tenantId?: string, use
   return false
 }
 
-export function checkRateLimit(req: http.IncomingMessage, isUpload = false): boolean {
+export async function checkRateLimit(req: http.IncomingMessage, isUpload = false): Promise<boolean> {
   const ip = getClientIP(req)
   
   if (isBanned(ip)) {
     return false // IP is banned
   }
 
-  const store = isUpload ? uploadStore : ipStore
   const limit = isUpload ? UPLOAD_MAX : MAX_REQUESTS
-  const now = Date.now()
+  const keyPrefix = isUpload ? 'ratelimit:upload' : 'ratelimit:request'
+  const key = `${keyPrefix}:${ip}`
+  const redis = getRedisConnection()
 
-  let data = store.get(ip)
-  if (!data || now > data.resetTime) {
-    data = { count: 0, resetTime: now + WINDOW_MS }
-    store.set(ip, data)
+  try {
+      const multi = redis.multi()
+      multi.incr(key)
+      multi.ttl(key)
+      const results = await multi.exec()
+      
+      if (!results) throw new Error('Redis transaction failed')
+      
+      const count = results[0][1] as number
+      const ttl = results[1][1] as number
+      
+      // Set expiration if key is new or has no TTL
+      if (count === 1 || ttl === -1) {
+          await redis.expire(key, Math.ceil(WINDOW_MS / 1000))
+      }
+      
+      if (count > limit) {
+          // Async record violation
+          dbQuery(
+              `INSERT INTO securetag.security_ban (type, value, violation_count, last_violation_at) 
+               VALUES ('ip', $1, 1, now()) 
+               ON CONFLICT (type, value) DO UPDATE 
+               SET violation_count = security_ban.violation_count + 1, last_violation_at = now()`,
+              [ip]
+          ).catch(console.error)
+          return false
+      }
+      
+      return true
+  } catch (err) {
+      console.error('[Security] Rate limit Redis error, failing open:', err)
+      return true
   }
-
-  data.count++
-  
-  if (data.count > limit) {
-      // Async record violation
-      dbQuery(
-          `INSERT INTO securetag.security_ban (type, value, violation_count, last_violation_at) 
-           VALUES ('ip', $1, 1, now()) 
-           ON CONFLICT (type, value) DO UPDATE 
-           SET violation_count = security_ban.violation_count + 1, last_violation_at = now()`,
-          [ip]
-      ).catch(console.error)
-      return false
-  }
-  
-  return true
 }
 
 export async function banEntity(type: 'ip' | 'api_key' | 'tenant' | 'user', value: string, reason: string) {

@@ -33,7 +33,6 @@ Eres el **Agente Server**. Tu misión es modernizar y robustecer el backend de S
         *   Los endpoints de escritura rechazan solicitudes con 503 si la BD está caída.
         *   Pruebas manuales o automatizadas que demuestren el comportamiento.
 
-## 📋 Tareas Asignadas
 
 ### ✅ Tareas Completadas (Histórico)
 *   **Fase 1 (Cimientos)**: Migración DB-Only, Health Checks, Gating.

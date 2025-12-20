@@ -40,6 +40,8 @@ function escapeHtml(s: any) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
 }
 
+import { getTasksQueue } from './queues.js'
+
 const server = http.createServer(async (req, res) => {
   // 1. Apply Security Headers to ALL responses
   addSecurityHeaders(res)
@@ -53,7 +55,7 @@ const server = http.createServer(async (req, res) => {
     if (isBanned(ip)) {
       return send(res, 403, { ok: false, error: 'Access denied. IP address temporarily banned due to suspicious activity.' })
     }
-    if (!checkRateLimit(req)) {
+    if (!await checkRateLimit(req)) {
       const ip = getClientIP(req)
       await addStrike('ip', ip, 'Rate limit exceeded')
       return send(res, 429, { ok: false, error: 'Too Many Requests' })
@@ -102,7 +104,22 @@ const server = http.createServer(async (req, res) => {
         }
         const tenantId = authReq.tenantId!
         try {
-          await dbQuery('INSERT INTO securetag.task(id, tenant_id, type, status, payload_json, retries, priority, created_at) VALUES($1,$2,$3,$4,$5,$6,$7, now())', [taskId, tenantId, 'web', 'queued', JSON.stringify({ url: body.url, options: payload.options }), 0, 0])
+          const taskPayload = { url: body.url, options: payload.options };
+          await dbQuery('INSERT INTO securetag.task(id, tenant_id, type, status, payload_json, retries, priority, created_at) VALUES($1,$2,$3,$4,$5,$6,$7, now())', [taskId, tenantId, 'web', 'queued', JSON.stringify(taskPayload), 0, 0])
+          
+          // Push to BullMQ
+          const queue = getTasksQueue();
+          await queue.add('web', {
+            id: taskId,
+            taskId, // Backwards compatibility
+            tenantId,
+            type: 'web',
+            ...taskPayload
+          }, {
+            jobId: taskId, // Deduplication
+            removeOnComplete: true
+          });
+          
         } catch {
           return send(res, 503, { ok: false })
         }
@@ -116,7 +133,7 @@ const server = http.createServer(async (req, res) => {
   }
   if (method === 'POST' && url === '/codeaudit/upload') {
     // Strict Rate Limiting for Uploads
-    if (!checkRateLimit(req, true)) {
+    if (!await checkRateLimit(req, true)) {
       return send(res, 429, { ok: false, error: 'Upload limit exceeded. Please wait.' })
     }
 
@@ -174,7 +191,38 @@ const server = http.createServer(async (req, res) => {
             return send(res, 503, { ok: false, error: 'Failed to verify tenant status' });
         }
 
-        // 2. Determine Deep Code Vision Access
+        // 2. Storage Quota Check
+        const fileSize = size;
+        const plan = tenantConfig.plan || 'free';
+        
+        // Parse limits from ENV (in MB) and convert to Bytes
+        const limitFree = parseInt(process.env.STORAGE_QUOTA_FREE_MB || '100', 10) * 1024 * 1024;
+        const limitPremium = parseInt(process.env.STORAGE_QUOTA_PREMIUM_MB || '1024', 10) * 1024 * 1024;
+        const limitEnterprise = parseInt(process.env.STORAGE_QUOTA_ENTERPRISE_MB || '5120', 10) * 1024 * 1024;
+
+        const storageLimitMap: Record<string, number> = {
+            'free': limitFree,
+            'premium': limitPremium,
+            'enterprise': limitEnterprise
+        };
+        const storageLimit = storageLimitMap[plan] || storageLimitMap['free'];
+        
+        try {
+            const usageQ = await dbQuery<{ total: string }>('SELECT SUM(size_bytes) as total FROM securetag.codeaudit_upload WHERE tenant_id=$1', [tenantId]);
+            const currentUsage = parseInt(usageQ.rows[0].total || '0', 10);
+            
+            if (currentUsage + fileSize > storageLimit) {
+                return send(res, 403, { 
+                    ok: false, 
+                    error: `Storage quota exceeded. Plan: ${plan}, Limit: ${Math.round(storageLimit/1024/1024)}MB, Used: ${Math.round(currentUsage/1024/1024)}MB` 
+                });
+            }
+        } catch (e) {
+            console.error('Error checking storage quota:', e);
+            // Fail open or closed? Let's fail open but log error to avoid blocking on DB glitch
+        }
+
+        // 3. Determine Deep Code Vision Access
         const enableDeepVision = tenantConfig.llm_config?.deep_code_vision === true;
 
         for (const p of parts) {
@@ -405,9 +453,27 @@ const server = http.createServer(async (req, res) => {
               crConfig = { enabled: true, qty: customRulesQty }
           }
           
+          const taskPayload = { zipPath, workDir: wkDir, profile, previousTaskId, userContext, apiKeyHash, features: { deep_code_vision: enableDeepVision } };
+          
           await dbQuery('INSERT INTO securetag.task(id, tenant_id, type, status, payload_json, retries, priority, created_at, project_id, previous_task_id, is_retest, double_check_config, custom_rules_config) VALUES($1,$2,$3,$4,$5,$6,$7, now(), $8, $9, $10, $11, $12)',
-            [taskId, tenantId, 'codeaudit', 'queued', JSON.stringify({ zipPath, workDir: wkDir, profile, previousTaskId, userContext, apiKeyHash, features: { deep_code_vision: enableDeepVision } }), 0, 0, projectId, previousTaskId, isRetest, dcConfig ? JSON.stringify(dcConfig) : null, crConfig ? JSON.stringify(crConfig) : null])
+            [taskId, tenantId, 'codeaudit', 'queued', JSON.stringify(taskPayload), 0, 0, projectId, previousTaskId, isRetest, dcConfig ? JSON.stringify(dcConfig) : null, crConfig ? JSON.stringify(crConfig) : null])
           await dbQuery('INSERT INTO securetag.codeaudit_upload(tenant_id, project_id, task_id, file_name, storage_path, size_bytes, created_at) VALUES($1,$2,$3,$4,$5,$6, now())', [tenantId, projectId, taskId, fileName, zipPath, size])
+          
+          // Push to BullMQ
+          const queue = getTasksQueue();
+          await queue.add('codeaudit', {
+            id: taskId,
+            taskId, // Backwards compatibility
+            tenantId,
+            type: 'codeaudit',
+            ...taskPayload,
+            double_check_config: dcConfig,
+            custom_rules_config: crConfig
+          }, {
+            jobId: taskId,
+            removeOnComplete: true
+          });
+
         } catch {
           return send(res, 503, { ok: false })
         }
