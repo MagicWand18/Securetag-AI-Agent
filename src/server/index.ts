@@ -222,8 +222,10 @@ const server = http.createServer(async (req, res) => {
             // Fail open or closed? Let's fail open but log error to avoid blocking on DB glitch
         }
 
-        // 3. Determine Deep Code Vision Access
+        // 3. Determine Deep Code Vision Access & Cross-File Analysis
         const enableDeepVision = tenantConfig.llm_config?.deep_code_vision === true;
+        // Tier 'Premium' is required for Cross-File Analysis (Server-Side Logic)
+        const enableCrossFile = tenantConfig.plan === 'Premium';
 
         for (const p of parts) {
           const idx = p.indexOf('\r\n\r\n')
@@ -453,7 +455,18 @@ const server = http.createServer(async (req, res) => {
               crConfig = { enabled: true, qty: customRulesQty }
           }
           
-          const taskPayload = { zipPath, workDir: wkDir, profile, previousTaskId, userContext, apiKeyHash, features: { deep_code_vision: enableDeepVision } };
+          const taskPayload = { 
+              zipPath, 
+              workDir: wkDir, 
+              profile, 
+              previousTaskId, 
+              userContext, 
+              apiKeyHash, 
+              features: { 
+                  deep_code_vision: enableDeepVision,
+                  cross_file_analysis: enableCrossFile
+              } 
+          };
           
           await dbQuery('INSERT INTO securetag.task(id, tenant_id, type, status, payload_json, retries, priority, created_at, project_id, previous_task_id, is_retest, double_check_config, custom_rules_config) VALUES($1,$2,$3,$4,$5,$6,$7, now(), $8, $9, $10, $11, $12)',
             [taskId, tenantId, 'codeaudit', 'queued', JSON.stringify(taskPayload), 0, 0, projectId, previousTaskId, isRetest, dcConfig ? JSON.stringify(dcConfig) : null, crConfig ? JSON.stringify(crConfig) : null])

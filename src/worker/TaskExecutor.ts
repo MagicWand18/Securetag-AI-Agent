@@ -8,6 +8,7 @@ import { ContextAnalyzer } from './ContextAnalyzer.js'
 import { ExternalAIService } from './services/ExternalAIService.js'
 import { CustomRuleGenerator } from './services/CustomRuleGenerator.js'
 import { ResearchOrchestrator } from './services/research/ResearchOrchestrator.js'
+import { CrossFileAnalyzer } from './services/CrossFileAnalyzer.js'
 import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
@@ -20,6 +21,7 @@ export class TaskExecutor {
     private contextAnalyzer: ContextAnalyzer
     private workerClient: WorkerClient
     private externalAIService: ExternalAIService
+    private crossFileAnalyzer: CrossFileAnalyzer
     private taskTimeouts: Map<string, number> = new Map([
         ['codeaudit', 300000], // 5 minutes
         ['web', 60000],        // 1 minute
@@ -32,6 +34,7 @@ export class TaskExecutor {
         this.contextAnalyzer = new ContextAnalyzer()
         this.workerClient = new WorkerClient()
         this.externalAIService = new ExternalAIService()
+        this.crossFileAnalyzer = new CrossFileAnalyzer()
     }
 
     async execute(job: any): Promise<any> {
@@ -270,7 +273,23 @@ export class TaskExecutor {
         // --- PHASE 2: SAST EXECUTION (10-30%) ---
         // Use local rules
         const rulesPath = '/opt/securetag/rules'
-        const args = ['scan', '--json', '--quiet', '--config', rulesPath, ...customRulesArgs, '--exclude', '__MACOSX/**', '--exclude', '**/._*', '--exclude', '**/.DS_Store', '--exclude', '.pre-commit-config.yaml', '--exclude', '.git', workDir]
+        
+        // Add topology rules dynamically (for Cross-File Analysis)
+        const rulesDir = path.join(process.cwd(), 'data/rules');
+        const extraRulesArgs: string[] = [];
+        
+        if (fs.existsSync(rulesDir)) {
+            const ruleFiles = fs.readdirSync(rulesDir);
+            for (const file of ruleFiles) {
+                if (file.startsWith('topology-') && file.endsWith('.yaml')) {
+                    const fullPath = path.join(rulesDir, file);
+                    extraRulesArgs.push('--config', fullPath);
+                    logger.info(`Loaded topology rules from ${fullPath}`);
+                }
+            }
+        }
+
+        const args = ['scan', '--json', '--quiet', '--config', rulesPath, '--no-git-ignore', ...extraRulesArgs, ...customRulesArgs, '--exclude', '__MACOSX/**', '--exclude', '**/._*', '--exclude', '**/.DS_Store', '--exclude', '.pre-commit-config.yaml', '--exclude', '.git', workDir]
 
         const result = await ExternalToolManager.execute('semgrep', args, { timeout: 300000 })
         const finished = Date.now()
@@ -298,7 +317,55 @@ export class TaskExecutor {
 
         try {
             const payload = result.stdout ? JSON.parse(result.stdout) : null
-            const items: any[] = payload && Array.isArray(payload.results) ? payload.results : []
+            let items: any[] = payload && Array.isArray(payload.results) ? payload.results : []
+            
+            // --- CROSS-FILE ANALYSIS (Feature Flag) ---
+            // Decoupled Logic: We trust the Server's 'features' flag.
+            const enableCrossFile = job.features?.cross_file_analysis === true;
+            
+            if (enableCrossFile && payload) {
+                try {
+                    logger.info('Running Cross-File Analysis (Premium Feature)...');
+                    const crossFileReports = await this.crossFileAnalyzer.analyze(payload, workDir);
+                    
+                    if (crossFileReports.length > 0) {
+                        logger.info(`Detected ${crossFileReports.length} Cross-File Vulnerabilities.`);
+                        
+                        // Transform to Semgrep format and append
+                        const syntheticFindings = crossFileReports.map(report => ({
+                            check_id: `cross-file-${report.category}`,
+                            path: report.file,
+                            start: { line: report.line, col: 1 },
+                            end: { line: report.line, col: 1 },
+                            extra: {
+                                message: `[Cross-File] ${report.title}`,
+                                severity: 'ERROR', // Map HIGH to ERROR
+                                lines: `Source: ${report.flow.source.code.trim()} -> Call: ${report.flow.call.code.trim()} -> Sink: ${report.flow.sink.code.trim()}`,
+                                metadata: {
+                                    category: report.category,
+                                    type: 'cross-file',
+                                    description: report.description,
+                                    flow: report.flow
+                                }
+                            }
+                        }));
+                        
+                        items = [...items, ...syntheticFindings];
+                        
+                        // Save enhanced results to disk so they are available for reporting/UI
+                        if (payload) {
+                            payload.results = items;
+                            fs.writeFileSync(semgrepFile, JSON.stringify(payload, null, 2));
+                            logger.info(`Updated ${semgrepFile} with ${syntheticFindings.length} cross-file findings.`);
+                        }
+                    }
+                } catch (cfaError: any) {
+                    logger.error(`Cross-File Analysis failed: ${cfaError.message}`);
+                }
+            } else {
+                logger.info('Skipping Cross-File Analysis (Free Tier or Disabled).');
+            }
+
             const totalItems = items.length
 
             // --- PHASE 3: COGNITIVE ANALYSIS (30-90%) ---

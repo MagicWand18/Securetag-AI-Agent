@@ -130,11 +130,11 @@ El sistema se compone de tres pilares principales que evolucionan en paralelo:
 *   Eliminar dependencia de `SEMGREP_APP_TOKEN`.
 **Estado**: ✅ Completado.
 
-### 🔄 Tarea 8.2: Optimizaciones de Backend (Pendiente Beta 1)
+### ✅ Tarea 8.2: Optimizaciones de Backend (Beta 2)
 **Objetivo**: Escalabilidad y Control.
 *   **Cola Escalable**: Migrar de Polling PG a **Redis** (BullMQ).
 *   **Cuotas**: Middleware para Rate Limiting y Storage Limits por Tenant.
-**Estado**: ⏸️ Standby.
+**Estado**: ✅ Completado (Ref: `EVIDENCE_Server_14`).
 
 ### 🔄 Tarea 8.3: Automatización Total (CI/CD)
 **Objetivo**: Pipeline completo.

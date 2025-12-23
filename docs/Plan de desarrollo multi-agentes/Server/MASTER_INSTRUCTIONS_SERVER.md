@@ -41,6 +41,7 @@ Eres el **Agente Server**. Tu misión es modernizar y robustecer el backend de S
     *   **Tarea 8.4**: Business Features (Alias de Proyecto, Historial, Retest).
     *   **Tarea 8.5**: Documentación API (Swagger UI en `/docs`).
     *   **Tarea 8.6**: Resiliencia de DB & Migraciones (Liquibase).
+    *   **Tarea 8.2**: Optimización Backend (Redis Queue, Distributed Rate Limit, Quotas).
 *   **Fase 10 (Soporte)**:
     *   **Tarea 10.1**: Contexto Seguro (Validación Zod en `POST /upload`).
 *   **Fase 12 (Enterprise)**:
@@ -58,16 +59,13 @@ Eres el **Agente Server**. Tu misión es modernizar y robustecer el backend de S
             *   **API**: Actualizar Schema Zod para `custom_rules` y `custom_rules_qty`.
             *   **Internal API**: Endpoint `POST /internal/rules` para que el Worker guarde reglas.
 
-### 🚀 Tarea Actual: Backend Optimization (Beta 2)
+### 🚀 Tarea Actual: Standby (Beta 2 Optimized)
 
-**Tarea 8.2: Optimización y Escalabilidad** [ ]
-*   **Objetivo**: Preparar el backend para alta concurrencia.
-*   **Acciones**:
-    *   **Redis Queue**: Migrar cola de `task` (Polling PG) a BullMQ (Redis).
-    *   **Rate Assurace**: Implementar `express-rate-limit` con almacenamiento en Redis.
-    *   **Storage Quotas**: Validar límites de almacenamiento por Tenant antes de subir archivos.
+**Esperando nuevas asignaciones**
+*   El agente ha completado la optimización del backend (Tarea 8.2).
+*   **Siguiente Posible**: Tarea 8.3 (CI/CD) o Tarea 9.1 (Perímetro).
 
-**Estado**: 🟢 **Activo**
+**Estado**: ⏸️ **Standby**
 
 ### 🔮 Backlog & Futuro
 

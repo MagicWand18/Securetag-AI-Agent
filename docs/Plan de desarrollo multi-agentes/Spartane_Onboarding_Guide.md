@@ -26,6 +26,10 @@ Su instancia dedicada de SecureTag AI opera bajo una arquitectura segura y aisla
 *   **AI Security Core**: Nuestro modelo cognitivo (`securetag-v1`) alojado en infraestructura GPU privada, entrenado para entender vulnerabilidades complejas.
     *   **Context-Aware Analysis (NUEVO)**: El sistema ahora "entiende" la arquitectura de su proyecto (lenguajes, frameworks, librerías) antes de auditar.
     *   **Deep Code Vision (Función Premium)**: A diferencia de herramientas estándar que analizan fragmentos aislados, SecureTag inyecta una **ventana de contexto extendida** al motor cognitivo. Esto permite a la IA "ver" el código circundante (importaciones, validaciones previas, manejo de errores) para distinguir con precisión humana entre una vulnerabilidad real y un falso positivo, tal como lo haría un auditor senior. *Esta capacidad está disponible exclusivamente para clientes del plan Premium para garantizar el análisis más profundo.*
+    *   **Architectural Flow (Cross-file Analysis) (Función Premium)**: SecureTag AI rompe las barreras del análisis estático tradicional al implementar un motor de **rastreo de flujo de datos entre archivos**.
+        *   Detecta ataques complejos que inician en un punto de entrada (ej. Controlador API) y explotan una vulnerabilidad en capas profundas (ej. Servicio de Base de Datos), invisibles para escáneres convencionales que analizan archivo por archivo.
+        *   Reconstruye la topología completa de su aplicación MVC para identificar rutas críticas de ataque ("Attack Paths") con cero configuración.
+        *   **Soporte Multi-Lenguaje Activo**: Ahora disponible para **TypeScript** (Node.js/NestJS), **Python** (Django/Flask) y **Java** (Spring Boot).
 *   **Tenant Isolation**: Sus datos (`spartane`) están lógicamente aislados y protegidos.
 
 ---
