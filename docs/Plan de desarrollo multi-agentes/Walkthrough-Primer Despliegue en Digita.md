@@ -501,5 +501,7 @@ docker compose down && docker compose build --no-cache && docker compose up -d
 # 4. Verificar que todo esté corriendo
 docker compose ps
 
+
+
 # 5. Actualizar la base de datos
-./scripts/init-db.sh
+./scripts/init-db.sh 

@@ -1,5 +1,5 @@
 import { WorkerClient } from './WorkerClient.js'
-import { ExternalToolManager } from '../agent/tools/ExternalToolManager.js'
+import { ExternalToolManager } from '../utils/ExternalToolManager.js'
 import { dbQuery, ensureTenant, updateTaskState } from '../utils/db.js'
 import { banEntity } from '../server/security.js'
 import { HeartbeatManager } from './HeartbeatManager.js'
@@ -57,7 +57,7 @@ export class TaskExecutor {
                     } else if (job.type === 'research') {
                         return await this.executeResearch(job, tenant, started)
                     } else {
-                        return await this.executeHttpx(job, tenant, started)
+                        throw new Error(`Unknown task type: ${job.type}`)
                     }
                 },
                 timeout,
@@ -602,35 +602,7 @@ export class TaskExecutor {
         }
     }
 
-    private async executeHttpx(job: any, tenant: string, started: number): Promise<any> {
-        const ok = await ExternalToolManager.isAvailable('httpx')
-        if (!ok) throw new Error('httpx not available')
 
-        const args = ['-version']
-        const result = await ExternalToolManager.execute('httpx', args, { timeout: 30000 })
-        const finished = Date.now()
-
-        const tenantId = await ensureTenant(tenant)
-        const taskId = job.id || job.taskId
-
-        await this.ensureTaskExists(taskId, tenantId, job.type || 'web', job)
-
-        await dbQuery('INSERT INTO securetag.tool_execution(tenant_id, task_id, tool, args_json, exit_code, started_at, finished_at, stdout_ref, stderr_ref, metrics_json) VALUES($1,$2,$3,$4,$5, to_timestamp($6/1000.0), to_timestamp($7/1000.0), $8, $9, $10)',
-            [tenantId, taskId, 'httpx', JSON.stringify({ command: 'httpx', flags: args }), result.exitCode || 1, started, finished, '', '', JSON.stringify({ durationMs: finished - started })])
-
-        // Update task state to completed
-        await updateTaskState(taskId, 'completed')
-
-        return {
-            ok: result.exitCode === 0,
-            status: 'completed',
-            taskId,
-            tool: 'httpx',
-            tenant,
-            durationMs: finished - started,
-            stdout: result.stdout.split('\n').slice(0, 5)
-        }
-    }
 
     private async ensureTaskExists(taskId: string, tenantId: string, type: string, job: any) {
         const exists = await dbQuery('SELECT 1 FROM securetag.task WHERE id=$1 LIMIT 1', [taskId])

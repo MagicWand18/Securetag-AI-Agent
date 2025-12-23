@@ -1,5 +1,5 @@
 import { ProjectContext } from '../ContextAnalyzer.js';
-import { ExternalToolManager } from '../../agent/tools/ExternalToolManager.js';
+import { ExternalToolManager } from '../../utils/ExternalToolManager.js';
 import { AIProvider } from './AIProvider.js';
 import { OpenAIProvider } from './OpenAIProvider.js';
 import { AnthropicProvider } from './AnthropicProvider.js';

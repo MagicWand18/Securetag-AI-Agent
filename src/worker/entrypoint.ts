@@ -1,7 +1,7 @@
 import { WorkerClient } from './WorkerClient.js'
 import { TaskExecutor } from './TaskExecutor.js'
 import { logger } from '../utils/logger.js'
-import { ExternalToolManager } from '../agent/tools/ExternalToolManager.js'
+import { ExternalToolManager } from '../utils/ExternalToolManager.js'
 import { startWorker } from './consumer.js'
 import fs from 'fs'
 import path from 'path'

@@ -27,14 +27,14 @@
 | **Fase 5: Auth & Multi-tenancy** | 1/1 | 0/1 | 100% ✅ |
 | **Fase 6: Producción** | 1/1 | 0/1 | 100% ✅ |
 | **Fase 7: Integración Final** | 1/1 | 0/1 | 100% ✅ |
-| **Fase 8: Beta 2 (SAST & Opt)** | 4/6 | 2/6 | 66% 🔄 |
+| **Fase 8: Beta 2 (SAST & Opt)** | 5/6 | 1/6 | 83% 🔄 |
 | **Fase 9: Hardening & Seguridad** | 3/4 | 1/4 | 75% 🔄 |
 | **Fase 10: Future (LLM/Data)** | 5/6 | 1/6 | 83% 🔄 |
 | **Fase 11: QA & Entrega** | 5/5 | 0/5 | 100% ✅ |
 | **Fase 12: Enterprise Features** | 4/4 | 0/4 | 100% ✅ |
 | **Fase 13: Offensive AI (xpl01t)** | 0/3 | 3/3 | 0% 🔄 |
 
-**Progreso Total**: 33/40 tareas completadas (82%)
+**Progreso Total**: 34/40 tareas completadas (85%)
 
 
 ## 1. Visión y Objetivos
@@ -198,7 +198,7 @@ El sistema se compone de tres pilares principales que evolucionan en paralelo:
     *   **Metodología**: Generación Determinista (Code-Only) sin alucinaciones.
     *   **Resultado**: 12.7k exploits verificados, 38k pares Q&A.
     *   **Nota**: Base para el futuro modelo `securetag-xpl01t` (Offensive).
-*   **Tarea 10.4: Polyglot Expansion (MVC)** [ ]
+*   **Tarea 10.4: Polyglot Expansion (MVC) Cross-file analysis parte 2** [ ]
     *   **Prioridad Alta**: C# (.NET Core), PHP (Laravel/Symfony), Ruby (Rails).
     *   **Prioridad Media**: Go (Golang).
     *   **Postponed**: Vue.js (Limitación parser Semgrep).
