@@ -1,0 +1,72 @@
+rules:
+  - id: ts-explicit-any
+    message: >-
+      Se detectó el uso del tipo 'any'. Esto deshabilita la verificación de tipos de TypeScript y puede llevar a errores en tiempo de ejecución.
+      Use tipos específicos o 'unknown' si el tipo es verdaderamente dinámico.
+    languages: [typescript, javascript]
+    severity: WARNING
+    metadata:
+      category: best-practice
+      technology:
+        - typescript
+      likelihood: LOW
+      impact: MEDIUM
+      confidence: HIGH
+      references:
+        - https://www.typescriptlang.org/docs/handbook/declaration-files/do-s-and-don-ts.html#any
+    patterns:
+      - pattern: |
+          $X: any
+      - pattern-not-inside: |
+          try { ... } catch ($X: any) { ... }
+
+  - id: ts-unsafe-cast
+    message: >-
+      Se detectó doble casteo inseguro (as unknown as Type).
+      Esto fuerza al compilador a ignorar la seguridad de tipos y oculta errores potenciales.
+    languages: [typescript, javascript]
+    severity: WARNING
+    metadata:
+      category: best-practice
+      technology:
+        - typescript
+      likelihood: MEDIUM
+      impact: MEDIUM
+      confidence: HIGH
+    patterns:
+      - pattern: $VAL as unknown as $TYPE
+
+  - id: no-native-date
+    message: >-
+      Se detectó el uso de Date() nativo. Considere usar Day.js (ya en package.json) para un manejo consistente de fechas y zonas horarias.
+    languages: [typescript, javascript]
+    severity: INFO
+    metadata:
+      category: best-practice
+      technology:
+        - javascript
+      likelihood: LOW
+      impact: LOW
+      confidence: HIGH
+    patterns:
+      - pattern: new Date(...)
+
+  - id: empty-catch-block
+    message: >-
+      Se detectó un bloque catch vacío. Silenciar errores hace imposible la depuración.
+      Al menos registre el error en la consola o un servicio de monitoreo.
+    languages: [typescript, javascript]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-390: Detection of Error Condition Without Action"
+      owasp: "A09:2021 - Security Logging and Monitoring Failures"
+      category: best-practice
+      technology:
+        - javascript
+        - typescript
+      likelihood: MEDIUM
+      impact: MEDIUM
+      confidence: HIGH
+    patterns:
+      - pattern: |
+          try { ... } catch ($E) { }

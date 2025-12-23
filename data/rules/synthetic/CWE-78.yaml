@@ -1,0 +1,60 @@
+rules:
+- id: synthetic-cwe78
+  languages:
+  - javascript
+  - typescript
+  message: "Posible OS Command Injection (CWE-78): se est\xE1 construyendo un comando\
+    \ del sistema operativo usando datos potencialmente controlados por el usuario\
+    \ y pas\xE1ndolo a una funci\xF3n de ejecuci\xF3n de comandos (`exec` / `execSync`\
+    \ / `spawn` / `spawnSync`). Esto permite que un atacante inyecte argumentos o\
+    \ comandos adicionales. Valida, escapa o usa APIs m\xE1s seguras (por ejemplo,\
+    \ pasar argumentos como array en lugar de concatenar strings).\n"
+  severity: ERROR
+  metadata:
+    cwe: CWE-78
+    category: security
+    technology:
+    - nodejs
+    - express
+    likelihood: MEDIUM
+    impact: HIGH
+    confidence: MEDIUM
+    owasp: A03:2021 - Injection
+    references:
+    - https://cwe.mitre.org/data/definitions/20.html
+  patterns:
+  - pattern-either:
+    - pattern: '$CP.exec($CMD, ...);
+
+        '
+    - pattern: '$CP.execSync($CMD, ...);
+
+        '
+    - pattern: '$CP.spawn($CMD, ...);
+
+        '
+    - pattern: '$CP.spawnSync($CMD, ...);
+
+        '
+  - pattern-inside: 'const $CP = require(''child_process'');
+
+      ...
+
+      '
+  - pattern-either:
+    - pattern: 'const $CMD = $X + $Y;
+
+        '
+    - pattern: 'let $CMD = $X + $Y;
+
+        '
+    - pattern: 'var $CMD = $X + $Y;
+
+        '
+    - pattern: 'const $CMD = `${...}`;
+
+        '
+    - pattern: 'let $CMD = `${...}`;
+
+        '
+    - pattern: var $CMD = `${...}`;

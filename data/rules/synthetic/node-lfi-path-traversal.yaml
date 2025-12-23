@@ -1,0 +1,103 @@
+rules:
+  - id: synthetic-e032f5bc45634096ae3b064bab588685
+    languages:
+      - javascript
+      - typescript
+    severity: ERROR
+    message: >-
+      Posible vulnerabilidad de lectura de archivos locales (path traversal) por uso de una ruta
+      controlada por el usuario en operaciones de lectura (p.ej., fs.readFile). Un atacante puede
+      suministrar payloads como "/../../.." para leer archivos sensibles fuera del directorio esperado.
+      En aplicaciones JVM esto suele manifestarse como "FileNotFoundException" con rutas filtradas.
+      Referencia: CVE e032f5bc-4563-4096-ae3b-064bab588685.
+    metadata:
+      cwe: "CWE-22: Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')"
+      owasp: "A01:2021 - Broken Access Control"
+      category: "security"
+      technology:
+        - javascript
+        - typescript
+        - nodejs
+      likelihood: "HIGH"
+      impact: "HIGH"
+      confidence: "MEDIUM"
+      references:
+        - "https://nvd.nist.gov/vuln/detail/e032f5bc-4563-4096-ae3b-064bab588685"
+    patterns:
+      - pattern-either:
+          # Direct user input used as path in fs.readFile / readFileSync
+          - patterns:
+              - pattern: |
+                  $FS.readFile($PATH, $ENC, $CB)
+              - pattern-inside: |
+                  $APP.$METHOD($ROUTE, ($REQ, $RES) => { ... })
+              - metavariable-regex:
+                  metavariable: $METHOD
+                  regex: "^(get|post|put|delete|patch|all|use)$"
+              - pattern-either:
+                  - pattern: |
+                      $PATH = $REQ.query.$P
+                  - pattern: |
+                      $PATH = $REQ.params.$P
+                  - pattern: |
+                      $PATH = $REQ.body.$P
+                  - pattern: |
+                      $PATH = $REQ.$P
+          - patterns:
+              - pattern: |
+                  $FS.readFileSync($PATH, $ENC)
+              - pattern-inside: |
+                  $APP.$METHOD($ROUTE, ($REQ, $RES) => { ... })
+              - metavariable-regex:
+                  metavariable: $METHOD
+                  regex: "^(get|post|put|delete|patch|all|use)$"
+              - pattern-either:
+                  - pattern: |
+                      $PATH = $REQ.query.$P
+                  - pattern: |
+                      $PATH = $REQ.params.$P
+                  - pattern: |
+                      $PATH = $REQ.body.$P
+                  - pattern: |
+                      $PATH = $REQ.$P
+          # User input joined into a path then read
+          - patterns:
+              - pattern: |
+                  $FS.readFile($TARGET, $ENC, $CB)
+              - pattern-inside: |
+                  $APP.$METHOD($ROUTE, ($REQ, $RES) => {
+                    ...
+                    $FILE = $REQ.query.$P;
+                    ...
+                    $TARGET = $PATHMOD.join($BASE, $FILE);
+                    ...
+                  })
+              - metavariable-regex:
+                  metavariable: $METHOD
+                  regex: "^(get|post|put|delete|patch|all|use)$"
+          - patterns:
+              - pattern: |
+                  $FS.readFileSync($TARGET, $ENC)
+              - pattern-inside: |
+                  $APP.$METHOD($ROUTE, ($REQ, $RES) => {
+                    ...
+                    $FILE = $REQ.query.$P;
+                    ...
+                    $TARGET = $PATHMOD.join($BASE, $FILE);
+                    ...
+                  })
+              - metavariable-regex:
+                  metavariable: $METHOD
+                  regex: "^(get|post|put|delete|patch|all|use)$"
+          # Optional signal: leaking FileNotFoundException-like message with user-controlled path
+          - patterns:
+              - pattern-inside: |
+                  $APP.$METHOD($ROUTE, ($REQ, $RES) => { ... })
+              - metavariable-regex:
+                  metavariable: $METHOD
+                  regex: "^(get|post|put|delete|patch|all|use)$"
+              - pattern-either:
+                  - pattern: |
+                      $RES.$SEND(`FileNotFoundException: ${$X}`)
+                  - pattern: |
+                      $RES.$SEND("FileNotFoundException: " + $X)

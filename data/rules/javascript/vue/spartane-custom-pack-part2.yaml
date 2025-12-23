@@ -1,0 +1,66 @@
+rules:
+  - id: vite-exposed-secrets
+    message: >-
+      Se detectó una variable de entorno sensible expuesta al cliente mediante el prefijo VITE_.
+      Asegúrese de que esta variable deba ser pública. Las claves de API y secretos no deben exponerse.
+    languages: [javascript, typescript]
+    severity: ERROR
+    metadata:
+      cwe: "CWE-200: Exposure of Sensitive Information to an Unauthorized Actor"
+      owasp: "A01:2021 - Broken Access Control"
+      category: security
+      technology:
+        - vite
+      likelihood: HIGH
+      impact: HIGH
+      confidence: MEDIUM
+      references:
+        - https://vitejs.dev/guide/env-and-mode.html#env-files
+    patterns:
+      - pattern: import.meta.env.VITE_$KEY
+      - metavariable-regex:
+          metavariable: $KEY
+          regex: (?i).*(KEY|SECRET|TOKEN|PASSWORD|AUTH).*
+
+  - id: jwt-decode-usage
+    message: >-
+      Se detectó decodificación de JWT en el cliente.
+      Decodificar un token sin verificar su firma es riesgoso para decisiones de autorización.
+      Asegúrese de que la lógica crítica ocurra en el backend.
+    languages: [javascript, typescript]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-345: Insufficient Verification of Data Authenticity"
+      owasp: "A07:2021 - Identification and Authentication Failures"
+      category: security
+      technology:
+        - jwt
+      likelihood: MEDIUM
+      impact: MEDIUM
+      confidence: MEDIUM
+      references:
+        - https://jwt.io/introduction
+    patterns:
+      - pattern-either:
+          - pattern: jwt_decode(...)
+          - pattern: jwtDecode(...)
+          - pattern: JSON.parse(atob(...))
+
+  - id: unsafe-innerhtml-assignment
+    message: >-
+      Asignación directa a innerHTML con contenido potencialmente inseguro.
+      Verifique si el contenido está sanitizado.
+    languages: [javascript, typescript]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+      owasp: "A03:2021 - Injection"
+      category: security
+      technology:
+        - browser
+      likelihood: HIGH
+      impact: HIGH
+      confidence: LOW
+    patterns:
+      - pattern: $EL.innerHTML = $VAL
+      - pattern-not: $EL.innerHTML = "..."

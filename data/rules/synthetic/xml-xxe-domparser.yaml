@@ -1,0 +1,68 @@
+rules:
+  - id: synthetic-c4e06896e27c458395ac91ce2279345d
+    languages:
+      - javascript
+      - typescript
+    severity: ERROR
+    message: >
+      Posible explotación XXE / parseo inseguro de XML: se está usando
+      xmldom.DOMParser para parsear datos XML potencialmente controlados por el
+      usuario sin deshabilitar entidades externas ni DTDs. En entornos JVM
+      (Rhino/Nashorn/Graal.js) esto puede derivar en vulnerabilidades similares
+      a XXE (lectura de archivos, SSRF o incluso RCE), como en
+      c4e06896-e27c-4583-95ac-91ce2279345d. Asegúrate de inicializar el parser
+      de forma segura y de validar el contenido del XML antes de usarlo.
+    metadata:
+      cwe: "CWE-611: Improper Restriction of XML External Entity Reference"
+      owasp: "A05:2021 - Security Misconfiguration"
+      category: "security"
+      technology:
+        - javascript
+        - typescript
+        - nodejs
+      likelihood: "HIGH"
+      impact: "HIGH"
+      confidence: "MEDIUM"
+      references:
+        - "https://nvd.nist.gov/vuln/detail/c4e06896-e27c-4583-95ac-91ce2279345d"
+    patterns:
+      - pattern-inside: |
+          const { DOMParser } = require('xmldom');
+          ...
+      - pattern-either:
+          - pattern: |
+              const $PARSER = new DOMParser($OPTS);
+          - pattern: |
+              let $PARSER = new DOMParser($OPTS);
+          - pattern: |
+              var $PARSER = new DOMParser($OPTS);
+          - pattern: |
+              $PARSER = new DOMParser($OPTS);
+      - pattern-inside: |
+          $PARSER = new DOMParser($OPTS);
+          ...
+          $DOC = $PARSER.parseFromString($XML, $TYPE);
+      - pattern-not: |
+          const $PARSER = new DOMParser({
+            $OPTSKEY: {
+              $OPTSVAL,
+              ...
+            },
+            ...
+          });
+      - pattern-not: |
+          let $PARSER = new DOMParser({
+            $OPTSKEY: {
+              $OPTSVAL,
+              ...
+            },
+            ...
+          });
+      - pattern-not: |
+          var $PARSER = new DOMParser({
+            $OPTSKEY: {
+              $OPTSVAL,
+              ...
+            },
+            ...
+          });

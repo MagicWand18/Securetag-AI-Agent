@@ -1,0 +1,69 @@
+rules:
+- id: synthetic-cwe352
+  languages:
+  - javascript
+  - typescript
+  severity: ERROR
+  message: "Esta ruta HTTP modifica el estado del servidor (operaci\xF3n sensible)\
+    \ y depende \xFAnicamente de cookies impl\xEDcitas para la autenticaci\xF3n, sin\
+    \ verificar ning\xFAn token CSRF (por ejemplo, cabecera personalizada, token en\
+    \ cuerpo o en cookie con validaci\xF3n expl\xEDcita). Esto permite que un atacante\
+    \ fuerce al navegador de la v\xEDctima a enviar la petici\xF3n autenticada desde\
+    \ otro sitio (CSRF, CWE-352), cambiando datos del usuario sin su consentimiento.\n"
+  metadata:
+    cwe: CWE-352
+    owasp:
+    - A01:2021 - Broken Access Control
+    category: security
+    technology:
+    - express
+    references:
+    - https://cwe.mitre.org/data/definitions/352.html
+    likelihood: MEDIUM
+    impact: HIGH
+    confidence: MEDIUM
+  patterns:
+  - pattern-either:
+    - pattern: "$APP.$METHOD($ROUTE, ($REQ, $RES) => {\n  ...\n})\n"
+    - pattern: "$APP.$METHOD($ROUTE, function ($REQ, $RES) {\n  ...\n})\n"
+  - pattern-inside: 'const $APP = require(''express'')();
+
+      ...
+
+      '
+  - pattern-inside: '$APP.$METHOD($ROUTE, $HANDLER);
+
+      '
+  - pattern-either:
+    - pattern: '$USER_ID = $REQ.cookies.$COOKIE_NAME;
+
+        '
+    - pattern: '$USER_ID = $REQ.session.$SESSION_KEY;
+
+        '
+    - pattern: 'const $USER_ID = $REQ.cookies.$COOKIE_NAME;
+
+        '
+    - pattern: 'const $USER_ID = $REQ.session.$SESSION_KEY;
+
+        '
+  - pattern-either:
+    - pattern: '$USERS[$USER_ID].$FIELD = $VALUE;
+
+        '
+    - pattern: '$USER.$FIELD = $VALUE;
+
+        '
+    - pattern: '$MODEL.update(...);
+
+        '
+    - pattern: '$MODEL.save(...);
+
+        '
+  - pattern-not:
+      pattern: "if ($REQ.headers['x-csrf-token'] || $REQ.get('x-csrf-token')) {\n\
+        \  ...\n}\n"
+  - pattern-not:
+      pattern: "if ($REQ.body.$CSRF_FIELD) {\n  ...\n}\n"
+  - pattern-not:
+      pattern: $APP.use(require('csurf')(...));

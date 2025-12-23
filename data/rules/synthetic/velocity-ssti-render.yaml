@@ -1,0 +1,45 @@
+rules:
+  - id: synthetic-16c86189b5564ee8b4c77e350a195a4f
+    languages:
+      - javascript
+      - typescript
+    severity: ERROR
+    message: >-
+      Possible Server-Side Template Injection (SSTI) in Velocity: rendering a template
+      string that can be influenced by user input may trigger Velocity parsing/runtime
+      exceptions (ParseErrorException / VelocityException / TemplateInitException) and
+      can lead to RCE in real-world exploitation scenarios (CVE-16c86189-b556-4ee8-b4c7-7e350a195a4f).
+      Avoid rendering untrusted templates; use allowlists/safe templates and restrict exposed context.
+    metadata:
+      cwe: "CWE-94: Improper Control of Generation of Code ('Code Injection')"
+      owasp: "A03:2021 - Injection"
+      category: security
+      technology:
+        - javascript
+        - typescript
+        - nodejs
+      likelihood: "HIGH"
+      impact: "HIGH"
+      confidence: "MEDIUM"
+      references:
+        - "https://nvd.nist.gov/vuln/detail/16c86189-b556-4ee8-b4c7-7e350a195a4f"
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $V.render($TEMPLATE, $CTX)
+          - pattern: |
+              Velocity.render($TEMPLATE, $CTX)
+          - pattern: |
+              $ENGINE.render($TEMPLATE, $CTX)
+      - pattern-inside: |
+          const { $V } = require('velocityjs');
+          ...
+      - metavariable-regex:
+          metavariable: $V
+          regex: ^Velocity$
+      - pattern-not: |
+          $V.render("...", $CTX)
+      - pattern-not: |
+          Velocity.render("...", $CTX)
+      - pattern-not: |
+          $ENGINE.render("...", $CTX)

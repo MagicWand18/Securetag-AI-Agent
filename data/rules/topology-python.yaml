@@ -1,0 +1,248 @@
+rules:
+  - id: source-controller
+    patterns:
+      - pattern-either:
+          - pattern: |
+              @app.route(...)
+              def $METHOD(..., $REQ, ...): ...
+          - pattern: |
+              @app.route(...)
+              def $METHOD(...): ...
+          - pattern: |
+              def $METHOD(request, ...): ...
+    message: "Potential Controller Source detected: $METHOD"
+    languages: [python]
+    severity: INFO
+    metadata:
+      type: source
+      tags: ["mvc-source"]
+
+  - id: call-service
+    patterns:
+      - pattern-either:
+          - pattern: $SERVICE.$METHOD(...)
+          - pattern: self.$SERVICE.$METHOD(...)
+    message: "Service call detected: $SERVICE.$METHOD"
+    languages: [python]
+    severity: INFO
+    metadata:
+      type: call
+      tags: ["mvc-call"]
+
+  # Sinks (18 categories)
+  - id: sink-sql
+    patterns:
+      - pattern-either:
+          - pattern: cursor.execute(...)
+          - pattern: $DB.raw(...)
+    message: "SQL Sink detected"
+    languages: [python]
+    severity: INFO
+    metadata:
+      type: sink
+      category: "sql-injection"
+
+  - id: sink-command
+    patterns:
+      - pattern-either:
+          - pattern: subprocess.call(...)
+          - pattern: subprocess.Popen(...)
+          - pattern: os.system(...)
+          - pattern: os.popen(...)
+    message: "Command Injection Sink detected"
+    languages: [python]
+    severity: INFO
+    metadata:
+      type: sink
+      category: "command-injection"
+
+  - id: sink-code-eval
+    patterns:
+      - pattern-either:
+          - pattern: eval(...)
+          - pattern: exec(...)
+    message: "Code Injection Sink detected"
+    languages: [python]
+    severity: INFO
+    metadata:
+      type: sink
+      category: "code-injection"
+
+  - id: sink-ssrf
+    patterns:
+      - pattern-either:
+          - pattern: requests.get(...)
+          - pattern: requests.post(...)
+          - pattern: urllib.request.urlopen(...)
+    message: "SSRF Sink detected"
+    languages: [python]
+    severity: INFO
+    metadata:
+      type: sink
+      category: "ssrf"
+
+  - id: sink-path-traversal
+    patterns:
+      - pattern-either:
+          - pattern: open(...)
+    message: "Path Traversal Sink detected"
+    languages: [python]
+    severity: INFO
+    metadata:
+      type: sink
+      category: "path-traversal"
+
+  - id: sink-nosql
+    patterns:
+      - pattern-either:
+          - pattern: '$COLL.find({"$where": ...})'
+    message: "NoSQL Sink detected"
+    languages: [python]
+    severity: INFO
+    metadata:
+      type: sink
+      category: "nosql-injection"
+
+  - id: sink-deserialization
+    patterns:
+      - pattern-either:
+          - pattern: pickle.loads(...)
+          - pattern: yaml.load(...)
+    message: "Deserialization Sink detected"
+    languages: [python]
+    severity: INFO
+    metadata:
+      type: sink
+      category: "deserialization"
+
+  - id: sink-proto-pollution
+    patterns:
+      - pattern-either:
+          - pattern: $OBJ.__class__.__base__
+          - pattern: $OBJ.__proto__
+    message: "Prototype Pollution Sink detected"
+    languages: [python]
+    severity: INFO
+    metadata:
+      type: sink
+      category: "prototype-pollution"
+
+  - id: sink-ssti
+    patterns:
+      - pattern-either:
+          - pattern: render_template_string(...)
+          - pattern: jinja2.Template(...)
+    message: "SSTI Sink detected"
+    languages: [python]
+    severity: INFO
+    metadata:
+      type: sink
+      category: "ssti"
+
+  - id: sink-xxe
+    patterns:
+      - pattern-either:
+          - pattern: lxml.etree.parse(...)
+          - pattern: xml.sax.parse(...)
+    message: "XXE Sink detected"
+    languages: [python]
+    severity: INFO
+    metadata:
+      type: sink
+      category: "xxe"
+
+  - id: sink-mass-assignment
+    patterns:
+      - pattern-either:
+          - pattern: $MODEL.objects.create(**$DATA)
+          - pattern: $MODEL.objects.update(**$DATA)
+    message: "Mass Assignment Sink detected"
+    languages: [python]
+    severity: INFO
+    metadata:
+      type: sink
+      category: "mass-assignment"
+
+  - id: sink-db-access-by-id
+    patterns:
+      - pattern-either:
+          - pattern: $MODEL.objects.get(id=...)
+          - pattern: $MODEL.objects.filter(id=...)
+    message: "Direct DB Access by ID (Potential BOLA/IDOR)"
+    languages: [python]
+    severity: INFO
+    metadata:
+      type: sink
+      category: "bola-idor"
+
+  - id: sink-csrf-check
+    patterns:
+      - pattern-either:
+          - pattern: |
+              @csrf_exempt
+              def $METHOD(...): ...
+    message: "CSRF Check Disabled Sink detected"
+    languages: [python]
+    severity: INFO
+    metadata:
+      type: sink
+      category: "csrf"
+
+  - id: sink-file-upload
+    patterns:
+      - pattern-either:
+          - pattern: $FILE.save(...)
+    message: "File Upload Sink detected"
+    languages: [python]
+    severity: INFO
+    metadata:
+      type: sink
+      category: "file-upload"
+
+  - id: sink-weak-crypto
+    patterns:
+      - pattern-either:
+          - pattern: hashlib.md5(...)
+          - pattern: random.random()
+    message: "Weak Crypto Sink detected"
+    languages: [python]
+    severity: INFO
+    metadata:
+      type: sink
+      category: "weak-crypto"
+
+  - id: sink-reflected-xss
+    patterns:
+      - pattern-either:
+          - pattern: return HttpResponse(...)
+          - pattern: return $HTML
+    message: "Reflected XSS Sink detected"
+    languages: [python]
+    severity: INFO
+    metadata:
+      type: sink
+      category: "reflected-xss"
+
+  - id: sink-log-injection
+    patterns:
+      - pattern-either:
+          - pattern: logging.info(...)
+          - pattern: logging.warning(...)
+    message: "Log Injection Sink detected"
+    languages: [python]
+    severity: INFO
+    metadata:
+      type: sink
+      category: "log-injection"
+
+  - id: sink-open-redirect
+    patterns:
+      - pattern-either:
+          - pattern: redirect(...)
+          - pattern: flask.redirect(...)
+    message: "Open Redirect Sink detected"
+    languages: [python]
+    severity: INFO
+    metadata:
+      type: sink
+      category: "open-redirect"

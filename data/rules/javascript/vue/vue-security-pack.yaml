@@ -1,0 +1,177 @@
+rules:
+  - id: vue-v-html-xss
+    message: >-
+      Se detectó el uso de la directiva v-html. Esto puede permitir ataques XSS si los datos provienen de una fuente no confiable.
+      Use v-text o {{ }} en su lugar, o asegúrese de que los datos estén sanitizados (por ejemplo, usando DOMPurify).
+    languages: [javascript, typescript, html]
+    severity: ERROR
+    metadata:
+      cwe: "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+      owasp: "A03:2021 - Injection"
+      category: security
+      technology:
+        - vue
+      likelihood: HIGH
+      impact: HIGH
+      confidence: MEDIUM
+      references:
+        - https://vuejs.org/guide/best-practices/security.html#potential-dangers
+    patterns:
+      - pattern-either:
+          - pattern: <$TAG v-html="$VAR">...</$TAG>
+          - pattern: <$TAG :inner-html.prop="$VAR">...</$TAG>
+
+  - id: vue-ref-manipulation
+    message: >-
+      La manipulación directa del DOM a través de $refs está desaconsejada y puede eludir los mecanismos de seguridad de Vue.
+      Evite usar innerHTML o outerHTML en referencias ($refs).
+    languages: [javascript, typescript]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+      owasp: "A03:2021 - Injection"
+      category: security
+      technology:
+        - vue
+      likelihood: MEDIUM
+      impact: MEDIUM
+      confidence: MEDIUM
+      references:
+        - https://vuejs.org/guide/essentials/template-refs.html
+    patterns:
+      - pattern-either:
+          - pattern: this.$refs.$REF.innerHTML = $VAL
+          - pattern: this.$refs.$REF.outerHTML = $VAL
+
+  - id: vue-dangerous-attributes
+    message: >-
+      Posible XSS en enlace de atributos. Vincular datos no confiables a href, src o action puede permitir URIs 'javascript:'.
+      Valide que el contenido no inicie con 'javascript:'.
+    languages: [javascript, typescript, html]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+      owasp: "A03:2021 - Injection"
+      category: security
+      technology:
+        - vue
+        - html
+      likelihood: LOW
+      impact: HIGH
+      confidence: LOW
+      references:
+        - https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html
+    patterns:
+      - pattern-either:
+          - pattern: <$TAG :href="'javascript:' + $VAR">...</$TAG>
+          - pattern: <$TAG :src="'javascript:' + $VAR">...</$TAG>
+          - pattern: <$TAG :href="javascript:...">...</$TAG>
+
+  - id: generic-dom-xss
+    message: >-
+      Se detectó escritura en un 'sink' del DOM (innerHTML/outerHTML). Este es un vector común de XSS.
+      Asegúrese de sanitizar los datos antes de asignarlos.
+    languages: [javascript, typescript]
+    severity: ERROR
+    metadata:
+      cwe: "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+      owasp: "A03:2021 - Injection"
+      category: security
+      technology:
+        - browser
+      likelihood: HIGH
+      impact: HIGH
+      confidence: MEDIUM
+      references:
+        - https://owasp.org/www-community/attacks/xss/
+    patterns:
+      - pattern-either:
+          - pattern: $EL.innerHTML = $VAL
+          - pattern: $EL.outerHTML = $VAL
+          - pattern: document.write($VAL)
+
+  - id: vue-debug-mode
+    message: >-
+      La configuración de Vue tiene el modo de depuración (debug) habilitado.
+      Esto debe estar deshabilitado en producción para evitar fugas de información.
+    languages: [javascript, typescript]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-489: Active Debug Code"
+      owasp: "A05:2021 - Security Misconfiguration"
+      category: security
+      technology:
+        - vue
+      likelihood: LOW
+      impact: LOW
+      confidence: HIGH
+      references:
+        - https://vuejs.org/api/application.html#app-config-errorhandler
+    patterns:
+      - pattern: Vue.config.debug = true
+
+  - id: prototype-pollution-assignment
+    message: >-
+      Posible contaminación de prototipo detectada. Asignar a propiedades como '__proto__', 'constructor' o 'prototype'
+      puede conducir a Denegación de Servicio (DoS), Ejecución Remota de Código (RCE) o Inyección de Propiedades.
+      Asegúrese de validar las claves contra una lista denegada o use Object.create(null).
+    languages: [javascript, typescript]
+    severity: ERROR
+    metadata:
+      cwe: "CWE-1321: Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')"
+      owasp: "A08:2021 - Software and Data Integrity Failures"
+      category: security
+      technology:
+        - javascript
+      likelihood: MEDIUM
+      impact: HIGH
+      confidence: MEDIUM
+      references:
+        - https://portswigger.net/web-security/prototype-pollution
+    patterns:
+      - pattern-either:
+          - pattern: $OBJ[__proto__] = $VAL
+          - pattern: $OBJ.constructor.prototype = $VAL
+          - pattern: $OBJ["__proto__"] = $VAL
+          - pattern: $OBJ['__proto__'] = $VAL
+
+  - id: vue-prop-mutation
+    message: >-
+      Evite mutar una 'prop' directamente, ya que el valor se sobrescribirá cuando el componente padre se re-renderice.
+      En su lugar, use una propiedad 'data' o 'computed' basada en el valor de la prop.
+    languages: [javascript, typescript]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+      owasp: "A03:2021 - Injection"
+      category: best-practice
+      technology:
+        - vue
+      likelihood: HIGH
+      impact: LOW
+      confidence: HIGH
+      references:
+        - https://vuejs.org/guide/components/props.html#one-way-data-flow
+    patterns:
+      - pattern: this.$props.$PROP = $VAL
+
+  - id: vuex-state-mutation
+    message: >-
+      La mutación directa del estado de Vuex no se recomienda. Use mutaciones (this.$store.commit) o acciones (this.$store.dispatch)
+      para asegurar que los cambios de estado sean rastreables y reactivos.
+    languages: [javascript, typescript]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+      owasp: "A03:2021 - Injection"
+      category: best-practice
+      technology:
+        - vue
+        - vuex
+      likelihood: HIGH
+      impact: LOW
+      confidence: HIGH
+      references:
+        - https://vuex.vuejs.org/guide/mutations.html
+    patterns:
+      - pattern: this.$store.state.$PROP = $VAL

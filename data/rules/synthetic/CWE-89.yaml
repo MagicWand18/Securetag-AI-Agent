@@ -1,0 +1,48 @@
+rules:
+- id: synthetic-cwe89
+  languages:
+  - javascript
+  - typescript
+  severity: ERROR
+  message: "Posible SQL Injection (CWE-89): se est\xE1 construyendo din\xE1micamente\
+    \ una consulta SQL concatenando valores potencialmente controlados por el usuario\
+    \ en la cadena de la query. Esto permite que un atacante altere la consulta SQL\
+    \ enviada a la base de datos. Usa consultas parametrizadas/preparadas (placeholders)\
+    \ en lugar de concatenar valores.\n"
+  metadata:
+    cwe: CWE-89
+    category: security
+    technology:
+    - mysql
+    - mysql2
+    - node
+    - express
+    likelihood: MEDIUM
+    impact: HIGH
+    confidence: MEDIUM
+    owasp: A03:2021 - Injection
+    references:
+    - https://cwe.mitre.org/data/definitions/20.html
+  patterns:
+  - pattern-either:
+    - pattern: '$CONN = require(''mysql2'');
+
+        ...
+
+        $CONNECTION.$QUERY_METHOD($QUERY, ...);
+
+        '
+    - pattern: '$CONN = require(''mysql'');
+
+        ...
+
+        $CONNECTION.$QUERY_METHOD($QUERY, ...);
+
+        '
+  - pattern-inside: "const express = require('express');\n...\napp.$METHOD($ROUTE,\
+      \ ($REQ, $RES) => {\n  ...\n});\n"
+  - pattern: 'const $QUERY = $SQL + $EXPR;
+
+      '
+  fix: 'Usa consultas parametrizadas, por ejemplo: const query = "SELECT * FROM users
+    WHERE id = ?"; connection.query(query, [userId], ...);'

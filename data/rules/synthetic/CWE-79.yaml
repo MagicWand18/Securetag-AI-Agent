@@ -1,0 +1,48 @@
+rules:
+- id: synthetic-cwe79
+  languages:
+  - javascript
+  - typescript
+  severity: ERROR
+  message: "Posible XSS reflejado (CWE-79): se inserta directamente en HTML una cadena\
+    \ derivada de datos controlados por el usuario sin escape ni sanitizaci\xF3n.\
+    \ Un atacante puede inyectar c\xF3digo JavaScript malicioso que se ejecutar\xE1\
+    \ en el navegador de la v\xEDctima. Valida y escapa siempre los datos antes de\
+    \ incorporarlos a HTML.\n"
+  metadata:
+    cwe: CWE-79
+    category: security
+    technology:
+    - express
+    references:
+    - https://cwe.mitre.org/data/definitions/79.html
+    likelihood: MEDIUM
+    impact: HIGH
+    confidence: MEDIUM
+    owasp: A03:2021 - Injection
+  patterns:
+  - pattern-inside: "app.$ROUTE($METHOD, $PATH, ($REQ, $RES) => {\n  ...\n})\n"
+  - pattern-either:
+    - pattern: "const $HTML = `\n  ...\n  ${$SINK}\n  ...\n`;\n...\n$RES.send($HTML)\n"
+    - pattern: "let $HTML = `\n  ...\n  ${$SINK}\n  ...\n`;\n...\n$RES.send($HTML)\n"
+    - pattern: "var $HTML = `\n  ...\n  ${$SINK}\n  ...\n`;\n...\n$RES.send($HTML)\n"
+    - pattern: "$RES.send(`\n  ...\n  ${$SINK}\n  ...\n`)\n"
+  - pattern-either:
+    - pattern: $SINK = $REQ.query.$PARAM
+    - pattern: $SINK = $REQ.params.$PARAM
+    - pattern: $SINK = $REQ.body.$PARAM
+    - pattern: $SINK = $REQ.$ANY[$KEY]
+  - pattern-not: '$SINK = $ESCAPER(...);
+
+      '
+  - pattern-not: '$SINK = $REQ.sanitize(...);
+
+      '
+  fix-regex:
+    regex: (\$\{)([^}]+\})
+    replacement: ${escapeHtml($2}
+  fix: "// Aseg\xFArate de definir una funci\xF3n de escape robusta, por ejemplo:\n\
+    // function escapeHtml(str) {\n//   return String(str)\n//     .replace(/&/g,\
+    \ \"&amp;\")\n//     .replace(/</g, \"&lt;\")\n//     .replace(/>/g, \"&gt;\"\
+    )\n//     .replace(/\"/g, \"&quot;\")\n//     .replace(/'/g, \"&#39;\");\n// }\n\
+    ..."

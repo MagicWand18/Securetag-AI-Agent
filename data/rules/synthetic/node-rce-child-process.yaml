@@ -1,0 +1,46 @@
+rules:
+  - id: synthetic-97661d9d2beb4630b42368985291a8af
+    languages:
+      - javascript
+      - typescript
+    message: >
+      Posible intento de explotación de RCE en Node.js: se detecta el uso de
+      'node:child_process' para ejecutar comandos del sistema operativo
+      construidos dinámicamente, potencialmente a partir de entrada de usuario.
+      Este patrón es consistente con vulnerabilidades de ejecución remota de
+      comandos (RCE) explotadas en escenarios similares al CVE
+      97661d9d-2beb-4630-b423-68985291a8af, donde errores de ejecución de
+      procesos pueden delatar intentos de explotación. Valida, restringe o
+      elimina la ejecución de comandos basados en datos controlables por el
+      usuario.
+    severity: ERROR
+    metadata:
+      cwe: "CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')"
+      owasp: "A03:2021 - Injection"
+      category: "security"
+      technology:
+        - javascript
+        - typescript
+        - nodejs
+      likelihood: "HIGH"
+      impact: "HIGH"
+      confidence: "MEDIUM"
+      references:
+        - "https://nvd.nist.gov/vuln/detail/97661d9d-2beb-4630-b423-68985291a8af"
+    patterns:
+      - pattern-inside: |
+          const $HTTP = require('http');
+          ...
+      - pattern-either:
+          - pattern: |
+              const { exec } = require('node:child_process');
+              ...
+              exec($CMD, ($ERR, $STDOUT, $STDERR) => {
+                ...
+              });
+          - pattern: |
+              const $CP = require('node:child_process');
+              ...
+              $CP.exec($CMD, ($ERR, $STDOUT, $STDERR) => {
+                ...
+              })

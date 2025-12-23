@@ -1,0 +1,47 @@
+rules:
+- id: synthetic-cwe94
+  languages:
+  - javascript
+  - typescript
+  message: "Posible CWE-94 (Code Injection): se est\xE1 ejecutando c\xF3digo construido\
+    \ din\xE1micamente a partir de datos potencialmente controlados por el usuario.\
+    \ Funciones como `eval`, `Function`, `setTimeout`/`setInterval` con primer argumento\
+    \ string, o `vm.runInThisContext` permiten la ejecuci\xF3n arbitraria de c\xF3\
+    digo si reciben entradas no validadas o no saneadas. Evita ejecutar c\xF3digo\
+    \ proveniente de la entrada del usuario; en su lugar, utiliza APIs espec\xEDficas,\
+    \ validaci\xF3n estricta o listas blancas de operaciones permitidas.\n"
+  severity: ERROR
+  patterns:
+  - pattern-either:
+    - pattern: eval($CODE)
+    - pattern: new Function($ARGS, $CODE)
+    - pattern: new Function($CODE)
+    - pattern: setTimeout($CODE, ...)
+    - pattern: setInterval($CODE, ...)
+    - pattern: $VM.runInThisContext($CODE, ...)
+    - pattern: $VM.runInNewContext($CODE, ...)
+  - pattern-inside: 'const $URL = new URL($REQ.url, ...);
+
+      ...
+
+      $CODE = $URL.searchParams.get(...);
+
+      ...
+
+      $SOMETHING($CODE, ...);
+
+      '
+  metadata:
+    cwe:
+    - 'CWE-94: Improper Control of Generation of Code (''Code Injection'')'
+    category: security
+    technology:
+    - nodejs
+    - javascript
+    - typescript
+    references:
+    - https://cwe.mitre.org/data/definitions/94.html
+    likelihood: HIGH
+    impact: HIGH
+    confidence: MEDIUM
+    owasp: A03:2021 - Injection
