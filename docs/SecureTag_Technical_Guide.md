@@ -210,9 +210,44 @@ Facilite el acceso a la información sin recordar IDs específicos.
     *   Web: `GET /codeaudit/index` (Tabla HTML con historial de tareas y estados).
 
 #### Historial y Proyectos
-*   Listar proyectos: `GET /projects`
-*   Historial de proyecto: `GET /projects/:alias/history`
-*   Última auditoría: `GET /codeaudit/latest`
+
+Gestione y consulte el historial de auditorías organizadas por proyecto.
+
+**1. Listar Proyectos (`GET /projects`)**
+Obtiene una lista de todos los proyectos registrados.
+
+```bash
+curl -X GET "http://143.198.61.64:8080/projects" -H "X-API-Key: SU_API_KEY_AQUI"
+```
+
+**2. Historial de Proyecto (`GET /projects/:alias/history`)**
+Consulta todos los escaneos realizados sobre un alias específico.
+
+```bash
+curl -X GET "http://143.198.61.64:8080/projects/backend-core/history" -H "X-API-Key: SU_API_KEY_AQUI"
+```
+
+**Respuesta de Ejemplo:**
+```json
+{
+  "ok": true,
+  "projectId": "3b4926f1-a15a-4b33-9f2d-4ae88427e583",
+  "history": [
+    {
+      "taskId": "550e8400-...",
+      "status": "completed",
+      "created_at": "2025-12-06T10:00:00Z",
+      "is_retest": true
+    },
+    {
+      "taskId": "123f5678-...",
+      "status": "completed",
+      "created_at": "2025-12-01T09:30:00Z",
+      "is_retest": false
+    }
+  ]
+}
+```
 
 ---
 
