@@ -223,9 +223,10 @@ const server = http.createServer(async (req, res) => {
         }
 
         // 3. Determine Deep Code Vision Access & Cross-File Analysis
-        const enableDeepVision = tenantConfig.llm_config?.deep_code_vision === true;
-        // Tier 'Premium' is required for Cross-File Analysis (Server-Side Logic)
-        const enableCrossFile = tenantConfig.plan === 'Premium';
+        // Tier 'Enterprise' is required for Deep Code Vision
+        const enableDeepVision = plan === 'enterprise' && tenantConfig.llm_config?.deep_code_vision === true;
+        // Tier 'Enterprise' is required for Cross-File Analysis (Server-Side Logic)
+        const enableCrossFile = plan === 'enterprise';
 
         for (const p of parts) {
           const idx = p.indexOf('\r\n\r\n')
@@ -346,10 +347,12 @@ const server = http.createServer(async (req, res) => {
             }
 
             // 2. Check Model Access
-            if ((customRulesModel === 'max' || customRulesModel === 'pro') && plan !== 'premium') {
-                return send(res, 403, { ok: false, error: 'Pro and Max models are only available for Premium tier.' });
+            // Max is Enterprise only
+            if (customRulesModel === 'max' && plan !== 'enterprise') {
+                 return send(res, 403, { ok: false, error: 'Max model is only available for Enterprise tier.' });
             }
-
+            // Pro is Premium or Enterprise (already checked non-free)
+            
             if (balance < processingFee) {
                 return send(res, 402, { ok: false, error: `Insufficient credits for Custom Rules. Required: ${processingFee}, Available: ${balance}.` });
             }

@@ -25,8 +25,8 @@ Su instancia dedicada de SecureTag AI opera bajo una arquitectura segura y aisla
 *   **Automated Research Pipeline (NUEVO)**: Sistema autónomo de "Zero-Day Detection" que monitorea amenazas globales (CISA KEV, NVD, GitHub) en tiempo real, genera reglas de detección sintéticas y las despliega automáticamente en su instancia para      protegerlo contra nuevas vulnerabilidades antes de que sean ampliamente conocidas.
 *   **AI Security Core**: Nuestro modelo cognitivo (`securetag-v1`) alojado en infraestructura GPU privada, entrenado para entender vulnerabilidades complejas.
     *   **Context-Aware Analysis (NUEVO)**: El sistema ahora "entiende" la arquitectura de su proyecto (lenguajes, frameworks, librerías) antes de auditar.
-    *   **Deep Code Vision (Función Premium)**: A diferencia de herramientas estándar que analizan fragmentos aislados, SecureTag inyecta una **ventana de contexto extendida** al motor cognitivo. Esto permite a la IA "ver" el código circundante (importaciones, validaciones previas, manejo de errores) para distinguir con precisión humana entre una vulnerabilidad real y un falso positivo, tal como lo haría un auditor senior. *Esta capacidad está disponible exclusivamente para clientes del plan Premium para garantizar el análisis más profundo.*
-    *   **Architectural Flow (Cross-file Analysis) (Función Premium)**: SecureTag AI rompe las barreras del análisis estático tradicional al implementar un motor de **rastreo de flujo de datos entre archivos**.
+    *   **Deep Code Vision (Función Enterprise)**: A diferencia de herramientas estándar que analizan fragmentos aislados, SecureTag inyecta una **ventana de contexto extendida** al motor cognitivo. Esto permite a la IA "ver" el código circundante (importaciones, validaciones previas, manejo de errores) para distinguir con precisión humana entre una vulnerabilidad real y un falso positivo, tal como lo haría un auditor senior. *Esta capacidad está disponible exclusivamente para clientes del plan Enterprise para garantizar el análisis más profundo.*
+    *   **Architectural Flow (Cross-file Analysis) (Función Enterprise)**: SecureTag AI rompe las barreras del análisis estático tradicional al implementar un motor de **rastreo de flujo de datos entre archivos**. *Esta capacidad está disponible exclusivamente para clientes del plan Enterprise.*
         *   Detecta ataques complejos que inician en un punto de entrada (ej. Controlador API) y explotan una vulnerabilidad en capas profundas (ej. Servicio de Base de Datos), invisibles para escáneres convencionales que analizan archivo por archivo.
         *   Reconstruye la topología completa de su aplicación MVC para identificar rutas críticas de ataque ("Attack Paths") con cero configuración.
         *   **Soporte Multi-Lenguaje Activo**: Ahora disponible para **TypeScript** (Node.js/NestJS), **Python** (Django/Flask) y **Java** (Spring Boot).
@@ -113,12 +113,12 @@ curl -X POST "http://143.198.61.64:8080/codeaudit/upload" \
     *   *Valores*: `standard` (1 crédito), `pro` (2 créditos), `max` (3 créditos). Default: `standard`.
 *   **`custom_rules`** (Opcional): Activa la generación de reglas personalizadas SAST específicas para su stack.
     *   *Valores*: `true`, `false`. Default: `false`.
-    *   *Requisito*: Disponible para planes Standard y Premium.
+    *   *Requisito*: Disponible para planes Premium y Enterprise.
 *   **`custom_rules_qty`** (Opcional): Cantidad de reglas personalizadas a intentar generar.
     *   *Valores*: Entero entre 1 y 10. Default: `3`.
 *   **`custom_rule_model`** (Opcional): Potencia del modelo de IA utilizado para la generación de reglas.
     *   *Valores*: `standard` (Rápido), `pro` (Complejo), `max` (Profundo/Casos Borde). Default: `standard`.
-    *   *Requisito*: Modelos `pro` y `max` exclusivos para plan Premium. (Ver sección *Generative Custom Rules* para costos).
+    *   *Requisito*: Modelos `pro` exclusivos para plan Premium/Enterprise, `max` exclusivo para plan Enterprise. (Ver sección *Generative Custom Rules* para costos).
 
 **Response (Error de Seguridad - Bloqueo de Amenaza):**
 Si nuestro sistema de inteligencia de amenazas detecta contenido malicioso en el archivo subido, la solicitud será rechazada inmediatamente:
@@ -213,6 +213,27 @@ Ahora puede visualizar el avance real de su auditoría en tiempo real.
 }
 ```
 
+#### 2.1 Accesos Directos y Reportes Web (NUEVO)
+
+Facilite el acceso a la información sin necesidad de recordar IDs específicos.
+
+**Última Auditoría Completada (`GET /codeaudit/latest`)**
+Recupere rápidamente el resultado de su último escaneo exitoso.
+
+*   **API (JSON)**:
+    ```bash
+    curl "http://143.198.61.64:8080/codeaudit/latest" -H "X-API-Key: ..."
+    # Response: { "ok": true, "taskId": "..." }
+    ```
+*   **Navegador (HTML)**:
+    `http://143.198.61.64:8080/codeaudit/latest?format=html`
+    *(Redirige automáticamente al reporte HTML de la última tarea)*
+
+**Índice de Auditorías (`GET /codeaudit/index`)**
+Visualice una tabla HTML simple con el historial de todas las tareas de su organización, sus estados y duraciones.
+
+*   **Navegador**: `http://143.198.61.64:8080/codeaudit/index`
+
 ---
 
 #### 3. Gestión de Proyectos e Historial (NUEVO en Beta 2)
@@ -268,7 +289,7 @@ El campo clave es `analysis_json` dentro de cada hallazgo. Este contiene la eval
 
 ### 🧠 Enterprise Intelligence: AI Double Check
 
-Para clientes con suscripción Enterprise, ofrecemos la funcionalidad de **"Segunda Opinión"**, que somete los hallazgos críticos a un panel de IAs externas de clase mundial para reducir falsos positivos con una precisión sin precedentes.
+Para cliDisponible para **todos los niveles de suscripción** (Free, Premium, Enterprise) mediante el uso de créditos. Esta funcionalidad de **"Segunda Opinión"** somete los hallazgos críticos a un panel de IAs externas de clase mundial para reducir falsos positivos con una precisión sin precedentes.entes con suscripción Enterprise, ofrecemos la funcionalidad de **"Segunda Opinión"**, que somete los hallazgos críticos a un panel de IAs externas de clase mundial para reducir falsos positivos con una precisión sin precedentes.
 
 **Características Clave:**
 *   **Análisis Híbrido**: Combina la velocidad de nuestro modelo local con la profundidad de razonamiento de modelos SOTA (State-of-the-Art).
@@ -305,16 +326,16 @@ Esta estructura permite a sus ingenieros de seguridad priorizar esfuerzos basán
 
 ---
 
-### 🧬 Enterprise Intelligence: Generative Custom Rules (NUEVO)
+### 🧬 Advanced Intelligence: Generative Custom Rules (NUEVO)
 
 Esta funcionalidad permite que SecureTag "aprenda" de su código. Analizamos su `package.json`, `pom.xml`, etc., para identificar librerías específicas y generamos reglas de detección SAST exclusivas para su proyecto en tiempo real.
 
 **Niveles de Acceso y Modelos:**
 
-| Feature | Standard (Paga) | Premium (Paga++) |
+| Feature | Premium (Paga) | Enterprise (Paga++) |
 | :--- | :--- | :--- |
 | **Acceso** | ✅ Disponible | ✅ Disponible |
-| **Modelos** | `standard` | `standard`, `pro`, `max`|
+| **Modelos** | `standard`, `pro` | `standard`, `pro`, `max`|
 
 **Estructura de Costos (Créditos):**
 

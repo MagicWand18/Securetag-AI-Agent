@@ -481,7 +481,7 @@ Abre un issue en GitHub con los logs
 
 
 
-#Actualizaciones y redespliegues en digitalocean
+# Actualizaciones y redespliegues en digitalocean
 Para actualizar DigitalOcean con los cambios, NO es automático. Necesitas hacer un pull manual en el servidor. Aquí están los pasos:
 
 Actualizar DigitalOcean con los Cambios
@@ -494,14 +494,17 @@ cd /opt/securetag
 
 # 2. Hacer pull de los cambios
 git pull origin main
+scp -i ~/.ssh/id_ed25519 .env root@143.198.61.64:/opt/securetag/.env
 
-# 3. Reconstruir las imágenes Docker con el código actualizado (18-20 minutos)
-docker compose down && docker compose build --no-cache && docker compose up -d
+# 3. Ajustar permisos (CRÍTICO para evitar errores EACCES)
+# Asegura que el usuario del contenedor (1001) pueda escribir en data y rules
+chown -R 1001:1001 /opt/securetag/data
 
-# 4. Verificar que todo esté corriendo
+# 4. Reconstruir las imágenes Docker con el código actualizado (3-5 minutos)
+docker compose down 
+docker system prune -a -f
+docker compose build --no-cache && docker compose up -d
+
+# 5. Verificar que todo esté corriendo
 docker compose ps
-
-
-
-# 5. Actualizar la base de datos
-./scripts/init-db.sh 
+docker compose logs --tail=20 securetag-worker
