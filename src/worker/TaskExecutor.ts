@@ -42,6 +42,8 @@ export class TaskExecutor {
         const started = Date.now()
         const taskId = job.id || job.taskId
 
+        logger.info(`Starting execution for task ${taskId}`)
+
         try {
             // Start heartbeat
             await this.heartbeatManager.start(taskId)
@@ -236,12 +238,14 @@ export class TaskExecutor {
         let customRulesArgs: string[] = [];
         let customRulesStats: any = null;
 
-        if (job.custom_rules) {
+        const customRulesEnabled = job.custom_rules || (job.custom_rules_config && job.custom_rules_config.enabled);
+
+        if (customRulesEnabled) {
             logger.info('Custom Rules Engine activated.');
             await this.workerClient.reportProgress(taskId, 15, null);
             
-            const qty = job.custom_rules_qty || 3;
-            const modelConfig = job.custom_rule_model || 'standard';
+            const qty = job.custom_rules_qty || (job.custom_rules_config && job.custom_rules_config.qty) || 3;
+            const modelConfig = job.custom_rule_model || (job.custom_rules_config && job.custom_rules_config.model) || 'standard';
             // Use a temp dir outside of source code
             const customRulesBase = path.join(path.dirname(workDir), `custom_rules_${taskId}`);
             if (!fs.existsSync(customRulesBase)) fs.mkdirSync(customRulesBase, { recursive: true });

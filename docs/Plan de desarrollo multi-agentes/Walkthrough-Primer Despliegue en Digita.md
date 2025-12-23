@@ -489,22 +489,105 @@ Desde tu terminal SSH que ya tienes abierta:
 
 ssh -i ~/.ssh/id_ed25519 root@143.198.61.64
 
-# 1. Ir al directorio del proyecto
+## 1. Ir al directorio del proyecto
 cd /opt/securetag
 
-# 2. Hacer pull de los cambios
+## 2. Hacer pull de los cambios
 git pull origin main
 scp -i ~/.ssh/id_ed25519 .env root@143.198.61.64:/opt/securetag/.env
 
-# 3. Ajustar permisos (CRÍTICO para evitar errores EACCES)
-# Asegura que el usuario del contenedor (1001) pueda escribir en data y rules
+## 3. Ajustar permisos (CRÍTICO para evitar errores EACCES)
+### Asegura que el usuario del contenedor (1001) pueda escribir en data y rules
 chown -R 1001:1001 /opt/securetag/data
 
-# 4. Reconstruir las imágenes Docker con el código actualizado (3-5 minutos)
-docker compose down 
-docker system prune -a -f
-docker compose build --no-cache && docker compose up -d
+## 4. Reconstruir las imágenes Docker con el código actualizado (3-5 minutos)
+docker compose down && docker system prune -a -f && docker compose build --no-cache && docker compose up -d
 
-# 5. Verificar que todo esté corriendo
+## 5. Verificar que todo esté corriendo
 docker compose ps
 docker compose logs --tail=20 securetag-worker
+
+## 6. Crear Tenants & API Keys
+### Acceder a la Base de Datos
+docker compose exec securetag-db psql -U securetag -d securetag
+
+### Generar API Keys
+node -e "console.log(require('crypto').createHash('sha256').update('securetagai-token-1994').digest('hex'))" && node -e "console.log(require('crypto').createHash('sha256').update('spartaneai-token-2025').digest('hex'))"
+node -e "console.log(require('crypto').createHash('sha256').update('admin-worker-key-2025').digest('hex'))"
+
+### Actualizar .env local y/o nube
+TENANT_ID=admin
+WORKER_API_KEY=admin-worker-key-2025
+
+### Crear Tenants e insertar API Keys (SQL)
+-- Crear Tenants
+INSERT INTO securetag.tenant (id, name, plan, credits_balance) VALUES 
+('admin', 'System Admin', 'enterprise', 999999),
+('testing', 'Testing Tenant', 'enterprise', 1000),
+('spartane', 'Spartane Client', 'enterprise', 1000)
+ON CONFLICT (id) DO UPDATE SET plan=EXCLUDED.plan, credits_balance=EXCLUDED.credits_balance;
+
+-- Crear API Key para Worker (admin)
+INSERT INTO securetag.api_key (id, tenant_id, key_hash, is_active, created_at) VALUES 
+('186167a3-6ecd-4003-9d86-31ae6eb44203', 'admin', 'c4b007249dbac7bf5085c7fd44bd48d28bbd46dd68ba3728a6629083d5816eef', true, now())
+ON CONFLICT (id) DO NOTHING;
+
+-- Crear API Key para Testing
+INSERT INTO securetag.api_key (id, tenant_id, key_hash, is_active, created_at) VALUES 
+('ae1d1494-ec26-42b1-93a8-ee7ccb815080', 'testing', 'c4882f37e7430f014a0bd0f452e6b60e04c1874ba3fb1161dfb05d869793ad71', true, now())
+ON CONFLICT (id) DO NOTHING;
+
+-- Crear API Key para Spartane
+INSERT INTO securetag.api_key (id, tenant_id, key_hash, is_active, created_at) VALUES 
+('fe43ea30-8002-47cb-ab71-a3244e0d3f98', 'spartane', '3bbd690e83a56c016690479e930bb220a7f3ad1ad699d91732a41c25efb28d78', true, now())
+ON CONFLICT (id) DO NOTHING;
+
+-- Actualizar LLM Config para Tenants
+UPDATE securetag.tenant 
+SET llm_config = '{"deep_code_vision": true}'::jsonb 
+WHERE id IN ('admin', 'testing', 'spartane');
+
+-- Eliminar registros antiguos para evitar duplicados
+DELETE FROM securetag.codeaudit_upload WHERE tenant_id NOT IN ('admin', 'testing', 'spartane');
+DELETE FROM securetag.scan_result WHERE tenant_id NOT IN ('admin', 'testing', 'spartane');
+
+-- Ejecuciones de herramientas y Tareas
+DELETE FROM securetag.tool_execution WHERE tenant_id NOT IN ('admin', 'testing', 'spartane');
+DELETE FROM securetag.task WHERE tenant_id NOT IN ('admin', 'testing', 'spartane');
+
+-- Reglas personalizadas y API Keys
+DELETE FROM securetag.custom_rule_library WHERE tenant_id NOT IN ('admin', 'testing', 'spartane');
+DELETE FROM securetag.api_key WHERE tenant_id NOT IN ('admin', 'testing', 'spartane');
+
+-- Eliminar Tenants obsoletos
+DELETE FROM securetag.tenant WHERE id NOT IN ('admin', 'testing', 'spartane');
+
+-- Comprueba que solo queden los 3 deseados con la configuración correcta
+SELECT id, name, plan, credits_balance, llm_config FROM securetag.tenant;
+
+## 7. Reiniciar servicios
+docker compose down && docker compose up -d --build
+
+## 8. Testing
+### Basico
+#### Tenant Testing
+curl -X POST -H "x-api-key: securetagai-token-1994" -F "file=@qa_artifacts/vuln_test.zip" -F "project_alias=qa-test-local" http://localhost:8080/codeaudit/upload
+
+docker compose logs securetag-app securetag-worker 
+
+docker compose exec securetag-db psql -U securetag -d securetag -c "SELECT id, status, finished_at FROM securetag.task WHERE id='11038364-67de-4252-a0a1-02c4178c3304';" && docker compose exec securetag-db psql -U securetag -d securetag -c "SELECT task_id, summary_json FROM securetag.scan_result WHERE task_id='11038364-67de-4252-a0a1-02c4178c3304';"
+
+#### Tenant Spartane
+curl -X POST -H "x-api-key: spartaneai-token-2025" -F "file=@qa_artifacts/vuln_test.zip" -F "project_alias=spartane-test-local" http://localhost:8080/codeaudit/upload
+
+docker compose logs securetag-app securetag-worker 
+
+docker compose exec securetag-db psql -U securetag -d securetag -c "SELECT id, status, finished_at FROM securetag.task WHERE id='11038364-67de-4252-a0a1-02c4178c3304';" && docker compose exec securetag-db psql -U securetag -d securetag -c "SELECT task_id, summary_json FROM securetag.scan_result WHERE task_id='11038364-67de-4252-a0a1-02c4178c3304';"
+
+### Completo
+#### Tenant Testing
+curl -X POST -H "x-api-key: securetagai-token-1994" -F "file=@qa_artifacts/mvc_extended_test.zip" -F "project_alias=enterprise-full-test-3" -F "custom_rules=true" -F "double_check=all" -F "double_check_level=standard" -F "profile=auto" http://localhost:8080/codeaudit/upload
+
+docker compose logs securetag-app securetag-worker 
+
+docker compose exec securetag-db psql -U securetag -d securetag -c "SELECT id, status, finished_at FROM securetag.task WHERE id='8cdf9376-4700-40a3-9207-1567c7d532bb';" && docker compose exec securetag-db psql -U securetag -d securetag -c "SELECT task_id, summary_json FROM securetag.scan_result WHERE task_id='8cdf9376-4700-40a3-9207-1567c7d532bb';"

@@ -508,7 +508,17 @@ const server = http.createServer(async (req, res) => {
 
     try {
       const tenantId = authReq.tenantId!
-      const q = await dbQuery<any>('SELECT id, type, payload_json, double_check_config, custom_rules_config FROM securetag.task WHERE tenant_id=$1 AND status=$2 ORDER BY created_at LIMIT 1', [tenantId, 'queued'])
+      
+      let query = 'SELECT id, tenant_id, type, payload_json, double_check_config, custom_rules_config FROM securetag.task WHERE tenant_id=$1 AND status=$2 ORDER BY created_at LIMIT 1'
+      let params = [tenantId, 'queued']
+
+      // Admin Worker Mode: Fetch from ANY tenant if the worker is 'admin'
+      if (tenantId === 'admin') {
+          query = 'SELECT id, tenant_id, type, payload_json, double_check_config, custom_rules_config FROM securetag.task WHERE status=$1 ORDER BY created_at LIMIT 1'
+          params = ['queued']
+      }
+
+      const q = await dbQuery<any>(query, params)
       if (!q.rows.length) return send(res, 204, { ok: true })
       const t = q.rows[0]
       await dbQuery('UPDATE securetag.task SET status=$1, started_at=now() WHERE id=$2', ['running', t.id])
@@ -552,7 +562,16 @@ const server = http.createServer(async (req, res) => {
     req.on('end', async () => {
       try {
         const body = chunks.length ? JSON.parse(Buffer.concat(chunks).toString('utf8')) : {}
-        const tenantId = authReq.tenantId!
+        let tenantId = authReq.tenantId!
+
+        // Admin Worker Mode: Resolve real tenant from Task ID
+        if (tenantId === 'admin' && body.taskId) {
+            const tq = await dbQuery('SELECT tenant_id FROM securetag.task WHERE id=$1', [body.taskId])
+            if (tq.rows.length > 0) {
+                tenantId = tq.rows[0].tenant_id
+            }
+        }
+
         const status = body.ok ? 'completed' : 'failed'
         await dbQuery('UPDATE securetag.task SET status=$1, finished_at=now() WHERE id=$2', [status, body.taskId])
 

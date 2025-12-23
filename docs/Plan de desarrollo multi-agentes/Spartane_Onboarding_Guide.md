@@ -368,5 +368,6 @@ Si tiene dudas sobre la integración o los resultados, contacte a su administrad
 
 *Generado el: 2025-12-12*
 
-online
-d294016e293c0bbca80c9495ad4fe8f93ca26ae3e966a60cade11649461017bd
+Tenant              Uso                 API Key (x-api-key) 
+testing             Tus pruebas         securetagai-token-1994 
+spartane            Cliente Spartane    spartaneai-token-2025
