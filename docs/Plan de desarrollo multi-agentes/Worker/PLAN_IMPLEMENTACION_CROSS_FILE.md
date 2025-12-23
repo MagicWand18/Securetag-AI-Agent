@@ -275,7 +275,13 @@ El motor `CrossFileAnalyzer` ha sido diseñado para ser agnóstico del lenguaje.
 
 El enfoque de Cross-File Analysis es altamente portable a lenguajes orientados a objetos o con estructuras MVC claras.
 
-1.  **C# (.NET Core)**:
+1.  **Vue.js (Frontend/Fullstack)**:
+    *   **Estado:** ⏸️ Pospuesto (Limitaciones Técnicas).
+    *   **Extensión:** `.vue`
+    *   **Razón:** El soporte actual de Semgrep para parsear semánticamente archivos `.vue` (Script + Template) es insuficiente para crear reglas de topología complejas. Se requiere un pre-procesador o esperar mejoras en el motor.
+    *   **Nota:** Las reglas basadas puramente en Regex fueron evaluadas y descartadas por falta de contexto semántico.
+
+2.  **C# (.NET Core)**:
     *   **Extensión:** `.cs`
     *   **Viabilidad:** Alta.
     *   **Estructura:** Controllers (`[HttpGet]`), Services (Dependency Injection), EF Core (`FromSqlRaw`).

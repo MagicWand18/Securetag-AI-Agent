@@ -19,19 +19,17 @@ Eres el **Agente Worker**. Has completado exitosamente la refactorización a una
 *   **Tarea 12.2**: AI Double-Check (Multi-Provider Logic) (Completado - Providers, Fallback & Deep Context)
 *   **Tarea 12.3**: Custom Rules Engine (Completado - On-Demand & Automated Research Pipeline)
 *   **Tarea 12.4**: Deep Code Vision Monetization (Completado - Context Limits by Plan)
+*   **Tarea 10.2**: Cross-file Taint Analysis (Completado - TS/Python/Java)
 
 
 
-### 🚀 Tarea Actual: Advanced Static Analysis
+### 🚀 Tarea Actual: Standby (Cross-File Ready)
 
-**Tarea 10.2: Cross-file Taint Analysis** [ ]
-*   **Objetivo**: Detectar vulnerabilidades complejas que atraviesan múltiples archivos.
-*   **Acciones**:
-    *   **Data Flow**: Rastreo de variables entre archivos (ej. Controller -> Service -> DB).
-    *   **Hybrid Analysis**: Combinar AST Parsing (TypeScript) con Semgrep rules avanzadas (taint mode).
-    *   Output: Reducir Falsos Negativos en arquitecturas MVC.
+**Esperando nuevas asignaciones**
+*   El agente ha completado el análisis de flujo avanzado (Tarea 10.2).
+*   **Siguiente Posible**: Fase 13 (Offensive AI) o soporte nuevos lenguajes.
 
-**Estado**: 🟢 **Activo**
+**Estado**: ⏸️ **Standby**
 
 ## 🔗 Dependencias
 *   **Agente Server**: Necesitas que la API exponga los endpoints de cola (`/queue/next`, `/queue/result`).

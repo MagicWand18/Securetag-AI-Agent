@@ -70,3 +70,16 @@ Script de verificación confirmó la detección de las siguientes categorías cr
 
 ## 💬 Revisiones y comentarios del supervisor
 La implementación es ahora completamente escalable. El sistema soporta TypeScript, Python y Java de forma nativa y está preparado para recibir nuevos lenguajes sin cambios de código en el Worker.
+
+### 📌 Nota para el Masterplan (Estado de Lenguajes Pendientes)
+Se ha realizado un análisis de factibilidad técnica para expandir el soporte a nuevos lenguajes. Se recomienda actualizar el Roadmap con la siguiente priorización:
+
+1.  **C# (.NET Core)**: **Alta Prioridad**. Completamente factible. Arquitectura similar a Java (Controllers/Services).
+2.  **PHP (Laravel/Symfony)**: **Alta Prioridad**. Completamente factible. Estructura MVC estándar muy clara para reglas de topología.
+3.  **Ruby (Rails)**: **Alta Prioridad**. Completamente factible. Patrones MVC estrictos facilitan la detección.
+4.  **Go (Golang)**: **Media Prioridad**. Factible, aunque requiere reglas más flexibles debido a la variedad de frameworks (Gin, Echo, Stdlib).
+
+**⚠️ Lenguaje Pospuesto:**
+*   **Vue.js**: Se ha evaluado y **descartado temporalmente** para Cross-File Analysis.
+    *   **Motivo**: El parser actual de Semgrep no soporta análisis semántico profundo dentro de bloques `<script>` en archivos `.vue`, lo que impide conectar `props` con `sinks` de manera fiable.
+    *   **Acción**: Esperar mejoras en el motor de Semgrep o implementar un pre-procesador dedicado en una fase futura.

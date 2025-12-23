@@ -29,12 +29,12 @@
 | **Fase 7: Integración Final** | 1/1 | 0/1 | 100% ✅ |
 | **Fase 8: Beta 2 (SAST & Opt)** | 4/6 | 2/6 | 66% 🔄 |
 | **Fase 9: Hardening & Seguridad** | 3/4 | 1/4 | 75% 🔄 |
-| **Fase 10: Future (LLM/Data)** | 4/5 | 1/5 | 80% 🔄 |
+| **Fase 10: Future (LLM/Data)** | 5/6 | 1/6 | 83% 🔄 |
 | **Fase 11: QA & Entrega** | 5/5 | 0/5 | 100% ✅ |
 | **Fase 12: Enterprise Features** | 4/4 | 0/4 | 100% ✅ |
 | **Fase 13: Offensive AI (xpl01t)** | 0/3 | 3/3 | 0% 🔄 |
 
-**Progreso Total**: 32/39 tareas completadas (82%)
+**Progreso Total**: 33/40 tareas completadas (82%)
 
 
 ## 1. Visión y Objetivos
@@ -190,11 +190,18 @@ El sistema se compone de tres pilares principales que evolucionan en paralelo:
     *   **Server**: Validación Zod en Upload ✅ (Ref: `EVIDENCE_Server_7`).
     *   **Worker**: Stack Detection, Context Injection (XML) & Anti-Prompt Injection Guardrails ✅ (Ref: `EVIDENCE_Worker_5`).
     *   **Extras Implementados**: Baneo automático de API Keys por inyección detectada, Validaciones de seguridad con IA.
-*   **Tarea 10.2: Análisis de Flujo Avanzado**: Cross-file Taint Analysis híbrido.
+*   **Tarea 10.2: Análisis de Flujo Avanzado** ✅ (Ref: `EVIDENCE_Worker_11`)
+    *   **Cross-file Taint Analysis**: Rastreo de variables entre archivos (Controller -> Service -> DB).
+    *   **Políglota**: Soporte nativo para TypeScript, Python y Java.
+    *   **Arquitectura**: Carga dinámica de reglas y feature flag server-side.
 *   **Tarea 10.3: Data Gen - Exploit-DB (Finetuning)** ✅ (Ref: `EVIDENCE_Finetuning_5`)
     *   **Metodología**: Generación Determinista (Code-Only) sin alucinaciones.
     *   **Resultado**: 12.7k exploits verificados, 38k pares Q&A.
     *   **Nota**: Base para el futuro modelo `securetag-xpl01t` (Offensive).
+*   **Tarea 10.4: Polyglot Expansion (MVC)** [ ]
+    *   **Prioridad Alta**: C# (.NET Core), PHP (Laravel/Symfony), Ruby (Rails).
+    *   **Prioridad Media**: Go (Golang).
+    *   **Postponed**: Vue.js (Limitación parser Semgrep).
 *   **Tarea 10.5: Sistema de Reputación "Strike-Based Ban"** (Server) ✅ (Ref: `EVIDENCE_Server_13`)
     *   **Objetivo**: Evitar baneos inmediatos por falsos positivos o errores menores.
     *   **Lógica**: Acumular "Strikes" en ventana de tiempo (ej. 3 strikes en 24h = Ban temporal).
