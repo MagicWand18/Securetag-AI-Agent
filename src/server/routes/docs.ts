@@ -86,6 +86,11 @@ export function serveDocs(req: http.IncomingMessage, res: http.ServerResponse): 
                 let content = fs.readFileSync(indexPath, 'utf8')
                 // Legacy replacement just in case
                 content = content.replace(/url:\s*["'][^"']+["']/, 'url: "/openapi.yaml"')
+                
+                // FORCE HTTPS: Inject CSP meta tag to fix Mixed Content behind proxy
+                const cspMeta = '<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">'
+                content = content.replace('<head>', `<head>${cspMeta}`)
+
                 res.statusCode = 200
                 res.setHeader('Content-Type', 'text/html')
                 res.end(content)
