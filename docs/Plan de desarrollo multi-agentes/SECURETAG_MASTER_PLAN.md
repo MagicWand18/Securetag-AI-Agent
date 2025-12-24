@@ -31,10 +31,10 @@
 | **Fase 9: Hardening & Seguridad** | 3/4 | 1/4 | 75% 🔄 |
 | **Fase 10: Future (LLM/Data)** | 5/6 | 1/6 | 83% 🔄 |
 | **Fase 11: QA & Entrega** | 5/5 | 0/5 | 100% ✅ |
-| **Fase 12: Enterprise Features** | 4/4 | 0/4 | 100% ✅ |
+| **Fase 12: Enterprise Features** | 4/5 | 1/5 | 80% 🔄 |
 | **Fase 13: Offensive AI (xpl01t)** | 0/3 | 3/3 | 0% 🔄 |
 
-**Progreso Total**: 34/40 tareas completadas (85%)
+**Progreso Total**: 34/41 tareas completadas (82%)
 
 
 ## 1. Visión y Objetivos
@@ -243,6 +243,10 @@ El sistema se compone de tres pilares principales que evolucionan en paralelo:
     *   **Objetivo**: Restringir el contexto extendido (50 líneas) a usuarios Premium.
     *   **Acción**: Validar `plan` del tenant en `ContextExtractor`.
     *   **Ref**: `Deep_Code_Vision_Monetization_Plan.md`.
+*   **Tarea 12.5: Automated Remediation (Snippet Fix)** [ ] (Worker)
+    *   **Objetivo**: Generar código de reemplazo exacto (`snippet_fix`) usando el LLM fine-tuned.
+    *   **Output**: JSON estructurado con `line` y `code` para parchar vulnerabilidades automáticamente.
+    *   **Scope**: Integrar en `LLMClient` y respuesta de análisis.
 
 ---
 

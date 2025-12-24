@@ -1,4 +1,4 @@
-# 🛡️ SecureTag AI - Documentación Técnica y Guía de Integración
+# SecureTag AI - Documentación Técnica y Guía de Integración
 
 Bienvenido a la documentación oficial de SecureTag AI. Esta guía detalla la arquitectura, capacidades, seguridad y proceso de integración de nuestra plataforma de Auditoría de Código de Nueva Generación (Next-Gen SAST).
 

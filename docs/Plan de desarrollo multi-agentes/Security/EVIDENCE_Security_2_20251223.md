@@ -1,0 +1,187 @@
+# EVIDENCE_Security_2_20251223.md
+
+## 📌 Evidencia de Seguridad – Fase 9.1 (Perímetro y Red)
+**Proyecto:** Securetag  
+**Fecha:** 2025-12-23  
+**Responsable:** Agente Security (SecOps)  
+**Estado:** ✅ Completado y Verificado
+
+---
+
+## 🛡️ Alcance de la Evidencia
+
+Este documento registra las acciones de **hardening del perímetro DNS, SSL/TLS, WAF, Rate Limiting y observabilidad** realizadas en Cloudflare como parte de la **Tarea 9.1 – Perímetro y Red**, con enfoque en:
+
+- Protección de la API pública (`api.securetag.com.mx`)
+- Reducción de superficie de ataque
+- Mitigación temprana de abuso y escaneo automatizado
+- Visibilidad y auditoría de eventos de seguridad
+
+---
+
+## 🔐 1. SSL/TLS – Cifrado y Seguridad de Transporte
+
+### 📍 Forzar SSL heredado del dominio
+Se configuró Cloudflare como **terminador TLS**, permitiendo que el backend opere sobre HTTP sin exponer tráfico plano al exterior.
+
+**Configuración:**
+- `SSL/TLS → Overview`
+  - **Modo:** `Flexible`
+
+### 📍 Endurecimiento inmediato
+En `SSL/TLS → Edge Certificates` se habilitó:
+
+- ✅ Always Use HTTPS
+- ✅ Automatic HTTPS Rewrites
+- ✅ TLS 1.3
+- ✅ Minimum TLS Version: 1.2
+- ❌ TLS 1.0 / 1.1 deshabilitados
+
+---
+
+## 🔒 2. HSTS (HTTP Strict Transport Security)
+
+### 📍 Configuración
+En `SSL/TLS → Edge Certificates → HSTS` se activó:
+
+- Enable HSTS: ✅
+- Max-Age: `31536000` (1 año)
+- Include Subdomains: ✅
+- Preload: ❌ (no activado en esta fase)
+
+### 🎯 Resultado
+- Prevención de downgrade attacks
+- Refuerzo del uso exclusivo de HTTPS
+- Alineación con headers HSTS ya implementados en backend
+
+---
+
+## 🚫 3. DNS Hygiene – Cierre de Superficies Innecesarias
+
+### 📍 Hallazgo
+Se identificaron subdominios administrativos expuestos mediante proxy de Cloudflare, incrementando la superficie de ataque.
+
+Subdominios afectados:
+- `admin`
+- `cpanel`
+- `whm`
+- `webdisk`
+- `webdisk.admin`
+- `www.admin`
+- `mail`
+
+---
+
+### ✅ Mitigación Aplicada
+- Cambio de **Proxy Status** a **DNS only (nube gris)**
+- Eliminación de exposición innecesaria al perímetro Cloudflare
+
+Se mantuvieron **proxied** únicamente:
+- `securetag.com.mx`
+- `www.securetag.com.mx`
+- `api.securetag.com.mx`
+
+---
+
+## 🧱 4. WAF – Protección Activa (IDS / IPS)
+
+### 📍 Reglas Administradas
+En `Security → WAF → Managed Rules` se habilitaron:
+
+| Regla | Estado |
+|----|----|
+| OWASP Core Ruleset | ✅ |
+| Cloudflare Managed Rules | ✅ |
+
+Estas reglas proveen detección y bloqueo automático de:
+- SQLi
+- XSS
+- LFI / RFI
+- Payloads maliciosos conocidos
+
+---
+
+### 📍 Custom Rule – Protección de Swagger (alternativa a rate limit)
+
+Dado que el plan no permite más reglas de Rate Limiting, se implementó una **regla WAF personalizada** para Swagger:
+
+- **Condición:** Requests hacia `/swagger`
+- **Acción:** Managed Challenge
+
+🎯 Resultado:
+- Humanos pueden acceder
+- Bots y scanners son mitigados
+- Protección efectiva sin romper la UI
+
+---
+
+## 🚦 5. Rate Limiting (Cloudflare – Edge)
+
+### 📍 Reglas Activas
+
+#### 🩺 Healthcheck
+- Ruta: `/healthz`
+- Límite: 100 req/min/IP
+- Acción: Managed Challenge
+
+#### 🚀 API General
+- Ruta: `/api/*`
+- Límite: 60 req/min/IP
+- Acción: Block
+
+Estas reglas actúan como **primera línea**, complementando el rate limit y sistema de bans implementado en backend.
+
+---
+
+## 🤖 6. Bot Management
+
+### 📍 Configuración
+- **Bot Fight Mode:** ✅ habilitado
+
+🎯 Resultado:
+- Mitigación automática de bots conocidos
+- Reducción de scraping y escaneo
+- Protección adicional para Swagger y endpoints públicos
+
+---
+
+## 📊 7. Observabilidad y Logs
+
+### 📍 Visibilidad confirmada en Cloudflare
+- Security Events
+- Firewall Events
+- Rate Limiting Events
+
+### 📍 Rutas verificadas:
+- `Security → Analytics`
+- `Security → Security rules → Firewall Events`
+- `Security → Security rules → Rate limiting rules → Events`
+
+Estos logs se alinean con los registros internos:
+- `security_event`
+- `security_ban`
+
+---
+
+## 🧠 Evaluación Final
+
+| Componente | Estado |
+|----|----|
+| SSL/TLS | 🟢 Endurecido |
+| HSTS | 🟢 Activo |
+| DNS Hygiene | 🟢 Endurecido |
+| WAF | 🟢 Activo |
+| Rate Limiting | 🟢 Óptimo para el plan |
+| Bot Protection | 🟢 Activo |
+| Observabilidad | 🟢 Completa |
+| Riesgo residual | 🟢 Bajo |
+
+---
+
+## ✅ Conclusión
+
+El perímetro Cloudflare de Securetag se encuentra correctamente endurecido, observable y alineado con buenas prácticas de seguridad para APIs públicas, cumpliendo completamente los objetivos de la **Tarea 9.1 – Perímetro y Red**.
+
+La infraestructura queda lista para proceder con el **Hardening del Droplet (UFW + allowlist de IPs Cloudflare)**.
+
+---

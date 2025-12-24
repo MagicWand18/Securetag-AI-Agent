@@ -23,13 +23,16 @@ Eres el **Agente Worker**. Has completado exitosamente la refactorización a una
 
 
 
-### 🚀 Tarea Actual: Standby (Cross-File Ready)
+### 🚀 Tarea Actual: Automated Remediation (GenAI)
 
-**Esperando nuevas asignaciones**
-*   El agente ha completado el análisis de flujo avanzado (Tarea 10.2).
-*   **Siguiente Posible**: Fase 13 (Offensive AI) o soporte nuevos lenguajes.
+**Tarea 12.5: Automated Remediation (Snippet Fix)** [ ]
+*   **Objetivo**: Generar parches de código automáticos (`snippet_fix`) en el análisis.
+*   **Acciones**:
+    *   **Prompt Engineering**: Ajustar prompt del LLM para solicitar `snippet_fix` structured JSON.
+    *   **Integration**: Parsear respuesta en `LLMClient` e inyectar en `analysis_json`.
+    *   **Context**: Usar contexto existente (Deep Vision) para generar parches precisos.
 
-**Estado**: ⏸️ **Standby**
+**Estado**: 🟢 **Activo**
 
 ## 🔗 Dependencias
 *   **Agente Server**: Necesitas que la API exponga los endpoints de cola (`/queue/next`, `/queue/result`).

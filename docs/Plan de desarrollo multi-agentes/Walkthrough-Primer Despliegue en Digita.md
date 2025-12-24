@@ -503,6 +503,7 @@ chown -R 1001:1001 /opt/securetag/data
 ## 4. Reconstruir las imágenes Docker con el código actualizado (3-5 minutos)
 docker compose down && docker system prune -a -f && docker compose build --no-cache && docker compose up -d
 
+
 ## 5. Verificar que todo esté corriendo
 docker compose ps
 docker compose logs --tail=20 securetag-worker
@@ -570,14 +571,14 @@ docker compose down && docker compose up -d --build
 
 ## 8. Testing
 ### Basico
-#### Tenant Testing
+#### Tenant Testing - local
 curl -X POST -H "x-api-key: securetagai-token-1994" -F "file=@qa_artifacts/vuln_test.zip" -F "project_alias=qa-test-local" http://localhost:8080/codeaudit/upload
 
 docker compose logs securetag-app securetag-worker 
 
 docker compose exec securetag-db psql -U securetag -d securetag -c "SELECT id, status, finished_at FROM securetag.task WHERE id='11038364-67de-4252-a0a1-02c4178c3304';" && docker compose exec securetag-db psql -U securetag -d securetag -c "SELECT task_id, summary_json FROM securetag.scan_result WHERE task_id='11038364-67de-4252-a0a1-02c4178c3304';"
 
-#### Tenant Spartane
+#### Tenant Spartane - local
 curl -X POST -H "x-api-key: spartaneai-token-2025" -F "file=@qa_artifacts/vuln_test.zip" -F "project_alias=spartane-test-local" http://localhost:8080/codeaudit/upload
 
 docker compose logs securetag-app securetag-worker 
@@ -585,9 +586,12 @@ docker compose logs securetag-app securetag-worker
 docker compose exec securetag-db psql -U securetag -d securetag -c "SELECT id, status, finished_at FROM securetag.task WHERE id='11038364-67de-4252-a0a1-02c4178c3304';" && docker compose exec securetag-db psql -U securetag -d securetag -c "SELECT task_id, summary_json FROM securetag.scan_result WHERE task_id='11038364-67de-4252-a0a1-02c4178c3304';"
 
 ### Completo
-#### Tenant Testing
-curl -X POST -H "x-api-key: securetagai-token-1994" -F "file=@qa_artifacts/mvc_extended_test.zip" -F "project_alias=enterprise-full-test-3" -F "custom_rules=true" -F "double_check=all" -F "double_check_level=standard" -F "profile=auto" http://localhost:8080/codeaudit/upload
+#### Tenant Testing - local
+curl -X POST -H "x-api-key: securetagai-token-1994" -F "file=@qa_artifacts/mvc_extended_test.zip" -F "project_alias=enterprise-full-test-3" -F "custom_rules=true" -F "custom_rules_qty=1" -F "double_check=all" -F "double_check_level=standard" -F "profile=auto" http://localhost:8080/codeaudit/upload
 
 docker compose logs securetag-app securetag-worker 
 
 docker compose exec securetag-db psql -U securetag -d securetag -c "SELECT id, status, finished_at FROM securetag.task WHERE id='8cdf9376-4700-40a3-9207-1567c7d532bb';" && docker compose exec securetag-db psql -U securetag -d securetag -c "SELECT task_id, summary_json FROM securetag.scan_result WHERE task_id='8cdf9376-4700-40a3-9207-1567c7d532bb';"
+
+#### Tenant Spartane - Online
+curl -X POST -H "x-api-key: spartaneai-token-2025" -F "file=@test/frontend.zip" -F "project_alias=my-first-scan" -F "custom_rules=true" -F "custom_rules_qty=1" -F "double_check=all" -F "double_check_level=standard" -F "profile=auto" http://143.198.61.64:8080/codeaudit/upload
