@@ -101,20 +101,6 @@ Estas reglas proveen detección y bloqueo automático de:
 
 ---
 
-### 📍 Custom Rule – Protección de Swagger (alternativa a rate limit)
-
-Dado que el plan no permite más reglas de Rate Limiting, se implementó una **regla WAF personalizada** para Swagger:
-
-- **Condición:** Requests hacia `/swagger`
-- **Acción:** Managed Challenge
-
-🎯 Resultado:
-- Humanos pueden acceder
-- Bots y scanners son mitigados
-- Protección efectiva sin romper la UI
-
----
-
 ## 🚦 5. Rate Limiting (Cloudflare – Edge)
 
 ### 📍 Reglas Activas
@@ -180,19 +166,21 @@ Para resolver la compatibilidad con Cloudflare (Error 522) y endurecer la seguri
 
 ---
 
-## 🔥 9. Hardening de Firewall (UFW)
+## 🔥 9. Hardening de Firewall (UFW) - Perímetro Estricto
 
 ### 📍 Acción Realizada
 Se detectó que el puerto `8080` estaba permitido en el firewall del sistema operativo (UFW), lo cual representaba un riesgo de seguridad residual.
-Se procedió a eliminar la regla, dejando únicamente los puertos esenciales.
+Además, se implementó una **Allowlist Estricta** para el puerto 80, permitiendo tráfico **únicamente desde las IPs de Cloudflare**.
 
 ### 📍 Estado Final del Firewall
-*   ✅ **22/tcp (SSH)**: ALLOW (Administración)
-*   ✅ **80/tcp (HTTP)**: ALLOW (Tráfico Nginx/Cloudflare)
+*   ✅ **22/tcp (SSH)**: ALLOW (Administración - Cualquier Origen)
+*   ✅ **80/tcp (HTTP)**: ALLOW **(Solo IPs de Cloudflare)**
+*   🚫 **80/tcp (HTTP)**: DENY (Cualquier otra IP, incluyendo acceso directo)
 *   🚫 **8080/tcp**: DENY (Bloqueado por defecto)
 
 ### 🎯 Resultado
-La superficie de ataque a nivel de red se ha minimizado al máximo posible.
+El servidor es invisible para escaneos directos de IP. Todo el tráfico web debe pasar obligatoriamente por Cloudflare (WAF/SSL).
+
 
 ---
 
