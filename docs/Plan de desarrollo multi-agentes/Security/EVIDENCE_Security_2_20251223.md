@@ -163,6 +163,39 @@ Estos logs se alinean con los registros internos:
 
 ---
 
+## 🏗️ 8. Nginx Reverse Proxy & Hardening (Local / Docker)
+
+### 📍 Implementación Técnica
+Para resolver la compatibilidad con Cloudflare (Error 522) y endurecer la seguridad del contenedor de aplicación:
+
+1.  **Nginx como Proxy Inverso**: Se implementó un contenedor `nginx:alpine` escuchando en el puerto **80**.
+2.  **Configuración de Headers**: Se asegura la propagación de la IP real del cliente:
+    *   `X-Real-IP`
+    *   `X-Forwarded-For`
+3.  **Aislamiento de Aplicación**: Se eliminó la exposición pública del puerto `8080` en `securetag-app`.
+
+### 🎯 Resultado de Validación (Local)
+*   ✅ `curl -I http://localhost/healthz` -> **200 OK** (Accesible vía Nginx)
+*   ✅ `curl -I http://localhost:8080/healthz` -> **Connection Refused** (Acceso directo bloqueado)
+
+---
+
+## 🔥 9. Hardening de Firewall (UFW)
+
+### 📍 Acción Realizada
+Se detectó que el puerto `8080` estaba permitido en el firewall del sistema operativo (UFW), lo cual representaba un riesgo de seguridad residual.
+Se procedió a eliminar la regla, dejando únicamente los puertos esenciales.
+
+### 📍 Estado Final del Firewall
+*   ✅ **22/tcp (SSH)**: ALLOW (Administración)
+*   ✅ **80/tcp (HTTP)**: ALLOW (Tráfico Nginx/Cloudflare)
+*   🚫 **8080/tcp**: DENY (Bloqueado por defecto)
+
+### 🎯 Resultado
+La superficie de ataque a nivel de red se ha minimizado al máximo posible.
+
+---
+
 ## 🧠 Evaluación Final
 
 | Componente | Estado |
@@ -174,14 +207,17 @@ Estos logs se alinean con los registros internos:
 | Rate Limiting | 🟢 Óptimo para el plan |
 | Bot Protection | 🟢 Activo |
 | Observabilidad | 🟢 Completa |
+| **Nginx Proxy** | 🟢 **Implementado** |
+| **App Isolation** | 🟢 **Verificado** |
+| **Firewall (UFW)** | 🟢 **Endurecido** |
 | Riesgo residual | 🟢 Bajo |
 
 ---
 
 ## ✅ Conclusión
 
-El perímetro Cloudflare de Securetag se encuentra correctamente endurecido, observable y alineado con buenas prácticas de seguridad para APIs públicas, cumpliendo completamente los objetivos de la **Tarea 9.1 – Perímetro y Red**.
+El perímetro Cloudflare de Securetag se encuentra correctamente endurecido. Adicionalmente, se ha actualizado la arquitectura local con **Nginx** para garantizar la conectividad correcta y el aislamiento del backend, eliminando la exposición de puertos innecesarios.
 
-La infraestructura queda lista para proceder con el **Hardening del Droplet (UFW + allowlist de IPs Cloudflare)**.
+La infraestructura queda lista para proceder con el despliegue y **Hardening del Droplet (UFW + allowlist de IPs Cloudflare)**.
 
 ---
