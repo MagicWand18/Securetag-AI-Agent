@@ -402,6 +402,52 @@ class TestPiiEdgeCases:
 
 
 # =============================================================================
+# Tests de telefonos MX/US (custom recognizer)
+# =============================================================================
+
+class TestPhoneDetection:
+    """Tests para deteccion de telefonos MX y US con custom recognizer."""
+
+    @pytest.mark.parametrize("text,start,end,label", [
+        # MX formato internacional
+        ("Llamar al +52 55 1234 5678 por favor", 10, 27, "MX +52"),
+        # MX formato local con area code comun
+        ("Tel: 55 1234 5678 oficina", 5, 17, "MX local 55"),
+        # MX Guadalajara
+        ("Contacto: 33 9876 5432", 10, 22, "MX local 33"),
+        # MX Monterrey
+        ("Su numero es 81 5555 4444 y esta activo", 13, 25, "MX local 81"),
+        # US formato 3-3-4 con guiones
+        ("Call me at 555-123-4567 please", 11, 23, "US dash"),
+        # US formato internacional
+        ("Phone: +1-555-867-5309", 7, 22, "US intl"),
+        # Parentesis
+        ("Tel: (55) 1234-5678 para citas", 5, 19, "Parens"),
+    ])
+    def test_detects_phone(self, text, start, end, label):
+        """Detecta telefono: {label}."""
+        _start, _end = start, end
+
+        def analyze_fn(text, entities, language, score_threshold):
+            if "PHONE_NUMBER" in entities:
+                return [FakeRecognizerResult("PHONE_NUMBER", _start, _end, 0.65)]
+            return []
+
+        _setup_mocks(analyze_fn)
+
+        result = presidio_mod.scan_messages(
+            messages=[{"role": "user", "content": text}],
+            pii_action=PiiAction.REDACT,
+            pii_entities=["PHONE_NUMBER"],
+            tenant_id="t1",
+        )
+
+        assert result.pii_found is True
+        assert result.incidents[0]["entity_type"] == "PHONE_NUMBER"
+        assert "<PHONE_NUMBER>" in result.sanitized_messages[0]["content"]
+
+
+# =============================================================================
 # Tests de merge de resultados
 # =============================================================================
 
@@ -526,3 +572,109 @@ class TestFireAndForgetLogWithPii:
 
         mock_log_request.assert_called_once()
         mock_log_pii.assert_not_called()
+
+
+# =============================================================================
+# Tests de logging PII en paths BLOCK y ERROR
+# =============================================================================
+
+class TestPiiLoggingInBlockAndError:
+    """Verifica que _log_blocked y _log_error incluyen PII data."""
+
+    @patch("src.pipeline.orchestrator.fire_and_forget_log_with_pii")
+    @patch("src.pipeline.orchestrator.fire_and_forget_log")
+    def test_log_blocked_with_pii_uses_pii_logger(self, mock_log, mock_log_pii):
+        """_log_blocked con PII incidents usa fire_and_forget_log_with_pii."""
+        from src.pipeline.orchestrator import _log_blocked
+        from src.models.schemas import (
+            AuthContext, ProxyRequest, ChatMessage,
+            LogStatus, PiiIncident,
+        )
+
+        auth = AuthContext(
+            tenant_id="t1", api_key_id="k1",
+            key_hash="abc", ai_gateway_enabled=True,
+        )
+        request = ProxyRequest(
+            model="gpt-4o",
+            messages=[ChatMessage(role="user", content="test")],
+        )
+        pii_incidents = [
+            PiiIncident(
+                log_id="pending", tenant_id="t1",
+                entity_type="PERSON", action_taken="block", confidence=0.85,
+            )
+        ]
+        pii_detected = [{"entity_type": "PERSON", "score": 0.85}]
+
+        _log_blocked(
+            auth, request, LogStatus.BLOCKED_PII, 0.0,
+            pii_incidents=pii_incidents, pii_detected=pii_detected,
+        )
+
+        mock_log_pii.assert_called_once()
+        mock_log.assert_not_called()
+        # Verificar que el entry tiene pii_detected
+        entry = mock_log_pii.call_args[0][0]
+        assert entry.pii_detected == pii_detected
+        assert entry.status == LogStatus.BLOCKED_PII
+
+    @patch("src.pipeline.orchestrator.fire_and_forget_log_with_pii")
+    @patch("src.pipeline.orchestrator.fire_and_forget_log")
+    def test_log_blocked_without_pii_uses_normal_logger(self, mock_log, mock_log_pii):
+        """_log_blocked sin PII usa fire_and_forget_log normal."""
+        from src.pipeline.orchestrator import _log_blocked
+        from src.models.schemas import (
+            AuthContext, ProxyRequest, ChatMessage, LogStatus,
+        )
+
+        auth = AuthContext(
+            tenant_id="t1", api_key_id="k1",
+            key_hash="abc", ai_gateway_enabled=True,
+        )
+        request = ProxyRequest(
+            model="gpt-4o",
+            messages=[ChatMessage(role="user", content="test")],
+        )
+
+        _log_blocked(auth, request, LogStatus.BLOCKED_CREDITS, 0.0)
+
+        mock_log.assert_called_once()
+        mock_log_pii.assert_not_called()
+
+    @patch("src.pipeline.orchestrator.fire_and_forget_log_with_pii")
+    @patch("src.pipeline.orchestrator.fire_and_forget_log")
+    def test_log_error_with_pii_uses_pii_logger(self, mock_log, mock_log_pii):
+        """_log_error con PII incidents usa fire_and_forget_log_with_pii."""
+        from src.pipeline.orchestrator import _log_error
+        from src.models.schemas import (
+            AuthContext, ProxyRequest, ChatMessage,
+            LogStatus, PiiIncident,
+        )
+
+        auth = AuthContext(
+            tenant_id="t1", api_key_id="k1",
+            key_hash="abc", ai_gateway_enabled=True,
+        )
+        request = ProxyRequest(
+            model="gpt-4o",
+            messages=[ChatMessage(role="user", content="test")],
+        )
+        pii_incidents = [
+            PiiIncident(
+                log_id="pending", tenant_id="t1",
+                entity_type="CREDIT_CARD", action_taken="redact", confidence=1.0,
+            )
+        ]
+        pii_detected = [{"entity_type": "CREDIT_CARD", "score": 1.0}]
+
+        _log_error(
+            auth, request, 0.0, "LLM auth error",
+            pii_incidents=pii_incidents, pii_detected=pii_detected,
+        )
+
+        mock_log_pii.assert_called_once()
+        mock_log.assert_not_called()
+        entry = mock_log_pii.call_args[0][0]
+        assert entry.pii_detected == pii_detected
+        assert entry.status == LogStatus.ERROR

@@ -111,7 +111,11 @@ async def process_request(
                 settings.credit_cost_proxy,
                 settings.credit_cost_blocked,
             )
-            _log_blocked(auth, request, LogStatus.BLOCKED_PII, start_time)
+            _log_blocked(
+                auth, request, LogStatus.BLOCKED_PII, start_time,
+                pii_incidents=pii_incidents_data,
+                pii_detected=pii_result.incidents,
+            )
             raise HTTPException(
                 status_code=400,
                 detail={
@@ -144,7 +148,11 @@ async def process_request(
         await refund_credits(
             auth.tenant_id, settings.credit_cost_proxy, f"LLM error: {e}"
         )
-        _log_error(auth, request, start_time, str(e))
+        _log_error(
+            auth, request, start_time, str(e),
+            pii_incidents=pii_incidents_data if pii_result.pii_found else None,
+            pii_detected=pii_result.incidents if pii_result.pii_found else None,
+        )
         raise HTTPException(status_code=502, detail=f"LLM provider error: {e}")
 
     # 8. LLM Guard output scan (stub - Fase 3)
@@ -229,9 +237,11 @@ def _get_provider(model: str) -> str:
 
 def _log_blocked(
     auth: AuthContext, request: ProxyRequest,
-    status: LogStatus, start_time: float
+    status: LogStatus, start_time: float,
+    pii_incidents: list[PiiIncident] | None = None,
+    pii_detected: list[dict] | None = None,
 ) -> None:
-    """Log para requests bloqueados."""
+    """Log para requests bloqueados, incluyendo PII data si aplica."""
     latency_ms = int((time.time() - start_time) * 1000)
     settings = get_settings()
     entry = GatewayLogEntry(
@@ -243,15 +253,21 @@ def _log_blocked(
             if status != LogStatus.BLOCKED_CREDITS else 0,
         latency_ms=latency_ms,
         status=status,
+        pii_detected=pii_detected,
     )
-    fire_and_forget_log(entry)
+    if pii_incidents:
+        fire_and_forget_log_with_pii(entry, pii_incidents)
+    else:
+        fire_and_forget_log(entry)
 
 
 def _log_error(
     auth: AuthContext, request: ProxyRequest,
-    start_time: float, error_msg: str
+    start_time: float, error_msg: str,
+    pii_incidents: list[PiiIncident] | None = None,
+    pii_detected: list[dict] | None = None,
 ) -> None:
-    """Log para errores de LLM."""
+    """Log para errores de LLM, incluyendo PII data si fue detectado antes del error."""
     latency_ms = int((time.time() - start_time) * 1000)
     entry = GatewayLogEntry(
         tenant_id=auth.tenant_id,
@@ -261,5 +277,9 @@ def _log_error(
         credits_charged=0,
         latency_ms=latency_ms,
         status=LogStatus.ERROR,
+        pii_detected=pii_detected,
     )
-    fire_and_forget_log(entry)
+    if pii_incidents:
+        fire_and_forget_log_with_pii(entry, pii_incidents)
+    else:
+        fire_and_forget_log(entry)

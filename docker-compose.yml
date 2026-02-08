@@ -217,6 +217,7 @@ services:
       AI_GW_REDIS_PASSWORD: securetagredis
       AI_GW_SECURETAG_SYSTEM_SECRET: s3cur3t4g-syst3m-s3cr3t-2025
       AI_GW_LOG_LEVEL: INFO
+      OPENAI_API_KEY: ${AI_PROVIDER_OPENAI_KEY}
     networks:
       - core-net
     depends_on:

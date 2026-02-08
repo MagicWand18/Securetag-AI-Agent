@@ -1,6 +1,7 @@
 """
 Modulo de escaneo PII usando Microsoft Presidio.
 Carga lazy de modelos spaCy (EN + ES) para minimizar uso de memoria.
+Incluye recognizer custom para telefonos MX/US.
 """
 import logging
 import threading
@@ -16,6 +17,35 @@ logger = logging.getLogger(__name__)
 _lock = threading.Lock()
 _analyzer = None
 _anonymizer = None
+
+
+def _build_phone_recognizer(lang: str):
+    """
+    Crea un PatternRecognizer custom para telefonos MX y US.
+    Presidio's built-in PhoneRecognizer usa libphonenumber que es estricto
+    con formatos, por lo que muchos telefonos MX no se detectan.
+    """
+    from presidio_analyzer import Pattern, PatternRecognizer
+
+    patterns = [
+        # MX: +52 followed by 10 digits with various separators
+        Pattern("MX_INTL", r"\+52\s?\(?\d{2,3}\)?\s?\d{3,4}[\s\-]?\d{4}", 0.75),
+        # MX: 10 digits with common area codes (55, 33, 81, etc) and separators
+        Pattern("MX_LOCAL", r"\b(?:55|33|81|44|56|22|99)\s?\d{4}[\s\-]?\d{4}\b", 0.6),
+        # US/MX: (area) number format
+        Pattern("PARENS", r"\(\d{2,3}\)\s?\d{3,4}[\s\-]?\d{4}", 0.65),
+        # US: 3-3-4 with dash/dot/space
+        Pattern("US_DASH", r"\b\d{3}[\-\.\s]\d{3}[\-\.\s]\d{4}\b", 0.55),
+        # US/MX: +1 format
+        Pattern("US_INTL", r"\+1[\-\.\s]?\(?\d{3}\)?[\-\.\s]?\d{3}[\-\.\s]?\d{4}", 0.75),
+    ]
+
+    return PatternRecognizer(
+        supported_entity="PHONE_NUMBER",
+        patterns=patterns,
+        supported_language=lang,
+        name=f"PhoneRecognizerCustom_{lang}",
+    )
 
 
 def _get_engines():
@@ -49,6 +79,11 @@ def _get_engines():
         provider = NlpEngineProvider(nlp_configuration=nlp_config)
         nlp_engine = provider.create_engine()
         _analyzer = AnalyzerEngine(nlp_engine=nlp_engine, supported_languages=["en", "es"])
+
+        # Registrar recognizers custom para telefonos MX/US
+        _analyzer.registry.add_recognizer(_build_phone_recognizer("en"))
+        _analyzer.registry.add_recognizer(_build_phone_recognizer("es"))
+        logger.info("Custom phone recognizers (MX/US) registrados")
 
         _anonymizer = AnonymizerEngine()
         logger.info("Presidio engines cargados exitosamente")
