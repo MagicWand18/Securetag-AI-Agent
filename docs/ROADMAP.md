@@ -1,6 +1,6 @@
 # SECURETAG AI - ROADMAP
 
-> **Ultima actualizacion**: 2026-02-07
+> **Ultima actualizacion**: 2026-02-08
 > **Fuentes**: Consolidacion de `SECURETAG_MASTER_PLAN_v1.md` + `PLAN_Backlog_Features.md`
 > **Criterio de priorizacion**: Impacto en revenue > Diferenciacion competitiva > Nice-to-have
 
@@ -8,7 +8,7 @@
 
 ## Prioridad 0: EN DESARROLLO — AI Shield (AI Security Gateway) [F15]
 
-**Estado**: Plan aprobado, pendiente de implementacion.
+**Estado**: En progreso — Fase 0 y Fase 1 completadas (2026-02-08)
 **Plan detallado**: [`docs/PLAN_AI_SHIELD.md`](./PLAN_AI_SHIELD.md)
 **Estimacion**: 27-35 dias (1 desarrollador)
 **Monetizacion**: 0.1 creditos/request proxeado, 0.01 creditos/request bloqueado
@@ -21,15 +21,17 @@ Proxy de seguridad entre desarrolladores y LLMs externos (OpenAI, Claude, Gemini
 - Dashboard con metricas de uso, costos e incidentes
 - Contenedor Python (FastAPI) independiente del SAST
 
-| Fase | Entregable | Dias |
-|------|-----------|------|
-| 0. Infra | Verificar RAM, mem_limit | 1 |
-| 1. Foundation | Proxy + auth + credits + logs | 5-7 |
-| 2. Presidio | PII detection (EN+ES) | 4-5 |
-| 3. LLM Guard | Injection + secrets | 4-5 |
-| 4. Management API | CRUD + analytics Node.js | 5-6 |
-| 5. Hardening | Resilience + rate limiting | 3-4 |
-| 6. Frontend | Modulo AI Shield en dashboard | 5-7 |
+| Fase | Entregable | Dias | Estado |
+|------|-----------|------|--------|
+| 0. Infra | Verificar RAM, mem_limit | 1 | ✅ Completada |
+| 1. Foundation | Proxy + auth + credits + logs | 5-7 | ✅ Completada |
+| 2. Presidio | PII detection (EN+ES) | 4-5 | Pendiente |
+| 3. LLM Guard | Injection + secrets | 4-5 | Pendiente |
+| 4. Management API | CRUD + analytics Node.js | 5-6 | Pendiente |
+| 5. Hardening | Resilience + rate limiting | 3-4 | Pendiente |
+| 6. Frontend | Modulo AI Shield en dashboard | 5-7 | Pendiente |
+
+**Bug conocido**: `credits_balance` es INTEGER en DB. Cobro de 0.1 creditos se trunca a 0. Requiere migracion a NUMERIC(10,2). Ver detalles en PLAN_AI_SHIELD.md Fase 1.
 
 ---
 

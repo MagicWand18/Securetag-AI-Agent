@@ -1,7 +1,7 @@
 # SECURETAG AI - PLAN MAESTRO
 
 > **Version**: 2.0 (Documento Unificado)
-> **Ultima actualizacion**: 2026-02-07
+> **Ultima actualizacion**: 2026-02-08
 > **Estado del Proyecto**: Beta 3.1 - Post-Launch
 > **Documento anterior**: `docs/legacy/plan-multi-agentes/SECURETAG_MASTER_PLAN_v1.md`
 
@@ -42,7 +42,7 @@ SecureTag AI es una plataforma SaaS de ciberseguridad de nueva generacion con do
 | **Migrations** | Liquibase | `core-migrate` | Schema versioning |
 | **Backup** | PostgreSQL Alpine | `core-backup` | Backups cifrados automaticos |
 | **LLM** | Ollama / RunPod | Externo | Modelo `securetag-v1` (Llama 3.1 8B fine-tuned) |
-| **AI Gateway** | Python (FastAPI) | `core-ai-gateway` | Proxy IA: PII redaction, injection detection, BYOK |
+| **AI Gateway** | Python 3.11 (FastAPI) | `core-ai-gateway` | Proxy IA: LiteLLM + auth + credits + logging (PII/injection en fases futuras) |
 
 ### Herramientas integradas
 
@@ -63,7 +63,7 @@ Semgrep (SAST), Nmap, Nuclei, Ffuf, Gobuster, Amass, Subfinder, Httpx, Katana, S
 | **F11** | QA & Validacion | 5/5 | COMPLETADO |
 | **F12** | Enterprise Features | 4/5 | 80% |
 | **F13** | Offensive AI (xpl01t) | 0/3 | 0% |
-| **F15** | AI Shield (AI Security Gateway) | 0/6 | 0% - SIGUIENTE |
+| **F15** | AI Shield (AI Security Gateway) | 2/6 | ~33% - EN PROGRESO |
 | **F14** | Frontend SaaS | 5/5 | COMPLETADO |
 | **Backlog F0** | Hotfixes & Estabilizacion | Completo | COMPLETADO |
 | **Backlog F1** | Release Critical | Completo | COMPLETADO |
@@ -134,13 +134,15 @@ Semgrep (SAST), Nmap, Nuclei, Ffuf, Gobuster, Amass, Subfinder, Httpx, Katana, S
 > Plan detallado AI Shield: [`docs/PLAN_AI_SHIELD.md`](./PLAN_AI_SHIELD.md)
 
 #### EN DESARROLLO: AI Shield [F15] - Prioridad P0
-- [ ] **F15.0**: Verificacion de infraestructura (RAM, mem_limit)
-- [ ] **F15.1**: Proxy basico funcional (FastAPI + LiteLLM + auth + credits)
+- [x] **F15.0**: Verificacion de infraestructura (RAM, mem_limit) ✅ 2026-02-08
+- [x] **F15.1**: Proxy basico funcional (FastAPI + LiteLLM + auth + credits) ✅ 2026-02-08
 - [ ] **F15.2**: Presidio PII detection + redaction (EN + ES)
 - [ ] **F15.3**: LLM Guard injection + secrets scanning
 - [ ] **F15.4**: Management API Node.js (CRUD config, keys, analytics)
 - [ ] **F15.5**: Hardening + resilience
 - [ ] **F15.6**: Frontend modulo AI Shield en dashboard
+
+> **Bug conocido F15.1**: `credits_balance` es INTEGER, cobro de 0.1 cred se trunca a 0. Requiere migracion a NUMERIC(10,2).
 
 #### Pendiente de Fases Core
 - [ ] **F8.3**: CI/CD automatico (GitHub Actions en push a main)

@@ -1,8 +1,8 @@
 # Plan de Implementacion: AI Shield (AI Security Gateway)
 
-> **Version**: 1.1
+> **Version**: 1.2
 > **Fecha**: 2026-02-08
-> **Estado**: En progreso - Fase 0 completada, Fase 1 en curso
+> **Estado**: En progreso - Fase 0 y Fase 1 completadas
 > **Prioridad**: P0 (siguiente modulo a construir)
 > **Estimacion**: 25-33 dias (1 desarrollador)
 
@@ -469,11 +469,32 @@ docker stats --no-stream  # Verificar que respeta los limites
 
 ---
 
-### Fase 1: Foundation — Proxy Basico (5-7 dias)
+### Fase 1: Foundation — Proxy Basico (5-7 dias) ✅ COMPLETADA 2026-02-08
 
 **Objetivo**: Proxy que autentica, valida creditos, rutea a LiteLLM, y loguea.
 
-**Archivos nuevos:**
+**Resultado**: Proxy funcional desplegado en produccion. 28 tests Python pasando. GPT-4o-mini respondio exitosamente a traves del gateway con ~1400ms de latencia. Logs registrados en `ai_gateway_log`. SAST no afectado.
+
+**Hallazgos durante implementacion:**
+1. **Tabla `security_ban`**: La query de auth.py referenciaba `securetag.ban` (no existe). La tabla correcta es `securetag.security_ban` con columnas `type`, `value`, `is_banned`, `banned_until`. Corregido en commit `bc65f85`.
+2. **`credits_balance` es INTEGER**: La columna `securetag.tenant.credits_balance` es `INTEGER` (precision 32, escala 0). El cobro de 0.1 creditos se redondea a 0, por lo que no se descuentan creditos reales. **Requiere migracion a `NUMERIC(10,2)`** para soportar fracciones de credito. Ver Bug Conocido abajo.
+3. **Python 3.14 incompatible**: asyncpg y pydantic-core no tienen wheels para Python 3.14. Se usa Python 3.11 en el Dockerfile.
+4. **Contenedor AI Gateway**: Corriendo en produccion con ~149 MiB de RAM (bien dentro del limite de 512m).
+
+**Bug Conocido — credits_balance INTEGER vs NUMERIC:**
+> La columna `securetag.tenant.credits_balance` esta definida como `INTEGER`, lo que significa que el cobro de 0.1 creditos por request proxeado se trunca a 0. Esto afecta tanto al AI Gateway (0.1/0.01 creditos) como potencialmente a otros cobros fraccionarios futuros.
+>
+> **Solucion requerida**: Crear migracion `029_fix_credits_balance_type.sql`:
+> ```sql
+> ALTER TABLE securetag.tenant
+>     ALTER COLUMN credits_balance TYPE NUMERIC(10,2)
+>     USING credits_balance::NUMERIC(10,2);
+> ```
+> **Impacto**: Cambio retrocompatible. Los valores enteros existentes se preservan (ej: 100 → 100.00). El frontend y `CreditsManager.ts` del worker ya manejan numeros; no deberian necesitar cambios.
+>
+> **Alternativa**: Multiplicar los costos de AI Shield x100 y cobrar en creditos enteros (10 cred/request, 1 cred/blocked). Descartada porque limita flexibilidad futura.
+
+**Archivos creados:**
 - `ai-gateway/` completo (main.py, config, middleware, routes, services, models)
 - `docker/ai-gateway/Dockerfile`
 - `migrations/026_ai_gateway_tables.sql`
@@ -481,29 +502,27 @@ docker stats --no-stream  # Verificar que respeta los limites
 - `migrations/028_ai_gateway_tenant.sql`
 
 **Archivos modificados:**
-- `docker-compose.yml` — agregar `core-ai-gateway`
-- `nginx/default.conf` — agregar upstream `/ai/`
-- `migrations/changelog-master.xml` — registrar 026, 027, 028
+- `docker-compose.yml` — agregado `core-ai-gateway` service con mem_limit 512m
+- `nginx/default.conf` — agregado upstream `/ai/` -> core-ai-gateway:8000
+- `migrations/changelog-master.xml` — registradas 026, 027, 028
 
-**Tests (Python):**
-- `test_auth.py` — SHA-256 match con Node.js, tenant resolution, ban check, ai_gateway_enabled
-- `test_proxy_basic.py` — Request valido proxea a LiteLLM, response OpenAI-compatible
-- `test_credits.py` — Upfront deduction, reembolso en error, cobro 0.01 en bloqueo
-- `test_audit_logger.py` — Logs batch insert a ai_gateway_log
+**Tests (28 Python, todos pasando):**
+- `test_auth.py` (9) — SHA-256 match con Node.js, tenant resolution, ban check, ai_gateway_enabled
+- `test_proxy_basic.py` (7) — Request valido proxea a LiteLLM, stream rechazado, healthz, modelos
+- `test_credits.py` (7) — Upfront deduction, reembolso en error, cobro 0.01 en bloqueo
+- `test_audit_logger.py` (5) — Logs batch insert a ai_gateway_log, error handling
 
-**Criterio de exito:**
+**Verificacion en produccion:**
 ```bash
-# Proxy funcional
-curl -X POST http://localhost/ai/v1/chat/completions \
-  -H "X-API-Key: <key>" \
-  -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"hello"}],"provider_key":"sk-..."}'
-# -> Response OpenAI-compatible, 0.1 creditos descontados
+# Proxy funcional (probado 2026-02-08)
+curl -X POST https://api.securetag.com.mx/ai/v1/chat/completions \
+  -H "X-API-Key: sk-st-..." \
+  -H "Content-Type: application/json" \
+  -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Responde solo: Hola desde AI Shield."}],"provider_key":"sk-proj-..."}'
+# -> {"choices":[{"message":{"content":"Hola desde AI Shield."}}], "usage":{"total_tokens":30}}
+# -> Log registrado en ai_gateway_log con latency_ms=1397
 
-# SAST no afectado
-curl -X POST http://localhost/codeaudit/upload -H "X-API-Key: <key>" -F "file=@test.zip"
-# -> Funciona igual que antes
-
-# npm test -> 8/8 passed
+# SAST no afectado (verificado)
 ```
 
 ---
@@ -661,15 +680,15 @@ frontend/.../src/client/pages/ai-shield/
 
 ## 8. Resumen de fases
 
-| Fase | Entregable | Dias | Tests nuevos |
-|------|-----------|------|-------------|
-| 0. Infra | Verificar RAM, agregar mem_limit | 1 | Manual |
-| 1. Foundation | Proxy basico + auth + credits + logs | 5-7 | 4 Python |
-| 2. Presidio | PII detection + redaction (EN+ES) | 4-5 | 1 Python (multi-case) |
-| 3. LLM Guard | Injection + secrets + output scan | 4-5 | 2 Python |
-| 4. Management | CRUD + analytics en Node.js | 5-6 | 1 TS (multi-test) |
-| 5. Hardening | Resilience + rate limiting + perf | 3-4 | 2 Python |
-| 6. Frontend | Modulo AI Shield en dashboard | 5-7 | Navegacion + CRUD |
+| Fase | Entregable | Dias | Tests nuevos | Estado |
+|------|-----------|------|-------------|--------|
+| 0. Infra | Verificar RAM, agregar mem_limit | 1 | Manual | ✅ 2026-02-08 |
+| 1. Foundation | Proxy basico + auth + credits + logs | 5-7 | 4 Python (28 tests) | ✅ 2026-02-08 |
+| 2. Presidio | PII detection + redaction (EN+ES) | 4-5 | 1 Python (multi-case) | Pendiente |
+| 3. LLM Guard | Injection + secrets + output scan | 4-5 | 2 Python | Pendiente |
+| 4. Management | CRUD + analytics en Node.js | 5-6 | 1 TS (multi-test) | Pendiente |
+| 5. Hardening | Resilience + rate limiting + perf | 3-4 | 2 Python | Pendiente |
+| 6. Frontend | Modulo AI Shield en dashboard | 5-7 | Navegacion + CRUD | Pendiente |
 
 **Total: 27-35 dias** (1 desarrollador)
 

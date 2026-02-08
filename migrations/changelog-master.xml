@@ -32,5 +32,6 @@
   <include file="026_ai_gateway_tables.sql" relativeToChangelogFile="true"/>
   <include file="027_ai_gateway_logs.sql" relativeToChangelogFile="true"/>
   <include file="028_ai_gateway_tenant.sql" relativeToChangelogFile="true"/>
+  <include file="029_fix_credits_balance_type.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
