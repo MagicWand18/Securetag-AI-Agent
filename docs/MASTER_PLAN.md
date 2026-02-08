@@ -63,7 +63,7 @@ Semgrep (SAST), Nmap, Nuclei, Ffuf, Gobuster, Amass, Subfinder, Httpx, Katana, S
 | **F11** | QA & Validacion | 5/5 | COMPLETADO |
 | **F12** | Enterprise Features | 4/5 | 80% |
 | **F13** | Offensive AI (xpl01t) | 0/3 | 0% |
-| **F15** | AI Shield (AI Security Gateway) | 3/6 | 50% - EN PROGRESO |
+| **F15** | AI Shield (AI Security Gateway) | 4/6 | 67% - EN PROGRESO |
 | **F14** | Frontend SaaS | 5/5 | COMPLETADO |
 | **Backlog F0** | Hotfixes & Estabilizacion | Completo | COMPLETADO |
 | **Backlog F1** | Release Critical | Completo | COMPLETADO |
@@ -137,12 +137,12 @@ Semgrep (SAST), Nmap, Nuclei, Ffuf, Gobuster, Amass, Subfinder, Httpx, Katana, S
 - [x] **F15.0**: Verificacion de infraestructura (RAM, mem_limit) ✅ 2026-02-08
 - [x] **F15.1**: Proxy basico funcional (FastAPI + LiteLLM + auth + credits) ✅ 2026-02-08
 - [x] **F15.2**: Presidio PII detection + redaction (EN + ES) ✅ 2026-02-08
-- [ ] **F15.3**: LLM Guard injection + secrets scanning
+- [x] **F15.3**: LLM Guard injection + secrets scanning ✅ 2026-02-08
 - [ ] **F15.4**: Management API Node.js (CRUD config, keys, analytics)
 - [ ] **F15.5**: Hardening + resilience
 - [ ] **F15.6**: Frontend modulo AI Shield en dashboard
 
-> **Bug conocido F15.1**: `credits_balance` es INTEGER, cobro de 0.1 cred se trunca a 0. Requiere migracion a NUMERIC(10,2).
+> **Bug corregido F15.1**: `credits_balance` migrado de INTEGER a NUMERIC(10,2) (migracion 029).
 
 #### Pendiente de Fases Core
 - [ ] **F8.3**: CI/CD automatico (GitHub Actions en push a main)

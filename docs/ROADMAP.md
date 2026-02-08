@@ -8,16 +8,17 @@
 
 ## Prioridad 0: EN DESARROLLO — AI Shield (AI Security Gateway) [F15]
 
-**Estado**: En progreso — Fases 0, 1 y 2 completadas y deployadas en produccion (2026-02-08)
+**Estado**: En progreso — Fases 0, 1, 2 y 3 completadas y deployadas en produccion (2026-02-08)
 **Plan detallado**: [`docs/PLAN_AI_SHIELD.md`](./PLAN_AI_SHIELD.md)
-**Estimacion restante**: ~17-22 dias (Fases 3-6)
+**Estimacion restante**: ~13-17 dias (Fases 4-6)
 **Monetizacion**: 0.1 creditos/request proxeado, 0.01 creditos/request bloqueado
-**Tests**: 63 tests Python pasando (35 test methods, varios parametrizados)
+**Tests**: 116 tests Python pasando (6 archivos, todos pasando)
 
 Proxy de seguridad entre desarrolladores y LLMs externos (OpenAI, Claude, Gemini) con:
 - PII detection + redaction (Presidio, EN+ES) con phone recognizer custom MX/US
-- Prompt injection detection (LLM Guard) — pendiente
-- Secrets/credentials scanning — pendiente
+- Prompt injection detection (heuristico, 22 patrones, scoring 0.0-1.0) — completado
+- Secrets/credentials scanning (detect-secrets + patrones custom) — completado
+- Output scanning (PII + secrets en respuestas del LLM) — completado
 - BYOK (Bring Your Own Key) — los tenants usan sus propias API keys de LLM
 - Dashboard con metricas de uso, costos e incidentes — pendiente
 - Contenedor Python (FastAPI) independiente del SAST
@@ -27,7 +28,7 @@ Proxy de seguridad entre desarrolladores y LLMs externos (OpenAI, Claude, Gemini
 | 0. Infra | Verificar RAM, mem_limit | 1 | ✅ Completada y deployada |
 | 1. Foundation | Proxy + auth + credits + logs | 5-7 | ✅ Completada y deployada |
 | 2. Presidio | PII detection + redaction (EN+ES) + phone MX/US + PII audit logging | 4-5 | ✅ Completada y deployada |
-| 3. LLM Guard | Injection + secrets + output scan | 4-5 | **Siguiente** |
+| 3. LLM Guard | Injection + secrets + output scan | 4-5 | ✅ Completada y deployada |
 | 4. Management API | CRUD + analytics Node.js | 5-6 | Pendiente |
 | 5. Hardening | Resilience + rate limiting avanzado | 3-4 | Pendiente |
 | 6. Frontend | Modulo AI Shield en dashboard | 5-7 | Pendiente |

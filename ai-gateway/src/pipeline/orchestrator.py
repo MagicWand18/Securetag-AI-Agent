@@ -17,6 +17,7 @@ from src.middleware.tenant_context import get_tenant_config, get_key_config
 from src.middleware.rate_limit import check_rate_limit
 from src.pipeline.llm_proxy import call_llm
 from src.pipeline.presidio_scan import scan_messages
+from src.pipeline.llm_guard_scan import scan_input, scan_output
 
 logger = logging.getLogger(__name__)
 
@@ -30,10 +31,10 @@ async def process_request(
     1. Config + rate limit
     2. Credits check (upfront)
     3. Model validation
-    4. LLM Guard input (stub Fase 3)
+    4. LLM Guard input (injection + secrets)
     5. Presidio PII scan (redact/block/log_only)
     6. LiteLLM call
-    7. LLM Guard output (stub Fase 3)
+    7. LLM Guard output (PII + secrets)
     8. Credits confirm
     9. Async log
     """
@@ -78,8 +79,37 @@ async def process_request(
     # 3. Validar modelo
     _validate_model(request.model, config)
 
-    # 4. LLM Guard input scan (stub - Fase 3)
-    # TODO: Fase 3 - PromptInjectionScanner + SecretsScanner
+    # 4. LLM Guard input scan (injection + secrets)
+    raw_messages_for_guard = [m.model_dump() for m in request.messages]
+    guard_result = scan_input(
+        messages=raw_messages_for_guard,
+        injection_enabled=config.prompt_injection_enabled,
+        secrets_enabled=config.secrets_scanning_enabled,
+        injection_threshold=settings.injection_score_threshold,
+    )
+
+    if guard_result.blocked:
+        await charge_inspection_fee(
+            auth.tenant_id, settings.credit_cost_proxy, settings.credit_cost_blocked
+        )
+
+        if guard_result.block_reason == "injection":
+            _log_blocked(auth, request, LogStatus.BLOCKED_INJECTION, start_time,
+                         injection_score=guard_result.injection_score)
+            raise HTTPException(status_code=403, detail={
+                "error": "Prompt injection detected",
+                "score": guard_result.injection_score,
+                "patterns": guard_result.injection_patterns,
+            })
+
+        if guard_result.block_reason == "secrets":
+            _log_blocked(auth, request, LogStatus.BLOCKED_SECRETS, start_time,
+                         secrets_detected=[{"type": s["type"]} for s in guard_result.secrets])
+            raise HTTPException(status_code=400, detail={
+                "error": "Secrets/credentials detected in request",
+                "count": len(guard_result.secrets),
+                "types": [s["type"] for s in guard_result.secrets],
+            })
 
     # 5. Presidio PII scan
     raw_messages = [m.model_dump() for m in request.messages]
@@ -155,8 +185,20 @@ async def process_request(
         )
         raise HTTPException(status_code=502, detail=f"LLM provider error: {e}")
 
-    # 8. LLM Guard output scan (stub - Fase 3)
-    # TODO: Fase 3 - output scanning
+    # 8. LLM Guard output scan (PII + secrets en respuesta)
+    output_incidents = []
+    if config.output_scanning_enabled and llm_response.get("choices"):
+        output_text = llm_response["choices"][0].get("message", {}).get("content", "")
+        if output_text:
+            output_result = scan_output(
+                text=output_text,
+                pii_entities=config.pii_entities,
+                secrets_enabled=config.secrets_scanning_enabled,
+                tenant_id=auth.tenant_id,
+            )
+            if output_result.was_modified:
+                llm_response["choices"][0]["message"]["content"] = output_result.sanitized_text
+            output_incidents = output_result.pii_incidents + output_result.secrets_incidents
 
     # 9. Async log (fire-and-forget)
     latency_ms = int((time.time() - start_time) * 1000)
@@ -178,6 +220,8 @@ async def process_request(
         latency_ms=latency_ms,
         status=LogStatus.SUCCESS,
         pii_detected=pii_result.incidents if pii_result.pii_found else None,
+        injection_score=guard_result.injection_score,
+        secrets_detected=output_incidents if output_incidents else None,
     )
 
     if pii_incidents_data:
@@ -240,8 +284,10 @@ def _log_blocked(
     status: LogStatus, start_time: float,
     pii_incidents: list[PiiIncident] | None = None,
     pii_detected: list[dict] | None = None,
+    injection_score: float | None = None,
+    secrets_detected: list[dict] | None = None,
 ) -> None:
-    """Log para requests bloqueados, incluyendo PII data si aplica."""
+    """Log para requests bloqueados, incluyendo PII/injection/secrets data si aplica."""
     latency_ms = int((time.time() - start_time) * 1000)
     settings = get_settings()
     entry = GatewayLogEntry(
@@ -254,6 +300,8 @@ def _log_blocked(
         latency_ms=latency_ms,
         status=status,
         pii_detected=pii_detected,
+        injection_score=injection_score,
+        secrets_detected=secrets_detected,
     )
     if pii_incidents:
         fire_and_forget_log_with_pii(entry, pii_incidents)
@@ -266,8 +314,10 @@ def _log_error(
     start_time: float, error_msg: str,
     pii_incidents: list[PiiIncident] | None = None,
     pii_detected: list[dict] | None = None,
+    injection_score: float | None = None,
+    secrets_detected: list[dict] | None = None,
 ) -> None:
-    """Log para errores de LLM, incluyendo PII data si fue detectado antes del error."""
+    """Log para errores de LLM, incluyendo PII/injection/secrets data si aplica."""
     latency_ms = int((time.time() - start_time) * 1000)
     entry = GatewayLogEntry(
         tenant_id=auth.tenant_id,
@@ -278,6 +328,8 @@ def _log_error(
         latency_ms=latency_ms,
         status=LogStatus.ERROR,
         pii_detected=pii_detected,
+        injection_score=injection_score,
+        secrets_detected=secrets_detected,
     )
     if pii_incidents:
         fire_and_forget_log_with_pii(entry, pii_incidents)

@@ -70,9 +70,12 @@ Plataforma SaaS de ciberseguridad con dos modulos:
   - PII logging en todos los paths (SUCCESS/BLOCK/ERROR) con pii_incidents en DB
   - Action labels alineados con DB CHECK constraint: `redacted`/`blocked`/`logged`
   - OPENAI_API_KEY inyectada via `${AI_PROVIDER_OPENAI_KEY}` del .env
-  - 63 tests Python pasando (35 de Fase 2, 28 de Fase 1)
-  - E2E verificado en produccion: REDACT/BLOCK/LOG_ONLY/sin_PII
-- **Fase 3**: LLM Guard (injection + secrets + output scan) — PENDIENTE
+- **Fase 3**: LLM Guard (injection + secrets + output scan) — COMPLETADA Y DEPLOYADA
+  - Prompt injection detection heuristico (22 patrones regex, scoring 0.0-1.0, threshold 0.8)
+  - Secrets/credentials scanning via detect-secrets + patrones custom (AWS, GitHub, OpenAI, Bearer, Slack)
+  - Output scanning: reutiliza Presidio PII + secrets scanner sobre respuestas del LLM
+  - Patron fail-open: si scanner falla, el request pasa (se loguea error)
+  - 116 tests Python pasando (53 de Fase 3, 35 de Fase 2, 28 de Fase 1)
 - **Fase 4**: Management API Node.js (CRUD, analytics) — PENDIENTE
 - **Fase 5**: Hardening + resilience — PENDIENTE
 - **Fase 6**: Frontend modulo AI Shield — PENDIENTE
@@ -80,12 +83,13 @@ Plataforma SaaS de ciberseguridad con dos modulos:
 ### Pipeline del request (orchestrator.py)
 ```
 POST /ai/v1/chat/completions → Auth → Credits → Model validation
-  → [Fase 3: LLM Guard input] → Presidio PII scan (redact/block/log_only)
-  → LiteLLM call → [Fase 3: LLM Guard output] → Async log (con PII incidents)
+  → LLM Guard input (injection + secrets) → Presidio PII scan (redact/block/log_only)
+  → LiteLLM call → LLM Guard output (PII + secrets) → Async log (con PII incidents)
 ```
 
 ### Archivos clave AI Gateway
 - `ai-gateway/src/pipeline/orchestrator.py` — Pipeline principal (9 pasos)
+- `ai-gateway/src/pipeline/llm_guard_scan.py` — Injection detection + secrets scanning + output scan
 - `ai-gateway/src/pipeline/presidio_scan.py` — PII detection (Presidio + spaCy EN/ES + custom phone MX/US)
 - `ai-gateway/src/config/settings.py` — Variables de entorno (prefijo `AI_GW_`)
 - `ai-gateway/src/models/schemas.py` — Todos los modelos Pydantic
@@ -157,9 +161,9 @@ Dos DBs separadas:
 | `max_requests_per_minute` | 60 | RPM del tenant |
 | `pii_action` | redact | Accion PII: redact, block, log_only |
 | `pii_entities` | [CREDIT_CARD, EMAIL, PHONE, PERSON, SSN, IP] | Entidades PII a detectar |
-| `prompt_injection_enabled` | true | Habilitar deteccion injection (Fase 3) |
-| `secrets_scanning_enabled` | true | Habilitar deteccion secrets (Fase 3) |
-| `output_scanning_enabled` | true | Habilitar escaneo de output LLM (Fase 3) |
+| `prompt_injection_enabled` | true | Habilitar deteccion injection (22 patrones, threshold 0.8) |
+| `secrets_scanning_enabled` | true | Habilitar deteccion secrets (detect-secrets + custom) |
+| `output_scanning_enabled` | true | Habilitar escaneo de output LLM (PII + secrets) |
 | `prompt_logging_mode` | hash | Modo de log: hash o encrypted |
 
 ### Config por API key (tabla ai_gateway_key_config, futuro super-admin panel)
@@ -181,5 +185,7 @@ Dos DBs separadas:
 - **spaCy models**: Usar `_sm` (12MB c/u), los `_lg` pesan 560MB c/u — imposible en 4GB
 - **NUNCA** incluir credenciales reales en documentacion ni codigo
 - Al hacer SCP + git pull en servidor, los archivos locales causan conflictos merge
-- **mem_limit** de core-ai-gateway es 768m (Presidio + spaCy)
+- **mem_limit** de core-ai-gateway es 768m (Presidio + spaCy + detect-secrets)
+- **detect-secrets**: Usar `transient_settings` con plugins especificos (no `default_settings`) para evitar falsos positivos de HexHighEntropyString
+- **Injection patterns**: Compilados a nivel de modulo (inmutables), no recompilar en cada request
 - **Proyecto en servidor**: `/opt/securetag` (NO `/root/securetag`)
