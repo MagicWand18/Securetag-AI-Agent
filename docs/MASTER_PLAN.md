@@ -42,7 +42,7 @@ SecureTag AI es una plataforma SaaS de ciberseguridad de nueva generacion con do
 | **Migrations** | Liquibase | `core-migrate` | Schema versioning |
 | **Backup** | PostgreSQL Alpine | `core-backup` | Backups cifrados automaticos |
 | **LLM** | Ollama / RunPod | Externo | Modelo `securetag-v1` (Llama 3.1 8B fine-tuned) |
-| **AI Gateway** | Python 3.11 (FastAPI) | `core-ai-gateway` | Proxy IA: LiteLLM + auth + credits + PII detection/redaction + logging |
+| **AI Gateway** | Python 3.11 (FastAPI) | `core-ai-gateway` | Proxy IA: LiteLLM + auth + credits + PII detection/redaction (EN+ES) + phone MX/US + logging. 63 tests |
 
 ### Herramientas integradas
 

@@ -1,8 +1,8 @@
 # Plan de Implementacion: AI Shield (AI Security Gateway)
 
-> **Version**: 1.3
+> **Version**: 1.4
 > **Fecha**: 2026-02-08
-> **Estado**: En progreso - Fases 0, 1 y 2 completadas
+> **Estado**: En progreso - Fases 0, 1 y 2 completadas y deployadas. 63 tests pasando.
 > **Prioridad**: P0 (siguiente modulo a construir)
 > **Estimacion**: 25-33 dias (1 desarrollador)
 
@@ -531,7 +531,7 @@ curl -X POST https://api.securetag.com.mx/ai/v1/chat/completions \
 
 **Objetivo**: Deteccion y redaccion de PII en ingles y espanol.
 
-**Resultado**: PII scanning funcional con 3 modos (redact/block/log_only), soporte EN+ES via spaCy `_sm` models, 25 tests nuevos (53 total). Redaccion manual (`_redact_text`) en vez de AnonymizerEngine para evitar dependencias extra y mejorar testeabilidad. mem_limit 768m.
+**Resultado**: PII scanning funcional con 3 modos (redact/block/log_only), soporte EN+ES via spaCy `_sm` models, custom phone recognizer MX/US, PII logging en todos los paths (SUCCESS/BLOCK/ERROR), 35 tests nuevos (63 total). Redaccion manual (`_redact_text`) en vez de AnonymizerEngine para evitar dependencias extra y mejorar testeabilidad. mem_limit 768m. E2E verificado en produccion.
 
 **Decisiones de implementacion:**
 
@@ -541,25 +541,39 @@ curl -X POST https://api.securetag.com.mx/ai/v1/chat/completions \
 | mem_limit | 512m → 768m | ~149 MiB actual + ~200-300 MiB Presidio+spaCy |
 | Carga de modelos | Lazy (primer request) con threading.Lock | Startup rapido, healthcheck no carga modelos |
 | Threshold confianza | 0.5 (env: `AI_GW_PII_CONFIDENCE_THRESHOLD`) | Filtra falsos positivos sin perder detecciones claras |
-| Error handling | Fail-open | Si Presidio falla, request pasa sin escaneo (se loguea error) |
+| Error handling | Fail-open (captura Exception + SystemExit) | Si Presidio falla, request pasa sin escaneo (se loguea error) |
 | Output scanning | No (Fase 3) | Solo input en Fase 2, output scanning con LLM Guard |
-| Custom recognizers MX | No en MVP | CURP/RFC se agrega si hay demanda |
+| Phone recognizer | Custom PatternRecognizer para MX/US | PhoneRecognizer built-in de Presidio usa libphonenumber, demasiado estricto para formatos MX |
+| Custom recognizers MX | CURP/RFC pendiente | Se agrega si hay demanda |
 | Redaccion | Manual (`_redact_text`) | Evita import de `OperatorConfig`, mas testeable |
 | Merge multi-idioma | Mayor score gana | Elimina duplicados EN/ES del mismo span |
+| Action labels DB | `redacted`/`blocked`/`logged` | Alineados con CHECK constraint en `ai_gateway_pii_incident.action_taken` |
+| PII audit en BLOCK/ERROR | `_log_blocked()` y `_log_error()` incluyen PII data | Auditoria completa en todos los paths, no solo SUCCESS |
+| OPENAI_API_KEY | Inyectada via `${AI_PROVIDER_OPENAI_KEY}` del .env | LiteLLM la usa como fallback si no hay BYOK |
 
 **Archivos creados:**
-- `ai-gateway/src/pipeline/presidio_scan.py` — Modulo principal: `_get_engines()` (singleton lazy), `scan_messages()`, `_redact_text()`, `_merge_results()`
-- `ai-gateway/tests/test_presidio.py` — 25 tests
+- `ai-gateway/src/pipeline/presidio_scan.py` — Modulo principal: `_get_engines()` (singleton lazy), `_build_phone_recognizer()` (custom MX/US), `scan_messages()`, `_redact_text()`, `_merge_results()`
+- `ai-gateway/tests/test_presidio.py` — 35 tests
 
 **Archivos modificados:**
-- `ai-gateway/src/pipeline/orchestrator.py` — Integrado PII scan: stub reemplazado, manejo BLOCK (refund+400), PII data en log, `fire_and_forget_log_with_pii()`
+- `ai-gateway/src/pipeline/orchestrator.py` — Integrado PII scan: stub reemplazado, manejo BLOCK (refund+400), PII data en log para todos los paths (SUCCESS/BLOCK/ERROR)
 - `ai-gateway/src/services/audit_logger.py` — Agregada `fire_and_forget_log_with_pii()` que encadena log → PII incidents con log_id real
 - `ai-gateway/src/config/settings.py` — Agregado `pii_confidence_threshold: float = 0.5`
 - `ai-gateway/requirements.txt` — Descomentados `presidio-analyzer==2.2.354` y `presidio-anonymizer==2.2.354`
 - `docker/ai-gateway/Dockerfile` — Agregado `spacy download en_core_web_sm && es_core_news_sm`
-- `docker-compose.yml` — `core-ai-gateway.mem_limit`: 512m → 768m
+- `docker-compose.yml` — `core-ai-gateway.mem_limit`: 512m → 768m, `OPENAI_API_KEY: ${AI_PROVIDER_OPENAI_KEY}`
 
-**Tests (25 nuevos, 53 total — todos pasando):**
+**Custom phone recognizer (MX/US) — registrado para EN y ES:**
+
+| Patron | Ejemplo | Score |
+|--------|---------|-------|
+| `MX_INTL` | +52 55 1234 5678 | 0.75 |
+| `MX_LOCAL` | 55 1234 5678 (area codes: 55, 33, 81, 44, 56, 22, 99) | 0.60 |
+| `PARENS` | (55) 1234-5678 | 0.65 |
+| `US_DASH` | 555-123-4567 | 0.55 |
+| `US_INTL` | +1-555-867-5309 | 0.75 |
+
+**Tests (35 nuevos, 63 total — todos pasando):**
 - `test_presidio.py`:
   - TestDetectPersonEN (1) — PERSON en ingles con redaccion
   - TestDetectPersonES (1) — PERSON en español con redaccion
@@ -567,16 +581,27 @@ curl -X POST https://api.securetag.com.mx/ai/v1/chat/completions \
   - TestDetectOtherEntities (5) — EMAIL, PHONE US, PHONE MX, SSN, IP
   - TestPiiModes (4) — redact reemplaza, block no modifica, log_only pasa, labels correctos
   - TestPiiEdgeCases (7) — sin PII, system skip, empty, multiples msgs, subset entidades, fail-open engines, fail-open analyzer
+  - TestPhoneDetection (7) — +52, MX local (55/33/81), US dash, US +1, parentesis
   - TestMergeResults (2) — solapamiento (score mayor gana), non-overlapping (ambos preservados)
   - TestFireAndForgetLogWithPii (2) — encadenamiento log+PII, no PII si log falla
+  - TestPiiLoggingInBlockAndError (3) — _log_blocked con PII, sin PII, _log_error con PII
+
+**Verificacion E2E en produccion (2026-02-08):**
+
+| Test | Modo | HTTP | PII Detectado | DB pii_incident |
+|------|------|------|---------------|-----------------|
+| Nombre+tarjeta+email+tel MX | REDACT | 200 | PERSON, CREDIT_CARD, EMAIL, PHONE | 4 rows (redacted) |
+| Nombre+tel MX Guadalajara | BLOCK | 400 | PERSON, PHONE | 2 rows (blocked) |
+| Nombre+tel MX+IP | LOG_ONLY | 200 | PERSON, PHONE, IP | 3 rows (logged) |
+| Sin PII | REDACT | 200 | — | 0 rows |
 
 **Criterio de exito:**
 ```bash
-# Prompt con PII -> redactado
+# Prompt con PII -> redactado (VERIFICADO en produccion)
 curl ... -d '{"messages":[{"role":"user","content":"El cliente Juan Perez (4111-1111-1111-1111) tiene un bug"}]}'
 # El LLM recibe: "El cliente <PERSON> (<CREDIT_CARD>) tiene un bug"
-# DB log: pii_detected: [{"type":"PERSON"},{"type":"CREDIT_CARD"}]
-# DB pii_incident: 2 filas con entity_type, action_taken, confidence
+# DB ai_gateway_log: pii_detected: [{"entity_type":"PERSON","score":0.85},{"entity_type":"CREDIT_CARD","score":1.0}]
+# DB ai_gateway_pii_incident: 2 filas con entity_type, action_taken=redacted, confidence
 ```
 
 ---
@@ -706,15 +731,17 @@ frontend/.../src/client/pages/ai-shield/
 
 ## 8. Resumen de fases
 
-| Fase | Entregable | Dias | Tests nuevos | Estado |
-|------|-----------|------|-------------|--------|
+| Fase | Entregable | Dias | Tests | Estado |
+|------|-----------|------|-------|--------|
 | 0. Infra | Verificar RAM, agregar mem_limit | 1 | Manual | ✅ 2026-02-08 |
-| 1. Foundation | Proxy basico + auth + credits + logs | 5-7 | 4 Python (28 tests) | ✅ 2026-02-08 |
-| 2. Presidio | PII detection + redaction (EN+ES) | 4-5 | 1 Python (25 tests) | ✅ 2026-02-08 |
+| 1. Foundation | Proxy basico + auth + credits + logs | 5-7 | 5 archivos (28 tests) | ✅ 2026-02-08 |
+| 2. Presidio | PII detection + redaction (EN+ES) + phone MX/US | 4-5 | 1 archivo (35 tests) | ✅ 2026-02-08 |
 | 3. LLM Guard | Injection + secrets + output scan | 4-5 | 2 Python | Pendiente |
 | 4. Management | CRUD + analytics en Node.js | 5-6 | 1 TS (multi-test) | Pendiente |
 | 5. Hardening | Resilience + rate limiting + perf | 3-4 | 2 Python | Pendiente |
 | 6. Frontend | Modulo AI Shield en dashboard | 5-7 | Navegacion + CRUD | Pendiente |
+
+**Total tests actuales: 63 (5 archivos Python, todos pasando)**
 
 **Total: 27-35 dias** (1 desarrollador)
 
@@ -819,7 +846,9 @@ frontend/.../src/client/pages/ai-shield/
 | Idiomas soportados | en, es | HARDCODED | Externalizar | **Si — Global** | Requiere instalar modelos spaCy adicionales |
 | Modelos spaCy | en_core_web_sm, es_core_news_sm | DOCKERFILE | Externalizar | No | `_sm` (~12MB c/u). Cambiar a `_lg` requiere mas RAM |
 | Escaneo de mensajes `system` | Desactivado (skip) | HARDCODED | No | No | Diseno: system prompts no se escanean |
+| Custom phone recognizer MX/US | Implementado (PatternRecognizer) | HARDCODED | No | No | 5 patrones regex: +52, area codes MX, parentesis, US dash, +1. Registrado para EN y ES |
 | Custom recognizers (CURP, RFC) | No implementado | — | — | — | Fase futura si hay demanda MX |
+| `OPENAI_API_KEY` | `${AI_PROVIDER_OPENAI_KEY}` del .env | DOCKER (compose) | Si | No | Fallback si no hay BYOK. LiteLLM la usa automaticamente |
 
 **Entidades PII soportadas por Presidio (seleccionables por tenant via `pii_entities`):**
 

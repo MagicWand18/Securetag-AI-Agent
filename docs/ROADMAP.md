@@ -8,28 +8,42 @@
 
 ## Prioridad 0: EN DESARROLLO — AI Shield (AI Security Gateway) [F15]
 
-**Estado**: En progreso — Fases 0, 1 y 2 completadas (2026-02-08)
+**Estado**: En progreso — Fases 0, 1 y 2 completadas y deployadas en produccion (2026-02-08)
 **Plan detallado**: [`docs/PLAN_AI_SHIELD.md`](./PLAN_AI_SHIELD.md)
-**Estimacion**: 27-35 dias (1 desarrollador)
+**Estimacion restante**: ~17-22 dias (Fases 3-6)
 **Monetizacion**: 0.1 creditos/request proxeado, 0.01 creditos/request bloqueado
+**Tests**: 63 tests Python pasando (35 test methods, varios parametrizados)
 
 Proxy de seguridad entre desarrolladores y LLMs externos (OpenAI, Claude, Gemini) con:
-- PII detection + redaction (Presidio, EN+ES)
-- Prompt injection detection (LLM Guard)
-- Secrets/credentials scanning
+- PII detection + redaction (Presidio, EN+ES) con phone recognizer custom MX/US
+- Prompt injection detection (LLM Guard) — pendiente
+- Secrets/credentials scanning — pendiente
 - BYOK (Bring Your Own Key) — los tenants usan sus propias API keys de LLM
-- Dashboard con metricas de uso, costos e incidentes
+- Dashboard con metricas de uso, costos e incidentes — pendiente
 - Contenedor Python (FastAPI) independiente del SAST
 
 | Fase | Entregable | Dias | Estado |
 |------|-----------|------|--------|
-| 0. Infra | Verificar RAM, mem_limit | 1 | ✅ Completada |
-| 1. Foundation | Proxy + auth + credits + logs | 5-7 | ✅ Completada |
-| 2. Presidio | PII detection + redaction (EN+ES) | 4-5 | ✅ Completada |
-| 3. LLM Guard | Injection + secrets | 4-5 | Pendiente |
+| 0. Infra | Verificar RAM, mem_limit | 1 | ✅ Completada y deployada |
+| 1. Foundation | Proxy + auth + credits + logs | 5-7 | ✅ Completada y deployada |
+| 2. Presidio | PII detection + redaction (EN+ES) + phone MX/US + PII audit logging | 4-5 | ✅ Completada y deployada |
+| 3. LLM Guard | Injection + secrets + output scan | 4-5 | **Siguiente** |
 | 4. Management API | CRUD + analytics Node.js | 5-6 | Pendiente |
-| 5. Hardening | Resilience + rate limiting | 3-4 | Pendiente |
+| 5. Hardening | Resilience + rate limiting avanzado | 3-4 | Pendiente |
 | 6. Frontend | Modulo AI Shield en dashboard | 5-7 | Pendiente |
+
+**Lo implementado en Fases 0-2 (verificado E2E en produccion):**
+- Auth via X-API-Key + permisos `ai_gateway_enabled` en tenant y api_key
+- Cobro upfront atomico 0.1 creditos + reembolso si LLM falla
+- Rate limiting por key y por tenant (configurable)
+- Model validation (allowed/blocked lists)
+- Presidio PII scan bilingue (EN+ES) con 3 modos: REDACT, BLOCK, LOG_ONLY
+- Custom phone recognizer (5 regex patterns: MX intl, MX local, US dash, US intl, parenthesis)
+- PII audit logging completo en todos los paths (SUCCESS, BLOCK, ERROR)
+- Tabla `ai_gateway_pii_incident` con action labels: `redacted`, `blocked`, `logged`
+- LiteLLM proxy con BYOK + fallback a OPENAI_API_KEY del .env
+- Logging async fire-and-forget con prompt hash/encrypted
+- mem_limit 768m, spaCy sm models (12MB c/u)
 
 **Bug corregido**: `credits_balance` migrado de INTEGER a NUMERIC(10,2) (migracion 029). Cobro fraccionario de creditos ahora funciona correctamente.
 

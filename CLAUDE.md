@@ -63,9 +63,15 @@ Plataforma SaaS de ciberseguridad con dos modulos:
 ## AI Shield — Estado y Pipeline
 
 ### Estado (Feb 2026)
-- **Fase 0**: Infra check + mem_limit — COMPLETADA
-- **Fase 1**: Proxy basico (auth + credits + LiteLLM + logging) — COMPLETADA
-- **Fase 2**: Presidio PII detection + redaction (EN+ES) — COMPLETADA
+- **Fase 0**: Infra check + mem_limit — COMPLETADA Y DEPLOYADA
+- **Fase 1**: Proxy basico (auth + credits + LiteLLM + logging) — COMPLETADA Y DEPLOYADA
+- **Fase 2**: Presidio PII detection + redaction (EN+ES) — COMPLETADA Y DEPLOYADA
+  - Custom phone recognizer MX/US (5 patrones regex para formatos +52, area codes, +1)
+  - PII logging en todos los paths (SUCCESS/BLOCK/ERROR) con pii_incidents en DB
+  - Action labels alineados con DB CHECK constraint: `redacted`/`blocked`/`logged`
+  - OPENAI_API_KEY inyectada via `${AI_PROVIDER_OPENAI_KEY}` del .env
+  - 63 tests Python pasando (35 de Fase 2, 28 de Fase 1)
+  - E2E verificado en produccion: REDACT/BLOCK/LOG_ONLY/sin_PII
 - **Fase 3**: LLM Guard (injection + secrets + output scan) — PENDIENTE
 - **Fase 4**: Management API Node.js (CRUD, analytics) — PENDIENTE
 - **Fase 5**: Hardening + resilience — PENDIENTE
@@ -74,15 +80,16 @@ Plataforma SaaS de ciberseguridad con dos modulos:
 ### Pipeline del request (orchestrator.py)
 ```
 POST /ai/v1/chat/completions → Auth → Credits → Model validation
-  → Presidio PII scan (redact/block/log_only) → LiteLLM call → Async log
+  → [Fase 3: LLM Guard input] → Presidio PII scan (redact/block/log_only)
+  → LiteLLM call → [Fase 3: LLM Guard output] → Async log (con PII incidents)
 ```
 
 ### Archivos clave AI Gateway
-- `ai-gateway/src/pipeline/orchestrator.py` — Pipeline principal
-- `ai-gateway/src/pipeline/presidio_scan.py` — PII detection (Presidio + spaCy EN/ES)
+- `ai-gateway/src/pipeline/orchestrator.py` — Pipeline principal (9 pasos)
+- `ai-gateway/src/pipeline/presidio_scan.py` — PII detection (Presidio + spaCy EN/ES + custom phone MX/US)
 - `ai-gateway/src/config/settings.py` — Variables de entorno (prefijo `AI_GW_`)
 - `ai-gateway/src/models/schemas.py` — Todos los modelos Pydantic
-- `ai-gateway/src/services/audit_logger.py` — Logging async + PII incidents
+- `ai-gateway/src/services/audit_logger.py` — Logging async + PII incidents (fire_and_forget_log_with_pii)
 
 ## Bases de Datos
 
@@ -117,7 +124,7 @@ Dos DBs separadas:
 
 ## Bugs Conocidos
 
-- **credits_balance**: Ya migrado a NUMERIC(10,2) (migracion 029). Verificar que el deploy lo aplico correctamente.
+- **credits_balance**: Migrado a NUMERIC(10,2) (migracion 029). Deploy verificado, cobro fraccionario funciona correctamente.
 
 ## Configuracion del AI Gateway
 
@@ -138,6 +145,7 @@ Dos DBs separadas:
 | `AI_GW_PII_CONFIDENCE_THRESHOLD` | 0.5 | Threshold minimo de confianza Presidio |
 | `AI_GW_CONFIG_CACHE_TTL` | 60 | TTL cache de config tenant (segundos) |
 | `AI_GW_LOG_LEVEL` | INFO | Nivel de logging |
+| `OPENAI_API_KEY` | `${AI_PROVIDER_OPENAI_KEY}` | Key OpenAI para LiteLLM (fallback si no hay BYOK) |
 
 ### Config por tenant (tabla ai_gateway_config, futuro super-admin panel)
 | Campo | Default | Descripcion |
@@ -168,7 +176,10 @@ Dos DBs separadas:
 - **Containers** en servidor usan prefijo `core-*` (los `securetag-*` fueron eliminados)
 - **Tabla de bans** es `securetag.security_ban` (NO `securetag.ban`)
 - **Presidio redaccion**: manual (`_redact_text`) en vez de `AnonymizerEngine.anonymize()` — evita import de OperatorConfig
+- **Phone recognizer**: Custom PatternRecognizer MX/US (5 patrones regex) — PhoneRecognizer built-in de Presidio es demasiado estricto
+- **Action labels DB**: `ai_gateway_pii_incident.action_taken` tiene CHECK constraint — solo acepta `redacted`, `blocked`, `logged`
 - **spaCy models**: Usar `_sm` (12MB c/u), los `_lg` pesan 560MB c/u — imposible en 4GB
 - **NUNCA** incluir credenciales reales en documentacion ni codigo
 - Al hacer SCP + git pull en servidor, los archivos locales causan conflictos merge
 - **mem_limit** de core-ai-gateway es 768m (Presidio + spaCy)
+- **Proyecto en servidor**: `/opt/securetag` (NO `/root/securetag`)
