@@ -36,19 +36,17 @@ def _get_engines():
         from presidio_anonymizer import AnonymizerEngine
 
         logger.info("Cargando Presidio engines + spaCy models (EN + ES)...")
-        _analyzer = AnalyzerEngine()
 
-        # Registrar el modelo de español como NLP engine adicional
         from presidio_analyzer.nlp_engine import NlpEngineProvider
 
-        es_config = {
+        nlp_config = {
             "nlp_engine_name": "spacy",
             "models": [
                 {"lang_code": "es", "model_name": "es_core_news_sm"},
                 {"lang_code": "en", "model_name": "en_core_web_sm"},
             ],
         }
-        provider = NlpEngineProvider(nlp_configuration=es_config)
+        provider = NlpEngineProvider(nlp_configuration=nlp_config)
         nlp_engine = provider.create_engine()
         _analyzer = AnalyzerEngine(nlp_engine=nlp_engine, supported_languages=["en", "es"])
 
@@ -92,8 +90,9 @@ def scan_messages(
 
     try:
         analyzer, anonymizer = _get_engines()
-    except Exception as e:
+    except (Exception, SystemExit) as e:
         # Fail-open: si Presidio no carga, el request pasa sin escaneo
+        # SystemExit: spaCy lo lanza si falla descarga de modelo
         logger.error(f"Error cargando Presidio engines: {e}")
         return PiiScanResult(sanitized_messages=messages)
 
