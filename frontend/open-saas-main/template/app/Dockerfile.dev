@@ -1,0 +1,27 @@
+FROM node:22-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    postgresql-client \
+    procps \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Wasp CLI
+ENV WASP_TELEMETRY_DISABLE=1
+ENV BROWSER=none
+RUN curl -sSL https://get.wasp-lang.dev/installer.sh | sh
+
+# Add Wasp to PATH
+ENV PATH="/root/.local/bin:$PATH"
+
+WORKDIR /app
+
+# Expose ports
+# 3000: Client
+# 3001: Server
+# 3002: Studio/DbSeed
+EXPOSE 3000 3001 3002
+
+# Default command (overridden in docker-compose)
+CMD ["wasp", "start"]

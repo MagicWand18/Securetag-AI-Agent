@@ -23,7 +23,7 @@ if [ -z "${SKIP_SETUP:-}" ]; then
 
   # Build y arranque de App y DB
   info "Arrancando infraestructura (App + DB)..."
-  docker compose up -d --build securetag-db securetag-app
+  docker compose up -d --build core-db core-api
 
   # Espera activa a health OK
   info "Comprobando salud de App..."
@@ -60,7 +60,7 @@ info "TaskId: ${TASK_ID}"
 
 # Ejecutar Worker (one-off)
 info "Ejecutando Worker..."
-docker compose run --rm -e LOOP_MODE=false securetag-worker
+docker compose run --rm -e LOOP_MODE=false core-worker
 
 # Poll del resultado
 info "Consultando resultado para taskId=${TASK_ID}..."

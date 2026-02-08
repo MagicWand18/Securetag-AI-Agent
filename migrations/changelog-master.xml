@@ -22,5 +22,15 @@
   <include file="016_add_tenant_credits.sql" relativeToChangelogFile="true"/>
   <include file="017_add_task_double_check.sql" relativeToChangelogFile="true"/>
   <include file="018_create_custom_rule_library.sql" relativeToChangelogFile="true"/>
+  <include file="019_create_security_strikes.sql" relativeToChangelogFile="true"/>
+  <include file="020_add_missing_user_columns.sql" relativeToChangelogFile="true"/>
+  <include file="021_add_tenant_owner.sql" relativeToChangelogFile="true"/>
+  <include file="022_add_user_profile_fields.sql" relativeToChangelogFile="true"/>
+  <include file="023_multiple_apikeys.sql" relativeToChangelogFile="true"/>
+  <include file="024_add_finding_evidence.sql" relativeToChangelogFile="true"/>
+  <include file="025_add_task_evolution_metrics.sql" relativeToChangelogFile="true"/>
+  <include file="026_ai_gateway_tables.sql" relativeToChangelogFile="true"/>
+  <include file="027_ai_gateway_logs.sql" relativeToChangelogFile="true"/>
+  <include file="028_ai_gateway_tenant.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

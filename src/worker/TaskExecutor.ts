@@ -7,6 +7,7 @@ import { LLMClient } from './LLMClient.js'
 import { ContextAnalyzer } from './ContextAnalyzer.js'
 import { ExternalAIService } from './services/ExternalAIService.js'
 import { CustomRuleGenerator } from './services/CustomRuleGenerator.js'
+import { CreditsManager } from './services/CreditsManager.js'
 import { ResearchOrchestrator } from './services/research/ResearchOrchestrator.js'
 import { CrossFileAnalyzer } from './services/CrossFileAnalyzer.js'
 import fs from 'fs'
@@ -22,6 +23,7 @@ export class TaskExecutor {
     private workerClient: WorkerClient
     private externalAIService: ExternalAIService
     private crossFileAnalyzer: CrossFileAnalyzer
+    private creditsManager: CreditsManager
     private taskTimeouts: Map<string, number> = new Map([
         ['codeaudit', 300000], // 5 minutes
         ['web', 60000],        // 1 minute
@@ -35,21 +37,32 @@ export class TaskExecutor {
         this.workerClient = new WorkerClient()
         this.externalAIService = new ExternalAIService()
         this.crossFileAnalyzer = new CrossFileAnalyzer()
+        this.creditsManager = new CreditsManager()
     }
 
     async execute(job: any): Promise<any> {
-        const tenant = process.env.TENANT_ID || 'default'
+        const tenant = job.tenantId || process.env.TENANT_ID || 'default'
         const started = Date.now()
         const taskId = job.id || job.taskId
 
-        logger.info(`Starting execution for task ${taskId}`)
+        logger.info(`Starting execution for task ${taskId} with job data keys: ${Object.keys(job).join(', ')}`)
+        logger.info(`Job Payload Debug: custom_rule_model=${job.custom_rule_model}, config=${JSON.stringify(job.custom_rules_config)}`)
 
         try {
             // Start heartbeat
             await this.heartbeatManager.start(taskId)
 
             // Get timeout for this task type
-            const timeout = this.getTimeout(job.type)
+            let timeout = this.getTimeout(job.type)
+
+            // Dynamic Timeout Extension for Custom Rules
+            // Each rule can take 2-3 minutes (generation + validation + retries)
+            if (job.custom_rules || (job.custom_rules_config && job.custom_rules_config.enabled)) {
+                const qty = job.custom_rules_qty || (job.custom_rules_config && job.custom_rules_config.qty) || 3;
+                const extraTime = qty * 180000; // 3 minutes per rule
+                timeout += extraTime;
+                logger.info(`Extended timeout by ${extraTime}ms for ${qty} custom rules. New timeout: ${timeout}ms`);
+            }
 
             // Execute with timeout
             const result = await this.executeWithTimeout(
@@ -79,6 +92,12 @@ export class TaskExecutor {
 
             // Update task state
             await updateTaskState(taskId, status)
+
+            // Refund credits if task failed and cost is known
+            if (job.totalCost && job.totalCost > 0) {
+                 logger.info(`Task ${taskId} failed/timeout. Refunding ${job.totalCost} credits to tenant ${tenant}.`);
+                 await this.creditsManager.refundCredits(tenant, job.totalCost, `Refund for failed task ${taskId}`);
+            }
 
             // Stop heartbeat with failure status
             await this.heartbeatManager.stop(status as any)
@@ -183,6 +202,24 @@ export class TaskExecutor {
             p.on('error', reject)
         })
 
+        const filesScannedCount = this.countFiles(workDir);
+        logger.info(`Scanned ${filesScannedCount} files in ${workDir}`);
+
+        // Debug: List files in workDir
+        try {
+            const files = fs.readdirSync(workDir);
+            logger.info(`[Debug] Files in workDir (${workDir}): ${files.join(', ')}`);
+            // Check subdirs if only one
+            if (files.length === 1) {
+                const sub = path.join(workDir, files[0]);
+                if (fs.statSync(sub).isDirectory()) {
+                     logger.info(`[Debug] Files in subdir (${files[0]}): ${fs.readdirSync(sub).join(', ')}`);
+                }
+            }
+        } catch (e: any) {
+            logger.error(`[Debug] Failed to list workDir: ${e.message}`);
+        }
+
         // Analyze Context (Stack & Structure)
         logger.info(`Analyzing context for ${workDir}`)
         const projectContext = await this.contextAnalyzer.analyze(workDir)
@@ -192,6 +229,9 @@ export class TaskExecutor {
 
         // Validate User Context Safety (Guardrail)
         let safeUserContext = job.userContext
+        
+        logger.info(`[Debug] Job payload: custom_rule_model=${job.custom_rule_model}, config=${JSON.stringify(job.custom_rules_config)}`);
+
         if (safeUserContext && safeUserContext.description) {
             logger.info('Validating user context safety...')
             const guardrailResult = await this.llmClient.validateContextSafety(safeUserContext)
@@ -237,6 +277,7 @@ export class TaskExecutor {
         // --- CUSTOM RULES ENGINE ---
         let customRulesArgs: string[] = [];
         let customRulesStats: any = null;
+        let generatedRulesSummary: any[] = [];
 
         const customRulesEnabled = job.custom_rules || (job.custom_rules_config && job.custom_rules_config.enabled);
 
@@ -253,7 +294,26 @@ export class TaskExecutor {
             const customRuleGenerator = new CustomRuleGenerator();
             const generationResult = await customRuleGenerator.generateRules(tenantId, projectContext, qty, customRulesBase, modelConfig);
             const generatedRules = generationResult.rules;
+            const failedRules = generationResult.failed_rules || [];
             customRulesStats = generationResult.stats;
+            
+            generatedRulesSummary = [
+                ...generatedRules.map(r => ({
+                    id: r.id,
+                    name: r.description,
+                    target: r.cwe,
+                    language: r.language,
+                    status: 'created'
+                })),
+                ...failedRules.map(r => ({
+                    id: null,
+                    name: r.description,
+                    target: r.cwe,
+                    language: 'unknown',
+                    status: 'failed',
+                    error: r.reason
+                }))
+            ];
 
             if (generatedRules.length > 0) {
                 // Save to server
@@ -294,6 +354,23 @@ export class TaskExecutor {
         }
 
         const args = ['scan', '--json', '--quiet', '--config', rulesPath, '--no-git-ignore', ...extraRulesArgs, ...customRulesArgs, '--exclude', '__MACOSX/**', '--exclude', '**/._*', '--exclude', '**/.DS_Store', '--exclude', '.pre-commit-config.yaml', '--exclude', '.git', workDir]
+
+        // Metrics Calculation
+        let rulesExecutedCount = this.countRules(rulesPath);
+        if (customRulesEnabled && generatedRulesSummary.length > 0) {
+            rulesExecutedCount += generatedRulesSummary.length;
+        }
+        // Topology rules are in extraRulesArgs as '--config', 'path'
+        for (let i = 0; i < extraRulesArgs.length; i += 2) {
+             if (extraRulesArgs[i] === '--config') {
+                 try {
+                     const content = fs.readFileSync(extraRulesArgs[i+1], 'utf8');
+                     const matches = content.match(/-\s+id:/g);
+                     if (matches) rulesExecutedCount += matches.length;
+                 } catch (e) {}
+             }
+        }
+        logger.info(`Executing ${rulesExecutedCount} rules against ${filesScannedCount} files.`);
 
         const result = await ExternalToolManager.execute('semgrep', args, { timeout: 300000 })
         const finished = Date.now()
@@ -430,27 +507,33 @@ export class TaskExecutor {
                 const filePath = rawPath
 
                 const line = (it.start && it.start.line) || null
-                const codeSnippet = (it.extra && it.extra.lines) || null
+                let codeSnippet = (it.extra && it.extra.lines) || null
                 
                 // Enhanced Context Extraction (Monetized)
                 const enableDeepVision = job.features?.deep_code_vision === true;
                 let extendedContext = codeSnippet;
 
-                if (enableDeepVision) {
-                    try {
-                        const fullAbsPath = path.join(workDir, filePath);
-                        if (fs.existsSync(fullAbsPath) && fs.statSync(fullAbsPath).isFile()) {
-                            const content = fs.readFileSync(fullAbsPath, 'utf8');
-                            const lines = content.split('\n');
-                            
-                            if (line) {
+                try {
+                    const fullAbsPath = path.join(workDir, filePath);
+                    if (fs.existsSync(fullAbsPath) && fs.statSync(fullAbsPath).isFile()) {
+                        const content = fs.readFileSync(fullAbsPath, 'utf8');
+                        const lines = content.split('\n');
+                        
+                        if (line) {
+                            // 1. Standard Snippet (5 lines before/after) for UI Highlighting
+                            const lineIndex = line - 1;
+                            const snippetStart = Math.max(0, lineIndex - 5);
+                            const snippetEnd = Math.min(lines.length, lineIndex + 6); 
+                            codeSnippet = lines.slice(snippetStart, snippetEnd).join('\n');
+
+                            // 2. Deep Vision Context (Header + 15 lines before/after)
+                            if (enableDeepVision) {
                                 // a. Include first 20 lines (Header)
                                 const headerLines = lines.slice(0, 20);
                                 
                                 // b. Include 15 lines before and after
-                                const lineIndex = line - 1;
                                 const startContext = Math.max(0, lineIndex - 15);
-                                const endContext = Math.min(lines.length, lineIndex + 16); // +15 lines after (inclusive of line itself logic)
+                                const endContext = Math.min(lines.length, lineIndex + 16);
                                 
                                 const beforeLines = lines.slice(startContext, lineIndex);
                                 const targetLine = lines[lineIndex];
@@ -470,16 +553,17 @@ export class TaskExecutor {
                                     ${afterLines.join('\n')}
                                 `;
                             } else {
-                                // If no line number, take first 100 lines
-                                extendedContext = `File: ${filePath} (First 100 lines)\n---\n${lines.slice(0, 100).join('\n')}\n---`;
+                                extendedContext = codeSnippet;
                             }
+                        } else {
+                             // If no line number, take first 100 lines for extended context if Deep Vision
+                             if (enableDeepVision) {
+                                extendedContext = `File: ${filePath} (First 100 lines)\n---\n${lines.slice(0, 100).join('\n')}\n---`;
+                             }
                         }
-                    } catch (e) {
-                        // Ignore read errors, fallback to snippet
                     }
-                } else {
-                    // For non-premium users, context is just the snippet
-                    extendedContext = codeSnippet;
+                } catch (e) {
+                    // Ignore read errors, fallback to default snippets
                 }
 
                 // Generate stable fingerprint using relative path and content
@@ -495,7 +579,6 @@ export class TaskExecutor {
                 let analysis = null
                 // Analyze ALL findings regardless of severity
                 try {
-                    logger.info(`[Deep Vision Check] Enabled: ${enableDeepVision}. Context length: ${extendedContext?.length || codeSnippet?.length || 0}`);
                     analysis = await this.llmClient.analyzeFinding({
                         rule_id: ruleId,
                         rule_name: ruleName,
@@ -506,66 +589,11 @@ export class TaskExecutor {
                         autofix_suggestion: autofix
                     }, projectContext, safeUserContext)
 
-                    // --- AI DOUBLE CHECK (ENTERPRISE) ---
-                    const dcConfig = job.double_check_config
-                    let shouldDoubleCheck = false
-
-                    if (dcConfig && dcConfig.enabled) {
-                        const scope = (dcConfig.scope || 'all').toLowerCase()
-                        const s = sev.toLowerCase()
-                        
-                        if (scope === 'all') {
-                            shouldDoubleCheck = true
-                        } else if (scope === 'critical') {
-                            shouldDoubleCheck = (s === 'critical')
-                        } else if (scope === 'high') {
-                            shouldDoubleCheck = (s === 'critical' || s === 'high')
-                        } else if (scope === 'medium') {
-                            shouldDoubleCheck = (s === 'critical' || s === 'high' || s === 'medium')
-                        } else if (scope === 'low') {
-                            shouldDoubleCheck = (s === 'critical' || s === 'high' || s === 'medium' || s === 'low')
-                        }
-                    }
-
-                    if (shouldDoubleCheck) {
-                        try {
-                            const dcResult = await this.externalAIService.performDoubleCheck(
-                                {
-                                    rule_id: ruleId,
-                                    rule_name: ruleName,
-                                    file_path: filePath,
-                                    line: line,
-                                    code_snippet: extendedContext || codeSnippet, // Use extended context
-                                    severity: sev,
-                                    autofix_suggestion: autofix
-                                },
-                                projectContext,
-                                this.llmClient.buildPrompt({
-                                    rule_id: ruleId,
-                                    rule_name: ruleName,
-                                    file_path: filePath,
-                                    line: line,
-                                    code_snippet: extendedContext || codeSnippet, // Use extended context
-                                    severity: sev,
-                                    autofix_suggestion: autofix
-                                }, projectContext, safeUserContext),
-                                tenantId,
-                                job.double_check_config
-                            )
-                            console.log(`DEBUG: Double Check execution finished. Result: ${dcResult ? 'YES' : 'NO'}`)
-
-                            if (dcResult) {
-                                if (!analysis) analysis = {}
-                                // Attach double check result to analysis object
-                                ;(analysis as any).double_check = dcResult
-                            }
-                        } catch (dcErr) {
-                            console.error('DEBUG: Double Check Exception:', dcErr)
-                            logger.error(`Double Check failed for ${ruleId}`, dcErr)
-                        }
-                    } else {
-                        console.log('DEBUG: Skipping Double Check (criteria not met)')
-                    }
+                    /*
+                     * LEGACY DOUBLE CHECK: Deshabilitado para transición a modelo On-Demand.
+                     * El análisis ahora se solicita explicitamente por el usuario después del escaneo.
+                     * Se mantiene el código comentado por referencia hasta completar la migración total.
+                     */
 
                 } catch (err: any) {
                     logger.error(`Failed to analyze finding ${fingerprint}`, err)
@@ -574,8 +602,8 @@ export class TaskExecutor {
                     // for now we rely on the worker logs and the fact that analysis is null.
                 }
 
-                await dbQuery('INSERT INTO securetag.finding(tenant_id, task_id, source_tool, rule_id, rule_name, severity, category, cwe, cve, file_path, line, fingerprint, evidence_ref, created_at, analysis_json) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13, now(), $14)',
-                    [tenantId, taskId, 'semgrep', ruleId, ruleName, sev, 'code', cwe, cve, filePath, line, fingerprint, `${semgrepFile}#${i}`, analysis ? JSON.stringify(analysis) : null])
+                await dbQuery('INSERT INTO securetag.finding(tenant_id, task_id, source_tool, rule_id, rule_name, severity, category, cwe, cve, file_path, line, fingerprint, evidence_ref, created_at, analysis_json, code_snippet, context_snippet) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13, now(), $14, $15, $16)',
+                    [tenantId, taskId, 'semgrep', ruleId, ruleName, sev, 'code', cwe, cve, filePath, line, fingerprint, `${semgrepFile}#${i}`, analysis ? JSON.stringify(analysis) : null, codeSnippet || null, extendedContext || null])
                 findingsCount++
                 analysisProcessed++
             }
@@ -587,26 +615,156 @@ export class TaskExecutor {
         await this.workerClient.reportProgress(taskId, 95, 0)
 
         await dbQuery('INSERT INTO securetag.scan_result(tenant_id, task_id, summary_json, storage_path, created_at) VALUES($1,$2,$3,$4, now()) ON CONFLICT (task_id) DO UPDATE SET summary_json=EXCLUDED.summary_json, storage_path=EXCLUDED.storage_path',
-            [tenantId, taskId, JSON.stringify({ findingsCount, severity: summary, custom_rules: customRulesStats }), semgrepFile])
+            [tenantId, taskId, JSON.stringify({ findingsCount, files_scanned_count: filesScannedCount, rules_executed_count: rulesExecutedCount, severity: summary, custom_rules: { ...customRulesStats, generated_rules: generatedRulesSummary } }), semgrepFile])
 
         // Update task state to completed
+        await this.calculateEvolutionMetrics(taskId, tenantId)
         await updateTaskState(taskId, 'completed')
         
         // Final 100% update (Server will likely do this too when status=completed, but good to be explicit)
         await this.workerClient.reportProgress(taskId, 100, 0)
 
         return {
-            ok: result.exitCode === 0,
-            status: result.exitCode === 0 ? 'completed' : 'failed',
-            taskId,
-            tool: 'semgrep',
-            tenant,
-            durationMs: Date.now() - started,
-            stdout: result.stdout
+                ok: true,
+                status: 'completed',
+                taskId,
+                tenant,
+                results: semgrepFile,
+                summary,
+                files_scanned_count: filesScannedCount,
+                rules_executed_count: rulesExecutedCount,
+                custom_rules_stats: { ...customRulesStats, generated_rules: generatedRulesSummary },
+                durationMs: Date.now() - started
+            }
+    }
+
+    private async calculateEvolutionMetrics(taskId: string, tenantId: string) {
+        try {
+            // 1. Get task info (project_id, previous_task_id)
+            const tq = await dbQuery<any>('SELECT project_id, previous_task_id FROM securetag.task WHERE id=$1', [taskId]);
+            if (!tq.rows.length) return;
+            const task = tq.rows[0];
+
+            let previousTaskId = task.previous_task_id;
+
+            // If no explicit previous task, try to find the last completed one for the same project
+            if (!previousTaskId && task.project_id) {
+                const pq = await dbQuery<any>(
+                    'SELECT id FROM securetag.task WHERE project_id=$1 AND status=\'completed\' AND id!=$2 ORDER BY created_at DESC LIMIT 1',
+                    [task.project_id, taskId]
+                );
+                if (pq.rows.length) {
+                    previousTaskId = pq.rows[0].id;
+                    // Update the current task to link to this previous one (for future reference)
+                    await dbQuery('UPDATE securetag.task SET previous_task_id=$1 WHERE id=$2', [previousTaskId, taskId]);
+                }
+            }
+
+            if (!previousTaskId) return;
+
+            // 2. Fetch findings fingerprints
+            const currentQ = await dbQuery<any>('SELECT fingerprint, severity FROM securetag.finding WHERE task_id=$1', [taskId]);
+            const prevQ = await dbQuery<any>('SELECT fingerprint FROM securetag.finding WHERE task_id=$1', [previousTaskId]);
+
+            const currentMap = new Map<string, any>();
+            currentQ.rows.forEach((f: any) => {
+                 if(f.fingerprint) currentMap.set(f.fingerprint, f);
+            });
+            
+            const prevSet = new Set<string>();
+            prevQ.rows.forEach((f: any) => {
+                if(f.fingerprint) prevSet.add(f.fingerprint);
+            });
+
+            // 3. Calculate diffs
+            let newCount = 0;
+            let fixedCount = 0;
+            let recurringCount = 0;
+            let netRiskScore = 0;
+
+            // Check Current vs Previous
+            for (const [fp, f] of currentMap.entries()) {
+                if (prevSet.has(fp)) {
+                    recurringCount++;
+                } else {
+                    newCount++;
+                }
+                
+                // Calculate Risk Score (Simple weight)
+                let weight = 0;
+                const s = (f.severity || '').toUpperCase();
+                if (s === 'CRITICAL') weight = 100;
+                else if (s === 'HIGH') weight = 50;
+                else if (s === 'MEDIUM') weight = 20;
+                else if (s === 'LOW') weight = 5;
+                else weight = 1; // Info
+                netRiskScore += weight;
+            }
+
+            // Check Fixed (In Previous but not in Current)
+            for (const fp of prevSet) {
+                if (!currentMap.has(fp)) {
+                    fixedCount++;
+                }
+            }
+
+            // 4. Update Task
+            await dbQuery(
+                'UPDATE securetag.task SET new_findings_count=$1, fixed_findings_count=$2, recurring_findings_count=$3, net_risk_score=$4 WHERE id=$5',
+                [newCount, fixedCount, recurringCount, netRiskScore, taskId]
+            );
+            
+            logger.info(`Calculated evolution for task ${taskId}: New=${newCount}, Fixed=${fixedCount}, Recur=${recurringCount}, Risk=${netRiskScore}`);
+
+        } catch (e: any) {
+            logger.error(`Failed to calculate evolution metrics for task ${taskId}: ${e.message}`);
         }
     }
 
 
+
+    private countFiles(dir: string): number {
+        let count = 0;
+        try {
+            const files = fs.readdirSync(dir, { withFileTypes: true });
+            for (const file of files) {
+                if (file.isDirectory()) {
+                    if (file.name !== '.git' && file.name !== 'node_modules' && file.name !== '__MACOSX') {
+                        count += this.countFiles(path.join(dir, file.name));
+                    }
+                } else {
+                    count++;
+                }
+            }
+        } catch (e) {
+            // Ignore errors
+        }
+        return count;
+    }
+
+    private countRules(dir: string): number {
+        let count = 0;
+        try {
+            if (!fs.existsSync(dir)) return 0;
+            const files = fs.readdirSync(dir, { withFileTypes: true });
+            for (const file of files) {
+                if (file.isDirectory()) {
+                    count += this.countRules(path.join(dir, file.name));
+                } else if (file.name.endsWith('.yaml') || file.name.endsWith('.yml')) {
+                    try {
+                        const content = fs.readFileSync(path.join(dir, file.name), 'utf8');
+                        const matches = content.match(/-\s+id:/g);
+                        if (matches) count += matches.length;
+                    } catch (readErr) {
+                        // Ignore file read error
+                    }
+                }
+            }
+        } catch (e) {
+            // Ignore dir read error
+        }
+        return count;
+    }
 
     private async ensureTaskExists(taskId: string, tenantId: string, type: string, job: any) {
         const exists = await dbQuery('SELECT 1 FROM securetag.task WHERE id=$1 LIMIT 1', [taskId])

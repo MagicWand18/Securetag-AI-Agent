@@ -4,7 +4,7 @@ ENV PATH=/opt/securetag/bin:/opt/securetag/venv/bin:$PATH
 
 # Install Python for semgrep and basic utils (git, unzip, etc. are needed for some operations)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 python3-venv git ca-certificates curl unzip \
+    python3 python3-venv python3-dev build-essential git ca-certificates curl unzip \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /opt/securetag/bin /opt/securetag/venv /opt/securetag/rules /var/securetag/default/home /var/securetag/default/config /var/securetag/default/cache
@@ -28,7 +28,7 @@ ENV XDG_CONFIG_HOME=/var/securetag/${TENANT_ID}/config
 ENV XDG_CACHE_HOME=/var/securetag/${TENANT_ID}/cache
 ENV QUEUE_DIR=/var/securetag/${TENANT_ID}/queue/tasks
 ENV RESULTS_DIR=/var/securetag/${TENANT_ID}/results
-ENV APP_HOST=securetag-app
+ENV APP_HOST=core-api
 ENV APP_PORT=8080
 
 # Security: Run as non-root user

@@ -181,6 +181,113 @@ export function codeauditLatest(req: http.IncomingMessage, res: http.ServerRespo
   return true
 }
 
+export async function codeauditDiff(req: http.IncomingMessage, res: http.ServerResponse): Promise<boolean> {
+  const method = req.method || 'GET'
+  const url = req.url || '/'
+  if (!(method === 'GET' && url.startsWith('/codeaudit/diff'))) return false
+
+  // Parse query params
+  const q = url.split('?')[1] || ''
+  const params = new URLSearchParams(q)
+  const fromId = params.get('from')
+  const toId = params.get('to')
+
+  if (!fromId || !toId) {
+    send(res, 400, { ok: false, error: 'Missing parameters: from, to' })
+    return true
+  }
+
+  // Determine Tenant ID
+  let tenantId = ''
+  if (req.headers['x-api-key'] || req.headers['x-securetag-system-secret']) {
+    const authReq = req as AuthenticatedRequest
+    const isAuthenticated = await authenticate(authReq, res)
+    if (!isAuthenticated) return true 
+    tenantId = authReq.tenantId!
+  } else {
+    const tenant = process.env.TENANT_ID || 'default'
+    try {
+      tenantId = await ensureTenant(tenant)
+    } catch (e) {
+      console.error('ensureTenant failed:', e)
+    }
+  }
+
+  if (!tenantId) {
+     send(res, 500, { ok: false, error: 'Tenant identification failed' })
+     return true
+  }
+
+  try {
+    // Verify tasks exist and belong to tenant
+    const tasksQ = await dbQuery<any>('SELECT id, created_at FROM securetag.task WHERE id IN ($1, $2) AND tenant_id=$3', [fromId, toId, tenantId])
+    if (tasksQ.rows.length !== 2) {
+       send(res, 404, { ok: false, error: 'One or both tasks not found or access denied' })
+       return true
+    }
+
+    // Fetch findings for FROM
+    const fromFindings = await dbQuery<any>('SELECT id, fingerprint, severity FROM securetag.finding WHERE task_id=$1', [fromId])
+    
+    // Fetch findings for TO
+    const toFindings = await dbQuery<any>('SELECT id, fingerprint, severity, rule_name, file_path, line FROM securetag.finding WHERE task_id=$1', [toId])
+
+    const fromMap = new Map<string, any>()
+    fromFindings.rows.forEach((f: any) => {
+        if (f.fingerprint) fromMap.set(f.fingerprint, f)
+    })
+
+    const toMap = new Map<string, any>()
+    toFindings.rows.forEach((f: any) => {
+        if (f.fingerprint) toMap.set(f.fingerprint, f)
+    })
+
+    const newFindings: any[] = []
+    const fixedFindings: any[] = []
+    const persistentFindings: any[] = []
+
+    // Detect NEW and PERSISTENT
+    toFindings.rows.forEach((f: any) => {
+        if (f.fingerprint && fromMap.has(f.fingerprint)) {
+            persistentFindings.push(f.id)
+        } else {
+            newFindings.push(f)
+        }
+    })
+
+    // Detect FIXED (in FROM but not in TO)
+    fromFindings.rows.forEach((f: any) => {
+        if (f.fingerprint && !toMap.has(f.fingerprint)) {
+            fixedFindings.push(f.id)
+        }
+    })
+
+    send(res, 200, {
+        ok: true,
+        diff: {
+            new_count: newFindings.length,
+            fixed_count: fixedFindings.length,
+            persistent_count: persistentFindings.length,
+            new_findings: newFindings.map(f => ({
+                id: f.id,
+                severity: f.severity,
+                rule_name: f.rule_name,
+                file_path: f.file_path, // Could clean this path if needed
+                line: f.line
+            })),
+            fixed_ids: fixedFindings,
+            persistent_ids: persistentFindings
+        }
+    })
+
+  } catch (e) {
+    console.error('Error calculating diff:', e)
+    send(res, 500, { ok: false, error: 'Internal Server Error' })
+  }
+
+  return true
+}
+
 export async function codeauditDetail(req: http.IncomingMessage, res: http.ServerResponse): Promise<boolean> {
   const method = req.method || 'GET'
   const url = req.url || '/'
@@ -193,11 +300,9 @@ export async function codeauditDetail(req: http.IncomingMessage, res: http.Serve
   // Determine Tenant ID
   let tenantId = ''
   // 1. Try authentication via header (if provided)
-  if (req.headers['x-api-key']) {
+  if (req.headers['x-api-key'] || req.headers['x-securetag-system-secret']) {
     const authReq = req as AuthenticatedRequest
     // authenticate writes 401 to res if fails, so we need to be careful.
-    // But here we want to allow fallback if auth fails? No, if key provided but invalid -> 401.
-    // If no key -> fallback to default tenant.
     const isAuthenticated = await authenticate(authReq, res)
     if (!isAuthenticated) return true // Response already sent
     tenantId = authReq.tenantId!
@@ -220,7 +325,7 @@ export async function codeauditDetail(req: http.IncomingMessage, res: http.Serve
 
   let dbTask: any = null
   try {
-    const tq = await dbQuery<any>('SELECT id, status, started_at, finished_at, progress_percent, eta_seconds FROM securetag.task WHERE id=$1 AND tenant_id=$2 AND type=$3 LIMIT 1', [id, tenantId, 'codeaudit'])
+    const tq = await dbQuery<any>('SELECT t.id, t.status, t.started_at, t.finished_at, t.progress_percent, t.eta_seconds, t.custom_rules_config, p.alias as project_alias, p.name as project_name FROM securetag.task t LEFT JOIN securetag.project p ON t.project_id = p.id WHERE t.id=$1 AND t.tenant_id=$2 AND t.type=$3 LIMIT 1', [id, tenantId, 'codeaudit'])
     dbTask = tq.rows.length ? tq.rows[0] : null
   } catch (e) { 
     console.error('Error fetching task:', e)
@@ -236,9 +341,19 @@ export async function codeauditDetail(req: http.IncomingMessage, res: http.Serve
           summary = sr.rows.length ? (sr.rows[0].summary_json || {}) : {}
         } catch { }
         try {
-          const f = await dbQuery<any>('SELECT rule_id, rule_name, severity, cwe, cve, file_path, line, fingerprint, analysis_json FROM securetag.finding WHERE task_id=$1 ORDER BY created_at DESC', [id])
+          console.log('[DEBUG] Executing findings query for taskId:', id);
+          const f = await dbQuery<any>('SELECT id, rule_id, rule_name, severity, cwe, cve, file_path, line, fingerprint, analysis_json, code_snippet FROM securetag.finding WHERE task_id=$1 ORDER BY created_at DESC', [id])
           findings = f.rows
-        } catch { }
+          console.log('[DEBUG] Findings retrieved:', findings.length);
+          if (findings.length > 0) {
+             console.log('[DEBUG] First finding sample (snippet length):', findings[0].code_snippet ? findings[0].code_snippet.length : 'null');
+             if (findings[0].code_snippet) {
+               console.log('[DEBUG] First finding snippet last 20 chars:', JSON.stringify(findings[0].code_snippet.slice(-20)));
+             }
+          }
+        } catch (err) { 
+          console.error('[DEBUG] Error fetching findings:', err);
+        }
 
         // Logic for Retest Diffing
         try {
@@ -298,13 +413,15 @@ export async function codeauditDetail(req: http.IncomingMessage, res: http.Serve
             }
 
             return {
+                id: f.id,
                 rule_name: f.rule_name,
                 severity: f.severity,
                 cwe: f.cwe,
                 cve: f.cve,
                 file_path: cleanPath,
                 line: f.line,
-                analysis_json: f.analysis_json,
+                analysis_json: f.analysis_json || {},
+                code_snippet: f.code_snippet,
                 retest_status: f.retest_status,
                 double_check: f.analysis_json?.double_check
             }
@@ -314,7 +431,18 @@ export async function codeauditDetail(req: http.IncomingMessage, res: http.Serve
           ok: true, 
           status: dbTask.status, 
           taskId: id, 
-          result: { summary, findings: sanitizedFindings, diff }, 
+          projectAlias: dbTask.project_alias,
+          projectName: dbTask.project_name,
+          result: { 
+            summary, 
+            findings: sanitizedFindings, 
+            diff,
+            // Include custom rules data if available in summary_json or config
+            custom_rules: (summary?.custom_rules || dbTask.custom_rules_config) ? {
+               ...dbTask.custom_rules_config,
+               ...summary?.custom_rules
+            } : null
+          }, 
           progress: `${dbTask.progress_percent || 0}%`, 
           eta: dbTask.eta_seconds !== null ? `${dbTask.eta_seconds}s` : null
         })
@@ -324,6 +452,8 @@ export async function codeauditDetail(req: http.IncomingMessage, res: http.Serve
         ok: true, 
         status: dbTask.status, 
         taskId: id, 
+        projectAlias: dbTask.project_alias,
+        projectName: dbTask.project_name,
         progress: `${dbTask.progress_percent || 0}%`, 
         eta: dbTask.eta_seconds !== null ? `${dbTask.eta_seconds}s` : null
       })

@@ -36,8 +36,15 @@ export interface GenerationStats {
     model: string;
 }
 
+export interface FailedRule {
+    cwe: string;
+    description: string;
+    reason?: string;
+}
+
 export interface GenerationResult {
     rules: GeneratedRule[];
+    failed_rules: FailedRule[];
     stats: GenerationStats;
 }
 
@@ -82,10 +89,11 @@ export class CustomRuleGenerator {
         const provider = this.getProvider(modelConfig);
         if (!provider) {
             logger.error(`No AI provider available for CustomRuleGenerator (model: ${modelConfig})`);
-            return { rules: [], stats: { attempts: 0, successes: 0, failures: 0, total_cost: 0, model: modelConfig } };
+            return { rules: [], failed_rules: [], stats: { attempts: 0, successes: 0, failures: 0, total_cost: 0, model: modelConfig } };
         }
 
         const validRules: GeneratedRule[] = [];
+        const failedRules: FailedRule[] = [];
         const stats: GenerationStats = {
             attempts: 0,
             successes: 0,
@@ -113,39 +121,63 @@ export class CustomRuleGenerator {
         for (let i = 0; i < targets.length; i++) {
             const target = targets[i];
             
-            // 1. Processing Fee (1 credit)
-            stats.attempts++;
-            const feePaid = await this.creditsManager.deductCredits(tenantId, 1, 'Custom Rule Generation Attempt');
-            if (!feePaid) {
-                logger.warn(`Stopped rule generation for tenant ${tenantId}: Insufficient credits.`);
-                stats.failures++; // Count as failure to proceed
-                break;
-            }
-            stats.total_cost += 1;
+            // 1. Processing Fee (1 credit) - REMOVED
+            // We now charge upfront in the Server (Task Creation) to simplify the economy.
+            // stats.attempts++;
+            // const feePaid = await this.creditsManager.deductCredits(tenantId, 1, 'Custom Rule Generation Attempt');
+            // if (!feePaid) {
+            //     logger.warn(`Stopped rule generation for tenant ${tenantId}: Insufficient credits.`);
+            //     stats.failures++; // Count as failure to proceed
+            //     break;
+            // }
+            // stats.total_cost += 1;
+            stats.attempts++; // Still count attempts for stats
 
             try {
                 // 2. Generate Rule Flow (Code -> Rule -> Validate)
                 const rule = await this.generateRuleForTarget(provider, context, tempDir, target, i);
                 
                 if (rule) {
-                    // 3. Success Fee
-                    const successPaid = await this.creditsManager.deductCredits(tenantId, successFee, 'Custom Rule Success Fee');
+                    // 3. Success Fee - REMOVED
+                    // We now charge upfront in the Server (Task Creation)
+                    // const successPaid = await this.creditsManager.deductCredits(tenantId, successFee, 'Custom Rule Success Fee');
                     
+                    // Always treat as paid/allowed if we got here
+                    const successPaid = true;
+
                     if (successPaid) {
                         validRules.push(rule);
                         stats.successes++;
-                        stats.total_cost += successFee;
+                        // stats.total_cost += successFee; // Don't track cost here anymore, or track as 'virtual' cost
                         logger.info(`Rule generated and validated successfully: ${rule.cwe}`);
                     } else {
+                        // Unreachable now
                         logger.warn(`Rule generated but user ran out of credits for Success Fee. Discarding.`);
                         stats.failures++;
+                        failedRules.push({ cwe: target.cwe, description: target.description, reason: 'Insufficient credits for success fee' });
                     }
                 } else {
                     stats.failures++;
+                    failedRules.push({ cwe: target.cwe, description: target.description, reason: 'Generation or validation failed' });
                 }
-            } catch (err) {
+            } catch (err: any) {
                 logger.error(`Error generating rule for ${target.cwe}:`, err);
                 stats.failures++;
+                failedRules.push({ cwe: target.cwe, description: target.description, reason: err.message || 'Unknown error' });
+            }
+        }
+
+        // Refund Logic for Unused Success Fees
+        // Since we charged upfront for POTENTIAL success of ALL rules, we must refund for any rule that failed to generate.
+        // successFee is already defined above (lines 103-105)
+        
+        const failedOrSkipped = qty - stats.successes;
+        
+        if (failedOrSkipped > 0) {
+            const refundAmount = failedOrSkipped * successFee;
+            if (refundAmount > 0) {
+                logger.info(`Refunding ${refundAmount} credits to tenant ${tenantId} for ${failedOrSkipped} failed/skipped rules.`);
+                await this.creditsManager.refundCredits(tenantId, refundAmount, `Refund for ${failedOrSkipped} failed custom rules`);
             }
         }
 
@@ -154,7 +186,7 @@ export class CustomRuleGenerator {
             fs.rmSync(tempDir, { recursive: true, force: true });
         } catch (e) {}
 
-        return { rules: validRules, stats };
+        return { rules: validRules, failed_rules: failedRules, stats };
     }
 
     private async getExistingRulesHint(languages: string[]): Promise<string> {

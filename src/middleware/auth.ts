@@ -26,6 +26,51 @@ export async function authenticate(
     req: AuthenticatedRequest,
     res: http.ServerResponse
 ): Promise<boolean> {
+    // 1. Check for System Secret (Internal Microservice / Wasp Backend)
+    const systemSecret = req.headers['x-securetag-system-secret'] as string
+    const impersonateUserId = req.headers['x-securetag-user-id'] as string
+
+    if (systemSecret && systemSecret === process.env.SECURETAG_SYSTEM_SECRET) {
+        if (!impersonateUserId) {
+             res.statusCode = 400
+             res.setHeader('Content-Type', 'application/json')
+             res.end(JSON.stringify({ ok: false, error: 'Missing X-SecureTag-User-Id for system call' }))
+             return false
+        }
+
+        // Fetch user details to populate context
+        try {
+            const userResult = await dbQuery<any>(
+                `SELECT u.id, u.tenant_id, u.role, t.name as tenant_name
+                 FROM securetag.app_user u
+                 JOIN securetag.tenant t ON u.tenant_id = t.id
+                 WHERE u.id = $1`,
+                [impersonateUserId]
+            )
+
+            if (userResult.rows.length === 0) {
+                 res.statusCode = 404
+                 res.setHeader('Content-Type', 'application/json')
+                 res.end(JSON.stringify({ ok: false, error: 'Impersonated user not found' }))
+                 return false
+            }
+
+            const user = userResult.rows[0]
+            req.userId = user.id
+            req.tenantId = user.tenant_id
+            req.userRole = user.role
+            req.tenantName = user.tenant_name
+            return true
+
+        } catch (error) {
+            console.error('System Auth Error:', error)
+            res.statusCode = 500
+            res.end(JSON.stringify({ ok: false, error: 'System Auth Failed' }))
+            return false
+        }
+    }
+
+    // 2. Standard API Key Auth
     const apiKey = req.headers['x-api-key'] as string
 
     if (!apiKey) {

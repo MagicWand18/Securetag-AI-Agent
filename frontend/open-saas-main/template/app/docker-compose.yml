@@ -1,0 +1,82 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    platform: linux/amd64
+    container_name: frontend-app
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    environment:
+      - WASP_TELEMETRY_DISABLE=1
+      - BROWSER=none
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/opensaas_dev
+      - WASP_WEB_CLIENT_URL=http://localhost:3000
+      - WASP_SERVER_URL=http://localhost:3001
+      - JWT_SECRET=securetag_dev_secret_123
+      # OpenAI Mock (prevent crash if not set)
+      - OPENAI_API_KEY=sk-mock-key
+      - STRIPE_KEY=mock-stripe-key
+      - STRIPE_API_KEY=mock-stripe-key
+      - STRIPE_WEBHOOK_SECRET=mock-secret
+      - POLAR_ORGANIZATION_ACCESS_TOKEN=mock-polar-token
+      - POLAR_SANDBOX_MODE=true
+      - LEMONSQUEEZY_API_KEY=mock-ls-key
+      - LEMONSQUEEZY_STORE_ID=mock-ls-store
+      - LEMONSQUEEZY_WEBHOOK_SECRET=mock-ls-secret
+      - AWS_S3_REGION=us-east-1
+      - AWS_S3_IAM_ACCESS_KEY=mock-access-key
+      - AWS_S3_IAM_SECRET_KEY=mock-secret-key
+      - AWS_S3_FILES_BUCKET=mock-bucket
+      - GOOGLE_ANALYTICS_CLIENT_EMAIL=mock@email.com
+      - GOOGLE_ANALYTICS_PRIVATE_KEY=bW9ja2tleQ==
+      - GOOGLE_ANALYTICS_PROPERTY_ID=123456
+      - PLAUSIBLE_API_KEY=mock-plausible-key
+      - PLAUSIBLE_SITE_ID=mock-site-id
+      - PLAUSIBLE_BASE_URL=http://mock-plausible.com
+      - ADMIN_EMAILS=admin@example.com
+      - SECURETAG_API_URL=http://core-gateway:80
+      - SECURETAG_API_HOST=api.securetag.com.mx
+      - SECURETAG_SYSTEM_SECRET=s3cur3t4g-syst3m-s3cr3t-2025
+    depends_on:
+      - db
+    networks:
+      - default
+      - core-net
+    volumes:
+      - .:/app
+      - /app/.wasp
+      - /app/node_modules
+    # Ensure DB is ready, then migrate, then start
+    command: >
+      bash -c "
+      echo 'Waiting for DB...' &&
+      until pg_isready -h db -U postgres; do sleep 1; done &&
+      echo 'DB Ready. Running migrations...' &&
+      wasp db migrate-dev --name init &&
+      echo 'Starting Wasp...' &&
+      wasp start
+      "
+
+  db:
+    image: postgres:15
+    container_name: frontend-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: opensaas_dev
+    ports:
+      - "5433:5432"
+    volumes:
+      - securetag_pgdata:/var/lib/postgresql/data
+    networks:
+      - default
+      - core-net
+
+volumes:
+  securetag_pgdata:
+
+networks:
+  core-net:
+    external: true

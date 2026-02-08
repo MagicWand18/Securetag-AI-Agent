@@ -88,12 +88,12 @@ Funcionalidades potenciadas por IA que requieren el uso de **Security Credits**.
 ### 4.1 AI Double Check ("Segunda Opinión")
 *Disponible para todos los planes (Free, Premium, Enterprise)*
 
-Somete los hallazgos críticos a un panel de IAs externas de clase mundial para una validación adicional.
+Funcionalidad **On-Demand** que permite seleccionar hallazgos específicos para una validación profunda mediante IA. A diferencia del escaneo automático, esta función se ejecuta a petición del usuario sobre hallazgos individuales *después* del escaneo inicial, permitiendo optimizar costos verificando solo lo que realmente importa.
 
-**Costos (Créditos por hallazgo):**
-*   **Standard (1 crédito)**: Modelos de alta eficiencia. Ideal para CI/CD.
-*   **Pro (2 créditos)**: Razonamiento avanzado. Ideal para auditorías.
-*   **Max (3 créditos)**: Razonamiento SOTA (State-of-the-Art). Ideal para infraestructura crítica.
+**Costos (Créditos por hallazgo verificado):**
+*   **Standard (1 crédito)**: Modelos de alta eficiencia. Ideal para descartar falsos positivos evidentes.
+*   **Pro (2 créditos)**: Razonamiento avanzado. Ideal para auditorías de seguridad y cumplimiento.
+*   **Max (3 créditos)**: Razonamiento SOTA (State-of-the-Art). Análisis profundo para infraestructura crítica.
 
 ### 4.2 Generative Custom Rules
 *Disponible para planes Premium y Enterprise*
@@ -131,8 +131,8 @@ Envía un archivo ZIP para iniciar una auditoría.
 | `file` | Binary | **Sí** | Archivo ZIP con el código fuente. | Archivo `.zip` válido | - |
 | `project_alias` | String | No | Identificador legible del proyecto. | Alfanumérico, guiones, guion bajo (3-50 caracteres). Ej: `backend-core` | - |
 | `profile` | String | No | Perfil de escaneo. | `auto` | `auto` |
-| `double_check` | String | No | Activa la "Segunda Opinión" con IA externa. | `critical`, `high`, `medium`, `low`, `all`, `false` | `false` |
-| `double_check_level` | String | No | Profundidad y costo del análisis Double Check. | `standard` (1 cr), `pro` (2 cr), `max` (3 cr) | `standard` |
+| `double_check` | String | No | **[DEPRECADO]** Utilice el endpoint `/findings/double-check` tras el escaneo. | - | `false` |
+| `double_check_level` | String | No | **[DEPRECADO]** Utilice el parámetro `model` en la verificación on-demand. | - | `standard` |
 | `custom_rules` | Boolean | No | Activa la generación de reglas personalizadas. | `true`, `false` | `false` |
 | `custom_rules_qty` | Integer | No | Cantidad de reglas a intentar generar. | 1 - 10 | 3 |
 | `custom_rule_model` | String | No | Modelo de IA para generación de reglas. | `standard`, `pro` (Premium/Ent), `max` (Ent) | `standard` |
@@ -263,9 +263,36 @@ El reporte JSON incluye un arreglo de `findings`. El campo más importante es `a
 
 ---
 
-## 7. Soporte
+## 7. Licenciamiento y Modelo de Créditos
+
+SecureTag AI opera bajo un modelo de "Pago por Valor" basado en créditos, diseñado para ser justo tanto para startups como para grandes corporativos.
+
+### 7.1 Valor del Crédito
+*   **1 Crédito = $2.00 USD**
+*   Los créditos pueden adquirirse bajo demanda o mediante suscripciones mensuales con descuento.
+
+### 7.2 Costo por Escaneo (Audit-as-a-Service)
+El costo de cada auditoría se calcula en función del tamaño del código base (`Lines of Code` - LOC), asegurando que solo pague por los recursos computacionales y de IA que consume.
+
+| Tamaño del Proyecto (LOC) | Clasificación | Costo (Créditos) | Costo Equivalente |
+| :--- | :--- | :--- | :--- |
+| **< 10,000** | Micro / Startup | **5 Créditos** | $10 USD |
+| **10,000 - 500,000** | Standard | **15 Créditos** | $30 USD |
+| **500,000 - 2,000,000** | High Performance | **40 Créditos** | $80 USD |
+| **> 2,000,000** | Massive / Gov | **Custom Quote** | Consultar Ventas |
+
+### 7.3 Planes de Suscripción (Recurrencia)
+Suscripciones mensuales diseñadas para equipos con necesidades de auditoría continua.
+
+*   **Free**: 10 Créditos/mes (Gratis). Ideal para probar la plataforma.
+*   **Premium**: 60 Créditos/mes ($99 USD/mes). Ahorro significativo para freelancers y agencias.
+*   **Enterprise**: 300 Créditos/mes ($499 USD/mes). Capacidad industrial para fábricas de software.
+
+---
+
+## 8. Soporte
 
 Para asistencia técnica, dudas sobre integración o reporte de incidentes, contacte a su administrador de cuenta SecureTag o al equipo de soporte técnico.
 
 ---
-*Documento generado el: 2025-12-23*
+*Documento generado el: 2026-01-01*

@@ -1,0 +1,4 @@
+node_modules
+.wasp
+.git
+.DS_Store

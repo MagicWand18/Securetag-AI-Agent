@@ -10,7 +10,7 @@ echo "🧪 Starting Docker Integration Tests - Full Cross-File Coverage"
 
 # 1. Setup Database
 echo "📋 Setting up Database..."
-docker exec securetag-db psql -U securetag -d securetag -c "
+docker exec core-db psql -U securetag -d securetag -c "
 UPDATE securetag.tenant SET plan = 'Premium' WHERE id = 'tenant_premium';
 DELETE FROM securetag.api_key WHERE key_hash = '$PREMIUM_HASH';
 INSERT INTO securetag.api_key (tenant_id, key_hash, name, is_active) VALUES 
@@ -25,7 +25,7 @@ run_test() {
     ALIAS=$4
 
     echo "---------------------------------------------------"
-    echo "� Testing $LANG (Fixture: $DIR)"
+    echo "🧪 Testing $LANG (Fixture: $DIR)"
     
     if [ ! -d "$DIR" ]; then
         echo "❌ Error: $DIR not found!"
@@ -39,7 +39,7 @@ run_test() {
     cd ../../..
 
     # Upload
-    echo "� Uploading to API..."
+    echo "🚀 Uploading to API..."
     RESPONSE=$(curl -s -X POST "$API_URL/codeaudit/upload" \
       -H "X-API-Key: $PREMIUM_KEY" \
       -F "file=@$ZIP_NAME" \
@@ -59,7 +59,7 @@ run_test() {
     
     # Check Logs
     echo "👀 Checking Logs for Vulnerabilities..."
-    LOGS=$(docker logs securetag-worker --since 2m)
+    LOGS=$(docker logs core-worker --since 2m)
     
     # Debug: Print extraction count
     echo "$LOGS" | grep "Extracted" || echo "⚠️ No extraction logs found"

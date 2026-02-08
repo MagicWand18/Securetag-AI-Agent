@@ -19,7 +19,7 @@ warn() { echo -e "${YELLOW}[WARN]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*" >&2; exit 1; }
 
 # Configuración
-DB_CONTAINER="${DB_CONTAINER:-securetag-db}"
+DB_CONTAINER="${DB_CONTAINER:-core-db}"
 DB_USER="${POSTGRES_USER:-securetag}"
 DB_NAME="${POSTGRES_DB:-securetag}"
 
@@ -46,7 +46,7 @@ info "Verificando estado de PostgreSQL..."
 
 # Verificar que el contenedor está corriendo
 if ! docker ps | grep -q "$DB_CONTAINER"; then
-    error "Contenedor $DB_CONTAINER no está corriendo. Ejecuta: docker compose up -d securetag-db"
+    error "Contenedor $DB_CONTAINER no está corriendo. Ejecuta: docker compose up -d core-db"
 fi
 
 # Esperar a que PostgreSQL esté listo
@@ -62,7 +62,7 @@ for i in {1..30}; do
     sleep 1
 done
 
-info "Nota: Las migraciones de esquema (tablas) son aplicadas automáticamente por el servicio 'securetag-migrate' al iniciar."
+info "Nota: Las migraciones de esquema (tablas) son aplicadas automáticamente por el servicio 'core-migrate' al iniciar."
 
 # Auto-insertar/actualizar WORKER_API_KEY si existe en el entorno
 if [ -n "${WORKER_API_KEY:-}" ]; then

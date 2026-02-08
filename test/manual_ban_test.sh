@@ -2,7 +2,7 @@
 
 # Configuration
 API_URL="http://localhost:8080"
-DB_CONTAINER="securetag-db"
+DB_CONTAINER="core-db"
 
 # Colors
 GREEN='\033[0;32m'

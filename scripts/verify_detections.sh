@@ -3,7 +3,7 @@ echo "🔍 Verifying Cross-File Detections in Docker Logs..."
 echo "---------------------------------------------------"
 
 # Get unique cross-file findings
-FINDINGS=$(docker logs securetag-worker --since 20m | grep "analyzeFinding called for cross-file-" | sort | uniq)
+FINDINGS=$(docker logs core-worker --since 20m | grep "analyzeFinding called for cross-file-" | sort | uniq)
 
 if [ -z "$FINDINGS" ]; then
     echo "❌ No cross-file vulnerabilities detected in the last 20 minutes."

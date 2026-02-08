@@ -41,4 +41,27 @@ export class CreditsManager {
             return false;
         }
     }
+
+    async refundCredits(tenantId: string, amount: number, description: string): Promise<boolean> {
+        try {
+            const res = await dbQuery(
+                `UPDATE securetag.tenant 
+                 SET credits_balance = credits_balance + $2 
+                 WHERE id = $1
+                 RETURNING credits_balance`,
+                [tenantId, amount]
+            );
+
+            if (res.rowCount === 0) {
+                logger.warn(`Failed to refund ${amount} credits to tenant ${tenantId}: Tenant not found.`);
+                return false;
+            }
+
+            logger.info(`Refunded ${amount} credits to tenant ${tenantId} for ${description}. New balance: ${res.rows[0].credits_balance}`);
+            return true;
+        } catch (error) {
+            logger.error(`Error refunding credits to tenant ${tenantId}`, error);
+            return false;
+        }
+    }
 }

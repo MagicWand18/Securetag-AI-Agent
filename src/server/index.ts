@@ -3,7 +3,12 @@ import http from 'http'
 import { v4 as uuidv4 } from 'uuid'
 import fs from 'fs'
 import path from 'path'
-import { codeauditIndex, codeauditLatest, codeauditDetail } from './routes/codeaudit.js'
+import { codeauditIndex, codeauditLatest, codeauditDetail, codeauditDiff } from './routes/codeaudit.js'
+import { handleFindingRoutes } from './routes/findings.js'
+import { getDashboardStats } from './routes/dashboard.js'
+import { handleTenantRoutes } from './routes/tenant.js'
+import { handleAuthSyncRoutes } from './routes/auth-sync.js'
+import { reportsHandler } from './routes/reports.js'
 import { serveDocs } from './routes/docs.js'
 import { dbQuery, ensureTenant } from '../utils/db.js'
 import validator from 'validator'
@@ -73,6 +78,28 @@ const server = http.createServer(async (req, res) => {
       return send(res, 503, { ok: false, db: 'disconnected', error: 'Database connection failed' })
     }
   }
+
+  // Dashboard Stats Endpoint
+  if (await getDashboardStats(req, res)) return
+
+  // Tenant Management Routes
+  if (await handleTenantRoutes(req, res)) return
+
+  // Findings Operations Routes
+  if (await handleFindingRoutes(req, res)) return
+
+  // Report Generation Routes (New Phase 2.1)
+  if (await reportsHandler(req, res)) return
+
+  // Code Audit Routes
+  if (codeauditIndex(req, res)) return
+  if (codeauditLatest(req, res)) return
+  if (await codeauditDiff(req, res)) return
+  if (await codeauditDetail(req, res)) return
+
+  // Auth Sync Routes (Frontend <-> Backend)
+  if (await handleAuthSyncRoutes(req, res)) return
+
   if (method === 'POST' && url === '/scans/web') {
     // Authenticate request
     const authReq = req as AuthenticatedRequest
@@ -150,7 +177,9 @@ const server = http.createServer(async (req, res) => {
     const tenantId = authReq.tenantId!
     const uploads = process.env.UPLOADS_DIR || `/var/securetag/${authReq.tenantName}/uploads`
     const work = process.env.WORK_DIR || `/var/securetag/${authReq.tenantName}/work`
+    // Parse Multipart manually (busboy/multer would be better but keeping it raw for now)
     const ct = req.headers['content-type'] || ''
+    console.log(`[DEBUG] Content-Type: ${ct}`)
     if (!ct.includes('multipart/form-data')) return send(res, 400, { ok: false })
     const boundary = ct.split('boundary=')[1]
     if (!boundary) return send(res, 400, { ok: false })
@@ -284,7 +313,11 @@ const server = http.createServer(async (req, res) => {
         }
         if (!fileData) return send(res, 400, { ok: false })
 
-        // 0. Validate Metadata (Zod Security Check)
+        // 0. Validate Metadata (Zod Security Check) & Calculate Costs
+        const BASE_COST = 5;
+        let totalCost = BASE_COST;
+        let costDetails: any = { base: BASE_COST };
+
         // Check Credit Balance for Double Check
         if (doubleCheck) {
             const levelCosts: Record<string, number> = { 'standard': 1, 'pro': 2, 'max': 3 }
@@ -296,17 +329,8 @@ const server = http.createServer(async (req, res) => {
                  return send(res, 400, { ok: false, error: `Invalid double_check_level: ${levelCheck.error.issues[0].message}` })
             }
             
-            // Validate double_check value (critical, high, all, true)
-            // If true/1, default to 'all' or handled by logic? Let's normalize.
-            // MASTER INSTRUCTIONS say: enum: critical, high, all.
-            // If user sends 'true', we treat as 'all'? Or reject? Let's be permissive and map true -> all for backward compat if needed,
-            // or strictly follow schema. Zod schema allows true/false/critical...
-            
-            // Check DB Balance from tenantConfig
-            const balance = tenantConfig.credits_balance || 0;
-            if (balance < cost) {
-                return send(res, 402, { ok: false, error: `Insufficient credits. Required: ${cost}, Available: ${balance}. Please upgrade or disable double_check.` });
-            }
+            totalCost += cost;
+            costDetails.doubleCheck = cost;
         }
 
         if (projectAlias) {
@@ -336,9 +360,7 @@ const server = http.createServer(async (req, res) => {
                 return send(res, 400, { ok: false, error: `Invalid custom_rules_qty: ${crCheck.error.issues[0].message}` })
             }
             
-            // Note: Actual deduction happens in Worker, this is just a pre-check to fail fast
             const processingFee = customRulesQty * 1;
-            const balance = tenantConfig.credits_balance || 0;
             const plan = tenantConfig.plan || 'free';
 
             // 1. Check Tier Permissions
@@ -351,11 +373,28 @@ const server = http.createServer(async (req, res) => {
             if (customRulesModel === 'max' && plan !== 'enterprise') {
                  return send(res, 403, { ok: false, error: 'Max model is only available for Enterprise tier.' });
             }
-            // Pro is Premium or Enterprise (already checked non-free)
             
-            if (balance < processingFee) {
-                return send(res, 402, { ok: false, error: `Insufficient credits for Custom Rules. Required: ${processingFee}, Available: ${balance}.` });
-            }
+            // Calculate Success Fee based on Model
+            // Standard: 2, Pro: 4, Max: 9
+            let successFeePerRule = 2;
+            if (customRulesModel === 'pro') successFeePerRule = 4;
+            if (customRulesModel === 'max') successFeePerRule = 9;
+
+            const potentialSuccessCost = customRulesQty * successFeePerRule;
+            const totalCustomRulesCost = processingFee + potentialSuccessCost;
+
+            totalCost += totalCustomRulesCost;
+            costDetails.customRules = {
+                processing: processingFee,
+                potentialSuccess: potentialSuccessCost,
+                total: totalCustomRulesCost
+            };
+        }
+        
+        // Final Balance Check
+        const balance = tenantConfig.credits_balance || 0;
+        if (balance < totalCost) {
+            return send(res, 402, { ok: false, error: `Insufficient credits. Required: ${totalCost}, Available: ${balance}.` });
         }
 
         // 1. Validate Magic Bytes (Must be ZIP)
@@ -455,7 +494,7 @@ const server = http.createServer(async (req, res) => {
 
           let crConfig = null
           if (customRules) {
-              crConfig = { enabled: true, qty: customRulesQty }
+              crConfig = { enabled: true, qty: customRulesQty, model: customRulesModel }
           }
           
           const taskPayload = { 
@@ -471,6 +510,10 @@ const server = http.createServer(async (req, res) => {
               } 
           };
           
+          // Deduct Credits
+          console.log(`[Core] Deducting ${totalCost} credits from tenant ${tenantId}. Breakdown:`, costDetails);
+          await dbQuery('UPDATE securetag.tenant SET credits_balance = credits_balance - $1 WHERE id = $2', [totalCost, tenantId]);
+
           await dbQuery('INSERT INTO securetag.task(id, tenant_id, type, status, payload_json, retries, priority, created_at, project_id, previous_task_id, is_retest, double_check_config, custom_rules_config) VALUES($1,$2,$3,$4,$5,$6,$7, now(), $8, $9, $10, $11, $12)',
             [taskId, tenantId, 'codeaudit', 'queued', JSON.stringify(taskPayload), 0, 0, projectId, previousTaskId, isRetest, dcConfig ? JSON.stringify(dcConfig) : null, crConfig ? JSON.stringify(crConfig) : null])
           await dbQuery('INSERT INTO securetag.codeaudit_upload(tenant_id, project_id, task_id, file_name, storage_path, size_bytes, created_at) VALUES($1,$2,$3,$4,$5,$6, now())', [tenantId, projectId, taskId, fileName, zipPath, size])
@@ -484,7 +527,8 @@ const server = http.createServer(async (req, res) => {
             type: 'codeaudit',
             ...taskPayload,
             double_check_config: dcConfig,
-            custom_rules_config: crConfig
+            custom_rules_config: crConfig,
+            totalCost // Pass total cost for refunding on failure
           }, {
             jobId: taskId,
             removeOnComplete: true
@@ -531,13 +575,15 @@ const server = http.createServer(async (req, res) => {
               customRulesProps = {
                   custom_rules: crc.enabled,
                   custom_rules_qty: crc.qty,
-                  custom_rule_model: crc.model
+                  custom_rule_model: crc.model, // Ensure model is propagated
+                  custom_rules_config: crc // Pass full config just in case
               };
           } catch (e) {}
       }
 
       const obj = { 
           id: t.id, 
+          tenantId: t.tenant_id,
           type: t.type, 
           status: 'running', 
           retries: 0, 
@@ -581,9 +627,25 @@ const server = http.createServer(async (req, res) => {
             // Check if result already exists (idempotency)
             const existing = await dbQuery('SELECT 1 FROM securetag.scan_result WHERE task_id=$1', [body.taskId])
             if (existing.rows.length === 0) {
+              // Construct a summary_json compatible with ReportService
+              let summaryJson = body;
+              
+              // If we have a rich result from Worker, use it to populate standard fields
+              if (body.result && typeof body.result === 'object') {
+                 const res = body.result;
+                 summaryJson = {
+                     findingsCount: res.findingsCount || (res.summary ? Object.values(res.summary).reduce((a:any,b:any)=>Number(a)+Number(b),0) : 0),
+                     files_scanned_count: res.files_scanned_count || 0,
+                     rules_executed_count: res.rules_executed_count || 0,
+                     severity: res.summary || {},
+                     custom_rules: res.custom_rules_stats || {},
+                     ...res
+                 };
+              }
+
               await dbQuery(
                 'INSERT INTO securetag.scan_result(tenant_id, task_id, summary_json, created_at) VALUES($1, $2, $3, now())',
-                [tenantId, body.taskId, JSON.stringify(body)]
+                [tenantId, body.taskId, JSON.stringify(summaryJson)]
               )
             }
           } catch (err) {
@@ -600,8 +662,10 @@ const server = http.createServer(async (req, res) => {
   }
   
   // Custom Rules Internal Endpoint
-  if (method === 'POST' && url === '/internal/rules') {
-      const authReq = req as AuthenticatedRequest
+  if (method === 'POST' && url === '/queue/codeaudit') {
+          console.log('[DEBUG] Received POST /queue/codeaudit')
+          const authReq = req as AuthenticatedRequest
+          // ... rest of code
       const isAuthenticated = await authenticate(authReq, res)
       if (!isAuthenticated) return
 
@@ -738,6 +802,63 @@ const server = http.createServer(async (req, res) => {
     const tenantId = authReq.tenantId!
 
     const parts = url.split('/')
+    // /projects/{id}/vulnerabilities (Project Backlog)
+    if (parts.length >= 4 && parts[3] === 'vulnerabilities') {
+        const idOrAlias = parts[2]
+        try {
+            let projectId = ''
+            if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrAlias)) {
+                projectId = idOrAlias
+            } else {
+                const pq = await dbQuery<any>('SELECT id FROM securetag.project WHERE tenant_id=$1 AND alias=$2', [tenantId, idOrAlias])
+                if (pq.rows.length) projectId = pq.rows[0].id
+            }
+
+            if (!projectId) return send(res, 404, { ok: false, error: 'Project not found' })
+
+            // Get latest task ID
+            const lt = await dbQuery<any>('SELECT id FROM securetag.task WHERE project_id=$1 AND status=\'completed\' ORDER BY created_at DESC LIMIT 1', [projectId]);
+            if (!lt.rows.length) {
+                return send(res, 200, { ok: true, vulnerabilities: [] })
+            }
+            const latestTaskId = lt.rows[0].id;
+
+            const vq = await dbQuery<any>(`
+                SELECT DISTINCT ON (f.fingerprint)
+                    f.id,
+                    f.rule_name,
+                    f.severity,
+                    f.file_path,
+                    f.line,
+                    f.fingerprint,
+                    f.created_at as last_seen,
+                    (
+                        SELECT MIN(t_first.created_at)
+                        FROM securetag.finding f_first
+                        JOIN securetag.task t_first ON f_first.task_id = t_first.id
+                        WHERE f_first.fingerprint = f.fingerprint 
+                        AND t_first.project_id = $1
+                    ) as first_seen,
+                    (
+                        SELECT COUNT(*)
+                        FROM securetag.finding f_count
+                        JOIN securetag.task t_count ON f_count.task_id = t_count.id
+                        WHERE f_count.fingerprint = f.fingerprint
+                        AND t_count.project_id = $1
+                    ) as recurrence_count
+                FROM securetag.finding f
+                WHERE f.task_id = $2
+                ORDER BY f.fingerprint, f.severity, f.rule_name
+            `, [projectId, latestTaskId]);
+
+            return send(res, 200, { ok: true, projectId, vulnerabilities: vq.rows })
+
+        } catch (e: any) {
+            console.error('getProjectVulnerabilities error:', e)
+            return send(res, 503, { ok: false, error: e.message })
+        }
+    }
+
     // /projects/{id}/history
     if (parts.length >= 4 && parts[3] === 'history') {
       const idOrAlias = parts[2]
@@ -753,10 +874,47 @@ const server = http.createServer(async (req, res) => {
 
         if (!projectId) return send(res, 404, { ok: false, error: 'Project not found' })
 
-        const tq = await dbQuery<any>('SELECT id as "taskId", status, created_at, finished_at, is_retest, previous_task_id FROM securetag.task WHERE project_id=$1 ORDER BY created_at DESC', [projectId])
-        return send(res, 200, { ok: true, projectId, history: tq.rows })
-      } catch {
-        return send(res, 503, { ok: false })
+        const tq = await dbQuery<any>(`
+          SELECT 
+            t.id as "taskId", 
+            t.status, 
+            t.created_at, 
+            t.finished_at, 
+            t.is_retest, 
+            t.previous_task_id,
+            t.double_check_config,
+            t.custom_rules_config,
+            t.new_findings_count,
+            t.fixed_findings_count,
+            t.recurring_findings_count,
+            t.net_risk_score,
+            (SELECT COUNT(*)::int FROM securetag.finding f WHERE f.task_id = t.id AND f.severity = 'critical') as critical,
+            (SELECT COUNT(*)::int FROM securetag.finding f WHERE f.task_id = t.id AND f.severity = 'high') as high,
+            (SELECT COUNT(*)::int FROM securetag.finding f WHERE f.task_id = t.id AND f.severity = 'medium') as medium,
+            (SELECT COUNT(*)::int FROM securetag.finding f WHERE f.task_id = t.id AND f.severity = 'low') as low,
+            (SELECT COUNT(*)::int FROM securetag.finding f WHERE f.task_id = t.id AND f.severity = 'info') as info,
+            (SELECT COUNT(*)::int FROM securetag.finding f WHERE f.task_id = t.id) as "totalVulns"
+          FROM securetag.task t 
+          WHERE t.project_id=$1 
+          ORDER BY t.created_at DESC
+        `, [projectId])
+        
+        const history = tq.rows.map(row => ({
+            ...row,
+            config: {
+                doubleCheck: !!row.double_check_config,
+                customRules: !!row.custom_rules_config,
+                // Pass through full details for UI tooltips/dialogs
+                customRulesQty: row.custom_rules_config?.qty,
+                customRulesModel: row.custom_rules_config?.model,
+                doubleCheckLevel: row.double_check_config?.level
+            }
+        }));
+
+        return send(res, 200, { ok: true, projectId, history })
+      } catch (e: any) {
+        console.error('getProjectHistory error:', e)
+        return send(res, 503, { ok: false, error: e.message })
       }
     }
   }

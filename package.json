@@ -21,6 +21,8 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.65.0",
     "@google/generative-ai": "^0.24.1",
+    "@react-pdf/renderer": "^4.3.2",
+    "@types/react": "^19.2.7",
     "@types/swagger-ui-express": "^4.1.8",
     "@types/yamljs": "^0.2.34",
     "axios": "^1.12.2",
@@ -34,6 +36,7 @@
     "openai": "^6.14.0",
     "pg": "^8.12.0",
     "rate-limit-redis": "^4.3.1",
+    "react": "^19.2.3",
     "swagger-ui-dist": "^5.30.3",
     "swagger-ui-express": "^5.0.1",
     "systeminformation": "^5.27.10",
@@ -41,6 +44,7 @@
     "uuid": "^13.0.0",
     "validator": "^13.15.15",
     "winston": "^3.17.0",
+    "xml-js": "^1.6.11",
     "yamljs": "^0.3.0",
     "zod": "^4.2.1"
   },

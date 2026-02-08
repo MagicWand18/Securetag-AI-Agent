@@ -55,3 +55,9 @@ pcap/
 
 # RunPod secrets
 runpod-deploy/README.md
+cookies.txt
+login_response.json
+ai-gateway/.venv/
+ai-gateway/.pytest_cache/
+ai-gateway/__pycache__/
+**/__pycache__/

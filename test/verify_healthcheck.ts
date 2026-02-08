@@ -45,7 +45,7 @@ async function runTests() {
     console.log('Test 3: Stopping DB proxy to simulate DB down...')
     const { exec } = await import('child_process')
     await new Promise((resolve) => {
-        exec('docker stop db-proxy 2>/dev/null || docker run -d --name db-proxy --network securetag-net -p 5433:5432 alpine/socat tcp-listen:5432,fork,bind=0.0.0.0 tcp-connect:securetag-db:5432', () => {
+        exec('docker stop db-proxy 2>/dev/null || docker run -d --name db-proxy --network core-net -p 5433:5432 alpine/socat tcp-listen:5432,fork,bind=0.0.0.0 tcp-connect:core-db:5432', () => {
             exec('docker stop db-proxy', () => {
                 console.log('  DB proxy stopped\n')
                 resolve(null)

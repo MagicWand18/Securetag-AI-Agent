@@ -4,7 +4,7 @@ set -euo pipefail
 # Configuración
 TENANT_ID="${TENANT_ID:-tenantA}"
 ZIP_PATH="${1:-}"
-NETWORK_NAME="securetag-net"
+NETWORK_NAME="core-net"
 
 # Utilidades
 die() { echo "[ERROR] $*" >&2; exit 1; }
@@ -18,8 +18,8 @@ fi
 
 # Build de imágenes (idempotente)
 info "Construyendo imágenes..."
-docker build -f docker/worker/Dockerfile -t securetag-worker:dev .
-docker build -f docker/app/Dockerfile -t securetag-app:dev .
+docker build -f docker/worker/Dockerfile -t core-worker:dev .
+docker build -f docker/app/Dockerfile -t core-api:dev .
 
 # Red de Docker: crear sólo si no existe
 info "Verificando red ${NETWORK_NAME}..."
@@ -28,8 +28,8 @@ if ! docker network inspect "${NETWORK_NAME}" >/dev/null 2>&1; then
 fi
 
 # Base de datos PostgreSQL 18.1
-docker rm -f securetag-db >/dev/null 2>&1 || true
-docker run -d --name securetag-db --network "${NETWORK_NAME}" \
+docker rm -f core-db >/dev/null 2>&1 || true
+docker run -d --name core-db --network "${NETWORK_NAME}" \
   -e POSTGRES_DB=securetag \
   -e POSTGRES_USER=securetag \
   -e POSTGRES_PASSWORD=securetagpwd \
@@ -41,14 +41,14 @@ mkdir -p "data/${TENANT_ID}/uploads" "data/${TENANT_ID}/work" "data/${TENANT_ID}
 
 # Arrancar App en la red interna
 info "Arrancando App..."
-docker rm -f securetag-app >/dev/null 2>&1 || true
-docker run -d --name securetag-app --network "${NETWORK_NAME}" -p 8080:8080 \
+docker rm -f core-api >/dev/null 2>&1 || true
+docker run -d --name core-api --network "${NETWORK_NAME}" -p 8080:8080 \
   -e TENANT_ID="${TENANT_ID}" \
   -e DB_DIR="/var/securetag/${TENANT_ID}/db" \
   -e UPLOADS_DIR="/var/securetag/${TENANT_ID}/uploads" \
   -e WORK_DIR="/var/securetag/${TENANT_ID}/work" \
   -e RESULTS_DIR="/var/securetag/${TENANT_ID}/results" \
-  -e DATABASE_URL="postgres://securetag:securetagpwd@securetag-db:5432/securetag" \
+  -e DATABASE_URL="postgres://securetag:securetagpwd@core-db:5432/securetag" \
   -v "$(pwd)/data:/var/securetag" securetag-app:dev
 
 # Espera activa a health OK
@@ -82,14 +82,14 @@ fi
 info "Ejecutando Worker..."
 docker run --rm --network "${NETWORK_NAME}" \
   -e TENANT_ID="${TENANT_ID}" \
-  -e APP_HOST=securetag-app \
+  -e APP_HOST=core-api \
   -e APP_PORT=8080 \
   -e RESULTS_DIR="/var/securetag/${TENANT_ID}/results" \
-  -e DATABASE_URL="postgres://securetag:securetagpwd@securetag-db:5432/securetag" \
+  -e DATABASE_URL="postgres://securetag:securetagpwd@core-db:5432/securetag" \
   -e SEMGREP_APP_TOKEN="${SEMGREP_APP_TOKEN:-}" \
   -e SEMGREP_ANONYMOUS_USER_ID="${SEMGREP_ANONYMOUS_USER_ID:-}" \
   -e SEMGREP_HAS_SHOWN_METRICS_NOTIFICATION="${SEMGREP_HAS_SHOWN_METRICS_NOTIFICATION:-true}" \
-  -v "$(pwd)/data:/var/securetag" securetag-worker:dev || true
+  -v "$(pwd)/data:/var/securetag" core-worker:dev || true
 
 # Poll del resultado hasta completed/failed (máx 60s)
 info "Consultando resultado para taskId=${TASK_ID}..."

@@ -31,7 +31,7 @@ export API_KEY="local-dev-key"
 export TENANT_ID="tenantA"
 
 # Reconstruimos el worker explícitamente
-docker compose build securetag-worker
+docker compose build core-worker
 
 # Set variables for the E2E script - NO saltamos setup para asegurar limpieza
 export SKIP_SETUP="" 

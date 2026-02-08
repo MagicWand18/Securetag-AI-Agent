@@ -7,7 +7,7 @@ export class WorkerClient {
   private appPort: number
 
   constructor() {
-    this.appHost = process.env.APP_HOST || 'securetag-app'
+    this.appHost = process.env.APP_HOST || 'core-api'
     this.appPort = parseInt(process.env.APP_PORT || '8080', 10)
 
     const headers: Record<string, string> = {}
@@ -66,7 +66,7 @@ export class WorkerClient {
 
   async saveCustomRule(rule: any): Promise<void> {
     try {
-      await this.client.post('/internal/rules', rule)
+      await this.client.post('/queue/codeaudit', rule)
     } catch (err: any) {
       logger.error(`Failed to save custom rule: ${err.message}`)
     }

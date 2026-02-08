@@ -4,7 +4,7 @@ echo "🧪 Testing Strike-Based Ban System..."
 
 # 1. Reset State
 echo "🧹 Cleaning up DB..."
-docker exec -i securetag-db psql -U securetag -d securetag -c "TRUNCATE TABLE securetag.security_strike; DELETE FROM securetag.security_ban WHERE type='ip';"
+docker exec -i core-db psql -U securetag -d securetag -c "TRUNCATE TABLE securetag.security_strike; DELETE FROM securetag.security_ban WHERE type='ip';"
 
 # 2. Strike 1
 echo "👊 Strike 1: Invalid API Key"
@@ -39,5 +39,5 @@ fi
 
 # Check DB
 echo "📊 Checking DB Records:"
-docker exec -i securetag-db psql -U securetag -d securetag -c "SELECT * FROM securetag.security_strike;"
-docker exec -i securetag-db psql -U securetag -d securetag -c "SELECT * FROM securetag.security_ban WHERE type='ip';"
+docker exec -i core-db psql -U securetag -d securetag -c "SELECT * FROM securetag.security_strike;"
+docker exec -i core-db psql -U securetag -d securetag -c "SELECT * FROM securetag.security_ban WHERE type='ip';"

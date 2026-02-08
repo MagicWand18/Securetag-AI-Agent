@@ -49,15 +49,22 @@ export class ContextAnalyzer {
         // Check if baseDir has config files
         if (this.hasConfigFiles(baseDir)) return baseDir;
 
-        // If not, check if it has only one directory
+        // Look for immediate subdirectories that have config files
         try {
             const items = fs.readdirSync(baseDir).filter(f => !f.startsWith('.') && f !== '__MACOSX');
+            
+            // Priority: Check if any subdirectory is a project root
+            for (const item of items) {
+                const fullPath = path.join(baseDir, item);
+                if (fs.statSync(fullPath).isDirectory()) {
+                    if (this.hasConfigFiles(fullPath)) return fullPath;
+                }
+            }
+
+            // Fallback: If only one directory, return it even if no config found (guess)
             if (items.length === 1) {
                 const subDir = path.join(baseDir, items[0]);
                 if (fs.statSync(subDir).isDirectory()) {
-                    // Check if subdir has config files
-                    if (this.hasConfigFiles(subDir)) return subDir;
-                    // Or just return it as a guess
                     return subDir;
                 }
             }
@@ -191,8 +198,8 @@ export class ContextAnalyzer {
         // Infrastructure
         if (fs.existsSync(path.join(dir, 'Dockerfile'))) {
             context.stack.infrastructure.push('Docker')
-            context.critical_files.push('Dockerfile')
         }
+
         if (fs.existsSync(path.join(dir, 'docker-compose.yml')) || fs.existsSync(path.join(dir, 'docker-compose.yaml'))) {
             context.stack.infrastructure.push('Docker Compose')
             context.critical_files.push('docker-compose.yml')
@@ -200,5 +207,104 @@ export class ContextAnalyzer {
         if (fs.existsSync(path.join(dir, 'k8s')) || fs.existsSync(path.join(dir, 'kubernetes')) || fs.existsSync(path.join(dir, 'helm'))) {
             context.stack.infrastructure.push('Kubernetes')
         }
+
+        // IaC & CI/CD
+        if (this.hasExtension(dir, '.tf')) {
+            context.stack.infrastructure.push('Terraform')
+        }
+        if (fs.existsSync(path.join(dir, 'serverless.yml')) || fs.existsSync(path.join(dir, 'serverless.yaml'))) {
+            context.stack.infrastructure.push('Serverless Framework')
+            context.critical_files.push('serverless.yml')
+        }
+        if (fs.existsSync(path.join(dir, '.github/workflows'))) {
+             context.stack.infrastructure.push('GitHub Actions')
+        }
+        if (fs.existsSync(path.join(dir, '.gitlab-ci.yml'))) {
+             context.stack.infrastructure.push('GitLab CI')
+             context.critical_files.push('.gitlab-ci.yml')
+        }
+
+        // Fallback: Detect by file extensions if no languages detected (or to augment)
+        this.detectLanguagesByExtension(dir, context);
+    }
+
+    private hasExtension(dir: string, ext: string): boolean {
+        try {
+            const files = fs.readdirSync(dir);
+            return files.some(f => f.endsWith(ext));
+        } catch (e) {
+            return false;
+        }
+    }
+
+    private detectLanguagesByExtension(dir: string, context: ProjectContext) {
+        const extensionMap: Record<string, string> = {
+            '.js': 'JavaScript',
+            '.ts': 'TypeScript',
+            '.py': 'Python',
+            '.java': 'Java',
+            '.go': 'Go',
+            '.rb': 'Ruby',
+            '.php': 'PHP',
+            '.c': 'C',
+            '.cpp': 'C++',
+            '.cs': 'C#',
+            '.rs': 'Rust',
+            '.swift': 'Swift',
+            '.kt': 'Kotlin',
+            '.scala': 'Scala',
+            '.pl': 'Perl',
+            '.sh': 'Shell',
+            '.html': 'HTML',
+            '.css': 'CSS',
+            '.sql': 'SQL'
+        };
+
+        try {
+            const files = this.getAllFiles(dir);
+            const counts: Record<string, number> = {};
+
+            for (const file of files) {
+                const ext = path.extname(file).toLowerCase();
+                if (extensionMap[ext]) {
+                    const lang = extensionMap[ext];
+                    counts[lang] = (counts[lang] || 0) + 1;
+                }
+            }
+
+            // Add detected languages if not already present
+            for (const [lang, count] of Object.entries(counts)) {
+                // Heuristic: If we have at least 1 file, consider it (or maybe a threshold?)
+                // Let's use 1 for now, but maybe prioritize primary ones.
+                if (!context.stack.languages.includes(lang) && !context.stack.languages.includes('JavaScript/TypeScript')) {
+                     // Handle JS/TS specific case merging
+                     if (lang === 'JavaScript' || lang === 'TypeScript') {
+                         if (!context.stack.languages.includes('JavaScript/TypeScript')) {
+                             context.stack.languages.push('JavaScript/TypeScript');
+                         }
+                     } else {
+                         context.stack.languages.push(lang);
+                     }
+                }
+            }
+        } catch (e) {
+            logger.warn(`Failed to detect languages by extension: ${(e as Error).message}`);
+        }
+    }
+
+    private getAllFiles(dir: string, fileList: string[] = []): string[] {
+        try {
+            const files = fs.readdirSync(dir);
+            for (const file of files) {
+                if (file.startsWith('.') || file === 'node_modules' || file === 'vendor' || file === '__MACOSX') continue;
+                const filePath = path.join(dir, file);
+                if (fs.statSync(filePath).isDirectory()) {
+                    this.getAllFiles(filePath, fileList);
+                } else {
+                    fileList.push(filePath);
+                }
+            }
+        } catch (e) {}
+        return fileList;
     }
 }

@@ -1,0 +1,199 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Enums para manejo de estado y nivel de suscripción
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  PAST_DUE
+  NONE
+}
+
+enum SubscriptionTier {
+  FREE
+  PREMIUM
+  ENTERPRISE
+}
+
+model User {
+  id                        String          @id @default(uuid())
+  createdAt                 DateTime        @default(now())
+
+  email                     String?         @unique
+  username                  String?         @unique
+  isAdmin                   Boolean         @default(false)
+
+  paymentProcessorUserId    String?         @unique
+  securetagApiKey           String?         // [DEPRECATED] API Key for Securetag Backend. Will be replaced by ApiKey model.
+  
+  // Identity Linking
+  securetagTenantId String?  // ID del Tenant en securetag-db (ej: "production", UUID)
+  securetagUserId   String?  // UUID del app_user en securetag-db
+  securetagRole     String   @default("member") // Cache del rol para UI rápida
+
+  // Lifecycle
+  deletedAt                 DateTime?       // Para Soft Delete y auditoría
+
+  // API Keys for CI/CD Integrations
+  apiKeys           ApiKey[]
+
+  // User Profile Data
+  firstName                 String?
+  lastName                  String?
+  jobTitle                  String?
+  phoneNumber               String?
+  about                     String?
+  avatarUrl                 String?
+
+  lemonSqueezyCustomerPortalUrl String?     // You can delete this if you're not using Lemon Squeezy as your payments processor.
+  
+  // Gestión de Suscripción Recurrente
+  subscriptionStatus        SubscriptionStatus @default(NONE)
+  subscriptionTier          SubscriptionTier   @default(FREE)
+  subscriptionPlan          String?         // [DEPRECATED] Mantener por compatibilidad temporal
+  subscriptionId            String?         // ID de suscripción de PayPal (Billing Agreement ID)
+  nextBillingDate           DateTime?       // Fecha del próximo cobro/renovación
+
+  datePaid                  DateTime?
+  credits                   Int             @default(3)
+
+  gptResponses              GptResponse[]
+  contactFormMessages       ContactFormMessage[]
+  tasks                     Task[]
+  files                     File[]
+  payments                  Payment[]
+  creditUsages              CreditUsage[]
+}
+
+model Payment {
+  id                String          @id @default(uuid())
+  createdAt         DateTime        @default(now())
+  
+  user              User            @relation(fields: [userId], references: [id])
+  userId            String
+
+  paypalOrderId     String          @unique // Puede ser OrderID de compra única o TransactionID de suscripción
+  amount            Float
+  currency          String          @default("USD")
+  status            String          // PENDING, COMPLETED, FAILED
+  creditsAmount     Int
+  paymentType       String          @default("ONE_OFF") // ONE_OFF, SUBSCRIPTION_RENEWAL
+  
+  creditUsages      CreditUsage[]
+}
+
+model CreditUsage {
+  id                String          @id @default(uuid())
+  createdAt         DateTime        @default(now())
+
+  user              User            @relation(fields: [userId], references: [id])
+  userId            String
+
+  amount            Int             // Positive for purchase/refund, Negative for usage
+  type              String          // PURCHASE, SCAN, REFUND, BONUS
+  description       String?
+  metadata          Json?           // Detailed breakdown (base cost, custom rules, etc.)
+  payment           Payment?        @relation(fields: [paymentId], references: [id])
+  paymentId         String?
+
+  relatedObjectId   String?         // ID of the related object (e.g. Scan ID from securetag-db)
+}
+
+model GptResponse {
+  id                        String          @id @default(uuid())
+  createdAt                 DateTime        @default(now())
+  updatedAt                 DateTime        @updatedAt
+
+  user                      User            @relation(fields: [userId], references: [id])
+  userId                    String
+
+  content                   String
+}
+
+model Task {
+  id                        String          @id @default(uuid())
+  createdAt                 DateTime        @default(now())
+
+  user                      User            @relation(fields: [userId], references: [id])
+  userId                    String
+
+  description               String
+  time                      String          @default("1")
+  isDone                    Boolean         @default(false)
+}
+
+model File {
+  id                        String          @id @default(uuid())
+  createdAt                 DateTime        @default(now())
+
+  user                      User            @relation(fields: [userId], references: [id])
+  userId                    String
+
+  name                      String
+  type                      String
+  s3Key                     String
+}
+
+model DailyStats {
+  id                               Int             @id @default(autoincrement())
+  date                             DateTime        @default(now()) @unique
+
+  totalViews                       Int             @default(0)
+  prevDayViewsChangePercent        String          @default("0")
+  userCount                        Int             @default(0)
+  paidUserCount                    Int             @default(0)
+  userDelta                        Int             @default(0)
+  paidUserDelta                    Int             @default(0)
+  totalRevenue                     Float           @default(0)
+  totalProfit                      Float           @default(0)
+
+  sources                          PageViewSource[]
+}
+
+model PageViewSource {
+  @@id([date, name])
+  name                     String
+  date                     DateTime        @default(now())
+
+  dailyStats               DailyStats?     @relation(fields: [dailyStatsId], references: [id])
+  dailyStatsId             Int?
+
+  visitors                 Int
+}
+
+model Logs {
+  id                       Int             @id @default(autoincrement())
+  createdAt                DateTime        @default(now())
+
+  message                  String
+  level                    String
+}
+
+model ContactFormMessage {
+  id                        String          @id @default(uuid())
+  createdAt                 DateTime        @default(now())
+
+  user                      User            @relation(fields: [userId], references: [id])
+  userId                    String
+
+  content                   String
+  isRead                    Boolean         @default(false)
+  repliedAt                 DateTime?
+}
+
+model ApiKey {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  label     String   // e.g. "Jenkins Production", "Dev Laptop"
+  lastUsed  DateTime?
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+}

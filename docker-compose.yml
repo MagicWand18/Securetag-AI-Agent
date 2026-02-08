@@ -1,7 +1,8 @@
 services:
-  securetag-db:
+  core-db:
     image: postgres:18.1
-    container_name: securetag-db
+    container_name: core-db
+    mem_limit: 1g
     environment:
       POSTGRES_DB: securetag
       POSTGRES_USER: securetag
@@ -9,58 +10,64 @@ services:
     volumes:
       - ./data/postgres:/var/lib/postgresql
     networks:
-      - securetag-net
+      - core-net
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U securetag" ]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  securetag-redis:
+  core-redis:
     image: redis:alpine
-    container_name: securetag-redis
+    container_name: core-redis
+    mem_limit: 128m
     command: redis-server --appendonly yes --requirepass securetagredis
     ports:
       - "6379:6379"
     volumes:
       - ./data/redis:/data
     networks:
-      - securetag-net
+      - core-net
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "securetagredis", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
 
-  securetag-nginx:
+  core-gateway:
     image: nginx:alpine
-    container_name: securetag-nginx
+    container_name: core-gateway
+    mem_limit: 64m
     ports:
       - "80:80"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - securetag-app
+      - core-api
+      - core-ai-gateway
     networks:
-      - securetag-net
+      - core-net
 
-  securetag-app:
+  core-api:
     build:
       context: .
       dockerfile: docker/app/Dockerfile
     image: securetag-app:dev
-    container_name: securetag-app
+    container_name: core-api
+    mem_limit: 512m
     environment:
       TENANT_ID: ${TENANT_ID:-tenantA}
       DB_DIR: /var/securetag/${TENANT_ID:-tenantA}/db
       UPLOADS_DIR: /var/securetag/${TENANT_ID:-tenantA}/uploads
       WORK_DIR: /var/securetag/${TENANT_ID:-tenantA}/work
       RESULTS_DIR: /var/securetag/${TENANT_ID:-tenantA}/results
-      DATABASE_URL: postgres://securetag:securetagpwd@securetag-db:5432/securetag
+      DATABASE_URL: postgres://securetag:securetagpwd@core-db:5432/securetag
       OLLAMA_HOST: ${OLLAMA_HOST}
       RUNPOD_API_KEY: ${RUNPOD_API_KEY}
       MODEL: ${MODEL:-securetag-v1}
       VIRUSTOTAL_API_KEY: ${VIRUSTOTAL_API_KEY}
+      AI_PROVIDER_OPENAI_KEY: ${AI_PROVIDER_OPENAI_KEY}
+      AI_PROVIDER_ANTHROPIC_KEY: ${AI_PROVIDER_ANTHROPIC_KEY}
       VIRUSTOTAL_MALICIOUS_THRESHOLD: ${VIRUSTOTAL_MALICIOUS_THRESHOLD:-0}
       RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-60000}
       RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-100}
@@ -77,44 +84,46 @@ services:
       ENABLE_RESEARCH_SCHEDULER: ${ENABLE_RESEARCH_SCHEDULER:-false}
       RESEARCH_INTERVAL_MS: ${RESEARCH_INTERVAL_MS:-604800000}
       RESEARCH_RUN_ON_BOOT: ${RESEARCH_RUN_ON_BOOT:-false}
-      REDIS_HOST: securetag-redis
+      REDIS_HOST: core-redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: securetagredis
+      SECURETAG_SYSTEM_SECRET: s3cur3t4g-syst3m-s3cr3t-2025
     volumes:
       - ./data:/var/securetag
     networks:
-      - securetag-net
+      - core-net
     depends_on:
-      securetag-db:
+      core-db:
         condition: service_healthy
-      securetag-migrate:
+      core-migrate:
         condition: service_completed_successfully
-      securetag-redis:
+      core-redis:
         condition: service_healthy
 
-  securetag-migrate:
+  core-migrate:
     image: liquibase/liquibase:4.24
-    container_name: securetag-migrate
+    container_name: core-migrate
     command: update --changelog-file=changelog-master.xml
     environment:
-      LIQUIBASE_COMMAND_URL: jdbc:postgresql://securetag-db:5432/securetag
+      LIQUIBASE_COMMAND_URL: jdbc:postgresql://core-db:5432/securetag
       LIQUIBASE_COMMAND_USERNAME: securetag
       LIQUIBASE_COMMAND_PASSWORD: securetagpwd
       LIQUIBASE_SEARCH_PATH: /liquibase/changelog
     volumes:
       - ./migrations:/liquibase/changelog
     depends_on:
-      securetag-db:
+      core-db:
         condition: service_healthy
     networks:
-      - securetag-net
+      - core-net
 
-  securetag-backup:
+  core-backup:
     image: postgres:18.1-alpine
-    container_name: securetag-backup
+    container_name: core-backup
+    mem_limit: 256m
     restart: always
     environment:
-      POSTGRES_HOST: securetag-db
+      POSTGRES_HOST: core-db
       POSTGRES_DB: securetag
       POSTGRES_USER: securetag
       POSTGRES_PASSWORD: securetagpwd
@@ -135,23 +144,24 @@ services:
         crond -f -l 8
       '
     depends_on:
-      securetag-db:
+      core-db:
         condition: service_healthy
     networks:
-      - securetag-net
+      - core-net
 
-  securetag-worker:
+  core-worker:
     build:
       context: .
       dockerfile: docker/worker/Dockerfile
-    image: securetag-worker:dev
-    container_name: securetag-worker
+    image: core-worker:dev
+    container_name: core-worker
+    mem_limit: 768m
     environment:
       TENANT_ID: ${TENANT_ID:-tenantA}
-      APP_HOST: securetag-app
+      APP_HOST: core-api
       APP_PORT: 8080
       RESULTS_DIR: /var/securetag/${TENANT_ID:-tenantA}/results
-      DATABASE_URL: postgres://securetag:securetagpwd@securetag-db:5432/securetag
+      DATABASE_URL: postgres://securetag:securetagpwd@core-db:5432/securetag
       SEMGREP_HAS_SHOWN_METRICS_NOTIFICATION: ${SEMGREP_HAS_SHOWN_METRICS_NOTIFICATION:-true}
       OLLAMA_HOST: ${OLLAMA_HOST}
       RUNPOD_API_KEY: ${RUNPOD_API_KEY}
@@ -160,7 +170,7 @@ services:
       LOOP_MODE: "true"
       USE_REDIS_WORKER: "true"
       WORKER_ID: worker-1
-      REDIS_HOST: securetag-redis
+      REDIS_HOST: core-redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: securetagredis
       DB_DIR: /var/securetag/${TENANT_ID:-tenantA}/db
@@ -186,13 +196,38 @@ services:
       - ./data:/var/securetag
       - ./data/rules:/opt/securetag/rules
     networks:
-      - securetag-net
+      - core-net
     depends_on:
-      securetag-app:
+      core-api:
         condition: service_started
-      securetag-redis:
-        condition: service_healthy  
+      core-redis:
+        condition: service_healthy
+
+  core-ai-gateway:
+    build:
+      context: ./ai-gateway
+      dockerfile: ../docker/ai-gateway/Dockerfile
+    image: core-ai-gateway:dev
+    container_name: core-ai-gateway
+    mem_limit: 512m
+    environment:
+      AI_GW_DATABASE_URL: postgres://securetag:securetagpwd@core-db:5432/securetag
+      AI_GW_REDIS_HOST: core-redis
+      AI_GW_REDIS_PORT: 6379
+      AI_GW_REDIS_PASSWORD: securetagredis
+      AI_GW_SECURETAG_SYSTEM_SECRET: s3cur3t4g-syst3m-s3cr3t-2025
+      AI_GW_LOG_LEVEL: INFO
+    networks:
+      - core-net
+    depends_on:
+      core-db:
+        condition: service_healthy
+      core-migrate:
+        condition: service_completed_successfully
+      core-redis:
+        condition: service_healthy
+
 networks:
-  securetag-net:
-    name: securetag-net
+  core-net:
+    name: core-net
     driver: bridge

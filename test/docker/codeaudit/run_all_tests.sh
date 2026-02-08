@@ -38,7 +38,7 @@ export TENANT_ID="tenantA"
 export SKIP_SETUP=1
 export POLL_MAX=600 # 10 minutes for safety (Juice Shop is big)
 
-docker compose up -d --build securetag-db securetag-app
+docker compose up -d --build core-db core-api
 
 # Esperar a que la App esté lista
 info "Esperando a que la App esté lista..."

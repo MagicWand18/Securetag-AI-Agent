@@ -147,8 +147,8 @@ info:
     | `file` | Binary | **Sí** | Archivo ZIP con el código fuente. | Archivo `.zip` válido | - |
     | `project_alias` | String | No | Identificador legible del proyecto. | Alfanumérico, guiones, guion bajo (3-50 caracteres). Ej: `backend-core` | - |
     | `profile` | String | No | Perfil de escaneo. | `auto` | `auto` |
-    | `double_check` | String | No | Activa la "Segunda Opinión" con IA externa. | `critical`, `high`, `medium`, `low`, `all`, `false` | `false` |
-    | `double_check_level` | String | No | Profundidad y costo del análisis Double Check. | `standard` (1 cr), `pro` (2 cr), `max` (3 cr) | `standard` |
+    | `double_check` | String | No | **[DEPRECATED]** Activa la "Segunda Opinión" con IA externa. Use `/api/v1/findings/double-check`. | `critical`, `high`, `medium`, `low`, `all`, `false` | `false` |
+    | `double_check_level` | String | No | **[DEPRECATED]** Profundidad y costo del análisis Double Check. | `standard` (1 cr), `pro` (2 cr), `max` (3 cr) | `standard` |
     | `custom_rules` | Boolean | No | Activa la generación de reglas personalizadas. | `true`, `false` | `false` |
     | `custom_rules_qty` | Integer | No | Cantidad de reglas a intentar generar. | 1 - 10 | 3 |
     | `custom_rule_model` | String | No | Modelo de IA para generación de reglas. | `standard`, `pro` (Premium/Ent), `max` (Ent) | `standard` |
@@ -364,11 +364,267 @@ components:
         previous_task_id:
           type: string
           format: uuid
+        critical:
+          type: integer
+          description: Count of critical vulnerabilities
+        high:
+          type: integer
+          description: Count of high vulnerabilities
+        medium:
+          type: integer
+          description: Count of medium vulnerabilities
+        low:
+          type: integer
+          description: Count of low vulnerabilities
+        info:
+          type: integer
+          description: Count of info vulnerabilities
+        totalVulns:
+          type: integer
+          description: Total count of vulnerabilities
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        username:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        jobTitle:
+          type: string
+        phoneNumber:
+          type: string
+        about:
+          type: string
+        avatarUrl:
+          type: string
+        role:
+          type: string
+        tenantId:
+          type: string
+          format: uuid
 
 security:
   - ApiKeyAuth: []
 
 paths:
+  /dashboard/stats:
+    get:
+      summary: Get Dashboard Metrics
+      description: Returns aggregated statistics for the user's dashboard (credits, projects, active scans, vulnerability distribution).
+      security:
+        - ApiKeyAuth: []
+      responses:
+        200:
+          description: Dashboard metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stats:
+                    type: object
+                    properties:
+                      credits: { type: integer }
+                      activeScans: { type: integer }
+                      totalVulns: { type: integer }
+                      totalProjects: { type: integer }
+                  severity:
+                    type: object
+                    properties:
+                      critical: { type: integer }
+                      high: { type: integer }
+                      medium: { type: integer }
+                      low: { type: integer }
+                      info: { type: integer }
+                  recentScans:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string }
+                        project: { type: string }
+                        status: { type: string }
+                        date: { type: string }
+                        critical: { type: integer }
+                        high: { type: integer }
+                        medium: { type: integer }
+                        low: { type: integer }
+                        info: { type: integer }
+                  missingKey:
+                    type: boolean
+        401:
+          description: Unauthorized
+        500:
+          description: Server Error
+
+  /reports/{taskId}/{type}:
+    get:
+      summary: Download Professional Reports
+      description: |
+        Generates and downloads audit reports in various formats.
+        Supported types: 'executive' (PDF), 'technical' (PDF), 'json', 'xml'.
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: path
+          name: taskId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Unique identifier of the audit task
+        - in: path
+          name: type
+          schema:
+            type: string
+            enum: [executive, technical, json, xml]
+          required: true
+          description: Type of report to generate
+      responses:
+        200:
+          description: Report generated successfully
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                type: object
+                description: Full audit data structure
+            application/xml:
+              schema:
+                type: string
+                description: JUnit/XML compatible format
+        400:
+          description: Invalid request or unsupported report type
+        401:
+          description: Unauthorized
+        404:
+          description: Task not found
+        500:
+          description: Server Error (Generation failed)
+
+  /api/v1/auth/sync:
+    post:
+      summary: Synchronize User Identity (Frontend <-> Backend)
+      description: |
+        Internal endpoint used by Frontend Server to register or sync a user with the Backend Core.
+        If user exists, returns their tenant/user IDs.
+        If user is new, creates a Personal Tenant and Admin User.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                name:
+                  type: string
+                source:
+                  type: string
+      responses:
+        200:
+          description: User synced successfully (Existing)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_id: { type: string, format: uuid }
+                  tenant_id: { type: string, format: uuid }
+                  role: { type: string }
+                  is_new: { type: boolean }
+        201:
+          description: User created successfully (New)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_id: { type: string, format: uuid }
+                  tenant_id: { type: string, format: uuid }
+                  role: { type: string }
+                  is_new: { type: boolean }
+        400:
+          description: Invalid Input
+        401:
+          description: Unauthorized (Missing System Secret)
+
+  /api/v1/findings/double-check:
+    post:
+      summary: Perform On-Demand AI Double Check
+      description: |
+        Executes an AI-powered validation ("Second Opinion") on a specific finding.
+        Requires 'security credits'. Deducts credits only if analysis is successful.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - finding_id
+              properties:
+                finding_id:
+                  type: string
+                  format: uuid
+                  description: ID of the finding to analyze
+                model:
+                  type: string
+                  enum: [standard, pro, max]
+                  default: standard
+                  description: AI Model complexity level (affects credit cost)
+      responses:
+        200:
+          description: Analysis successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean, example: true }
+                  analysis:
+                    type: object
+                    properties:
+                      triage:
+                        type: string
+                        example: "False Positive"
+                      reasoning:
+                        type: string
+                        example: "El código utiliza una variable sanitizada previamente..."
+                      confidence:
+                        type: string
+                        example: "High"
+                  credits_deducted:
+                    type: integer
+                    example: 1
+        400:
+          description: Invalid request or missing evidence (code_snippet)
+        401:
+          description: Unauthorized
+        402:
+          description: Insufficient credits or Payment Required
+        404:
+          description: Finding not found
+        500:
+          description: Server Error
+
   /healthz:
     get:
       summary: System Health Check
@@ -437,14 +693,18 @@ paths:
                   type: string
                   enum: [critical, high, medium, low, all, "false"]
                   default: "false"
+                  deprecated: true
                   description: |
+                    [DEPRECATED] Use on-demand double check via /api/v1/findings/double-check instead.
                     Enable AI Second Opinion validation.
                     Values: 'critical', 'high', 'medium', 'low', 'all' (activates for specified severities and above), or 'false' to disable.
                 double_check_level:
                   type: string
                   enum: [standard, pro, max]
                   default: standard
+                  deprecated: true
                   description: |
+                    [DEPRECATED] Use on-demand double check via /api/v1/findings/double-check instead.
                     Depth and cost of the Double Check analysis.
                     - standard: Fast Reasoning (1 credit)
                     - pro: Advanced Reasoning (2 credits)
@@ -673,3 +933,209 @@ paths:
           description: Project not found
         503:
           description: Service Unavailable
+
+  /api/v1/tenant/me:
+    get:
+      summary: Get Tenant Info
+      description: Retrieve information about the current tenant (organization).
+      security:
+        - ApiKeyAuth: []
+      tags:
+        - Tenant
+      responses:
+        '200':
+          description: Tenant information retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  name:
+                    type: string
+                  plan:
+                    type: string
+                    enum: [free, premium, enterprise]
+                  credits_balance:
+                    type: integer
+                  created_at:
+                    type: string
+                    format: date-time
+        '401':
+          description: Unauthorized (Invalid API Key).
+        '500':
+          description: Internal Server Error.
+
+  /api/v1/tenant/users:
+    get:
+      summary: List Tenant Users
+      description: Retrieve a list of all users belonging to the tenant.
+      security:
+        - ApiKeyAuth: []
+      tags:
+        - Tenant
+      responses:
+        '200':
+          description: List of users retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    email:
+                      type: string
+                      format: email
+                    role:
+                      type: string
+                      enum: [admin, member]
+                    created_at:
+                      type: string
+                      format: date-time
+                    last_login:
+                      type: string
+                      format: date-time
+        '401':
+          description: Unauthorized.
+        '500':
+          description: Internal Server Error.
+
+  /api/v1/tenant/invite:
+    post:
+      summary: Invite User
+      description: Invite a new user to the tenant. Only admins can perform this action.
+      security:
+        - ApiKeyAuth: []
+      tags:
+        - Tenant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                role:
+                  type: string
+                  enum: [admin, member]
+                  default: member
+      responses:
+        '201':
+          description: User invited successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  email:
+                    type: string
+                  role:
+                    type: string
+                  created_at:
+                    type: string
+                    format: date-time
+        '400':
+          description: Invalid input or user already exists.
+        '401':
+          description: Unauthorized.
+        '403':
+          description: Forbidden (Non-admin user).
+        '409':
+          description: User already in tenant.
+        '500':
+          description: Internal Server Error.
+
+  /api/v1/tenant/users/{id}:
+    delete:
+      summary: Remove User
+      description: Remove a user from the tenant. Only admins can perform this action.
+      security:
+        - ApiKeyAuth: []
+      tags:
+        - Tenant
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: ID of the user to remove
+      responses:
+        '200':
+          description: User removed successfully.
+        '400':
+          description: Cannot remove yourself.
+        '401':
+          description: Unauthorized.
+        '403':
+          description: Forbidden (Non-admin user).
+        '404':
+          description: User not found.
+        '500':
+          description: Internal Server Error.
+
+  /api/v1/tenant/users/{id}/role:
+    put:
+      summary: Update User Role
+      description: Update a user's role (e.g., promote to admin). Only admins can perform this action.
+      security:
+        - ApiKeyAuth: []
+      tags:
+        - Tenant
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: ID of the user to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - role
+              properties:
+                role:
+                  type: string
+                  enum: [admin, member]
+      responses:
+        '200':
+          description: User role updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  role:
+                    type: string
+        '400':
+          description: Invalid input.
+        '401':
+          description: Unauthorized.
+        '403':
+          description: Forbidden.
+        '404':
+          description: User not found.
+        '500':
+          description: Internal Server Error.

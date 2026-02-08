@@ -40,7 +40,7 @@ echo ""
 
 # 2. Verificar Base de Datos
 echo "2. Verificando PostgreSQL..."
-if docker compose exec -T securetag-db pg_isready -U securetag > /dev/null 2>&1; then
+if docker compose exec -T core-db pg_isready -U securetag > /dev/null 2>&1; then
     info "PostgreSQL está listo"
 else
     error "PostgreSQL no responde"
@@ -70,7 +70,7 @@ echo ""
 
 # 4. Verificar Worker (logs recientes)
 echo "4. Verificando Worker..."
-WORKER_LOGS=$(docker compose logs --tail=10 securetag-worker 2>&1)
+WORKER_LOGS=$(docker compose logs --tail=10 core-worker 2>&1)
 if echo "$WORKER_LOGS" | grep -q "error\|Error\|ERROR"; then
     warn "Worker tiene errores en logs recientes"
     echo "$WORKER_LOGS" | grep -i error | head -3
