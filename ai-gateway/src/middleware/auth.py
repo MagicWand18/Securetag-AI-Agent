@@ -65,14 +65,15 @@ async def authenticate_request(request: Request) -> AuthContext:
             detail="AI Shield is not enabled for this API key"
         )
 
-    # Verificar bans via tabla de bans (check simplificado)
+    # Verificar bans via security_ban (check simplificado)
     ban_row = await fetch_one(
-        """SELECT id FROM securetag.ban
-           WHERE (entity_type = 'tenant' AND entity_id = $1
-                  OR entity_type = 'api_key' AND entity_id = $2)
-             AND (expires_at IS NULL OR expires_at > now())
+        """SELECT value FROM securetag.security_ban
+           WHERE is_banned = true
+             AND ((type = 'tenant' AND value = $1)
+                  OR (type = 'api_key' AND value = $2))
+             AND (banned_until IS NULL OR banned_until > now())
            LIMIT 1""",
-        row["tenant_id"], str(row["api_key_id"])
+        row["tenant_id"], key_hash
     )
     if ban_row is not None:
         raise HTTPException(
