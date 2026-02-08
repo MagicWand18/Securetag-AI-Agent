@@ -209,7 +209,7 @@ services:
       dockerfile: ../docker/ai-gateway/Dockerfile
     image: core-ai-gateway:dev
     container_name: core-ai-gateway
-    mem_limit: 512m
+    mem_limit: 768m
     environment:
       AI_GW_DATABASE_URL: postgres://securetag:securetagpwd@core-db:5432/securetag
       AI_GW_REDIS_HOST: core-redis

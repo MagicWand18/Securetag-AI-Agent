@@ -1,8 +1,8 @@
 # Plan de Implementacion: AI Shield (AI Security Gateway)
 
-> **Version**: 1.2
+> **Version**: 1.3
 > **Fecha**: 2026-02-08
-> **Estado**: En progreso - Fase 0 y Fase 1 completadas
+> **Estado**: En progreso - Fases 0, 1 y 2 completadas
 > **Prioridad**: P0 (siguiente modulo a construir)
 > **Estimacion**: 25-33 dias (1 desarrollador)
 
@@ -527,23 +527,48 @@ curl -X POST https://api.securetag.com.mx/ai/v1/chat/completions \
 
 ---
 
-### Fase 2: Presidio PII Detection + Redaction (4-5 dias)
+### Fase 2: Presidio PII Detection + Redaction (4-5 dias) ✅ COMPLETADA 2026-02-08
 
 **Objetivo**: Deteccion y redaccion de PII en ingles y espanol.
 
-**Archivos nuevos:**
-- `ai-gateway/src/pipeline/orchestrator.py`
-- `ai-gateway/src/pipeline/presidio_scan.py`
+**Resultado**: PII scanning funcional con 3 modos (redact/block/log_only), soporte EN+ES via spaCy `_sm` models, 25 tests nuevos (53 total). Redaccion manual (`_redact_text`) en vez de AnonymizerEngine para evitar dependencias extra y mejorar testeabilidad. mem_limit 768m.
 
-**Tests:**
+**Decisiones de implementacion:**
+
+| Decision | Eleccion | Razon |
+|----------|----------|-------|
+| Modelos spaCy | `en_core_web_sm` + `es_core_news_sm` (~12MB c/u) | Droplet 4GB. Los `_lg` pesan 560MB c/u |
+| mem_limit | 512m → 768m | ~149 MiB actual + ~200-300 MiB Presidio+spaCy |
+| Carga de modelos | Lazy (primer request) con threading.Lock | Startup rapido, healthcheck no carga modelos |
+| Threshold confianza | 0.5 (env: `AI_GW_PII_CONFIDENCE_THRESHOLD`) | Filtra falsos positivos sin perder detecciones claras |
+| Error handling | Fail-open | Si Presidio falla, request pasa sin escaneo (se loguea error) |
+| Output scanning | No (Fase 3) | Solo input en Fase 2, output scanning con LLM Guard |
+| Custom recognizers MX | No en MVP | CURP/RFC se agrega si hay demanda |
+| Redaccion | Manual (`_redact_text`) | Evita import de `OperatorConfig`, mas testeable |
+| Merge multi-idioma | Mayor score gana | Elimina duplicados EN/ES del mismo span |
+
+**Archivos creados:**
+- `ai-gateway/src/pipeline/presidio_scan.py` — Modulo principal: `_get_engines()` (singleton lazy), `scan_messages()`, `_redact_text()`, `_merge_results()`
+- `ai-gateway/tests/test_presidio.py` — 25 tests
+
+**Archivos modificados:**
+- `ai-gateway/src/pipeline/orchestrator.py` — Integrado PII scan: stub reemplazado, manejo BLOCK (refund+400), PII data en log, `fire_and_forget_log_with_pii()`
+- `ai-gateway/src/services/audit_logger.py` — Agregada `fire_and_forget_log_with_pii()` que encadena log → PII incidents con log_id real
+- `ai-gateway/src/config/settings.py` — Agregado `pii_confidence_threshold: float = 0.5`
+- `ai-gateway/requirements.txt` — Descomentados `presidio-analyzer==2.2.354` y `presidio-anonymizer==2.2.354`
+- `docker/ai-gateway/Dockerfile` — Agregado `spacy download en_core_web_sm && es_core_news_sm`
+- `docker-compose.yml` — `core-ai-gateway.mem_limit`: 512m → 768m
+
+**Tests (25 nuevos, 53 total — todos pasando):**
 - `test_presidio.py`:
-  - Detecta PERSON en ingles y espanol
-  - Detecta CREDIT_CARD (Visa, MC, AMEX)
-  - Detecta EMAIL, PHONE (US, MX), SSN, IP
-  - Redaccion: "Juan Perez" -> "<PERSON>"
-  - Modo 'block' retorna 400, cobra 0.01
-  - Modo 'log_only' deja pasar, loguea
-  - PII incidents se escriben a ai_gateway_pii_incident
+  - TestDetectPersonEN (1) — PERSON en ingles con redaccion
+  - TestDetectPersonES (1) — PERSON en español con redaccion
+  - TestDetectCreditCard (3) — Visa, Mastercard, Amex (parametrizado)
+  - TestDetectOtherEntities (5) — EMAIL, PHONE US, PHONE MX, SSN, IP
+  - TestPiiModes (4) — redact reemplaza, block no modifica, log_only pasa, labels correctos
+  - TestPiiEdgeCases (7) — sin PII, system skip, empty, multiples msgs, subset entidades, fail-open engines, fail-open analyzer
+  - TestMergeResults (2) — solapamiento (score mayor gana), non-overlapping (ambos preservados)
+  - TestFireAndForgetLogWithPii (2) — encadenamiento log+PII, no PII si log falla
 
 **Criterio de exito:**
 ```bash
@@ -551,6 +576,7 @@ curl -X POST https://api.securetag.com.mx/ai/v1/chat/completions \
 curl ... -d '{"messages":[{"role":"user","content":"El cliente Juan Perez (4111-1111-1111-1111) tiene un bug"}]}'
 # El LLM recibe: "El cliente <PERSON> (<CREDIT_CARD>) tiene un bug"
 # DB log: pii_detected: [{"type":"PERSON"},{"type":"CREDIT_CARD"}]
+# DB pii_incident: 2 filas con entity_type, action_taken, confidence
 ```
 
 ---
@@ -684,7 +710,7 @@ frontend/.../src/client/pages/ai-shield/
 |------|-----------|------|-------------|--------|
 | 0. Infra | Verificar RAM, agregar mem_limit | 1 | Manual | ✅ 2026-02-08 |
 | 1. Foundation | Proxy basico + auth + credits + logs | 5-7 | 4 Python (28 tests) | ✅ 2026-02-08 |
-| 2. Presidio | PII detection + redaction (EN+ES) | 4-5 | 1 Python (multi-case) | Pendiente |
+| 2. Presidio | PII detection + redaction (EN+ES) | 4-5 | 1 Python (25 tests) | ✅ 2026-02-08 |
 | 3. LLM Guard | Injection + secrets + output scan | 4-5 | 2 Python | Pendiente |
 | 4. Management | CRUD + analytics en Node.js | 5-6 | 1 TS (multi-test) | Pendiente |
 | 5. Hardening | Resilience + rate limiting + perf | 3-4 | 2 Python | Pendiente |
@@ -732,3 +758,173 @@ frontend/.../src/client/pages/ai-shield/
 | LLM Guard falsos positivos | Media | Medio | Threshold configurable por tenant (default 0.8) |
 | Latencia del pipeline | Baja | Medio | Async logging, cache de config, benchmark <200ms |
 | LiteLLM no soporta modelo X | Baja | Bajo | LiteLLM soporta 100+ providers, fallback manual |
+
+---
+
+## 12. Matriz de Configuracion Completa
+
+> Esta seccion documenta **todas** las variables configurables del AI Shield, organizadas por tecnologia.
+> Cada variable indica donde se configura actualmente y donde deberia configurarse en produccion.
+
+### Leyenda de origen
+
+| Icono | Significado |
+|-------|-------------|
+| `ENV` | Variable de entorno del contenedor (settings.py, prefijo `AI_GW_`) |
+| `DB/tenant` | Tabla `ai_gateway_config` — configurable por tenant |
+| `DB/key` | Tabla `ai_gateway_key_config` — configurable por API key |
+| `DOCKER` | docker-compose.yml |
+| `DOCKERFILE` | Dockerfile del ai-gateway |
+| `HARDCODED` | Valor fijo en codigo, pendiente de externalizar |
+
+### 12.1 Infraestructura Base
+
+| Variable | Valor actual | Origen | Futuro: ENV | Futuro: Super Admin | Notas |
+|----------|-------------|--------|-------------|---------------------|-------|
+| `database_url` | postgres://...core-db:5432/securetag | ENV | Si | No | Secreto de infra |
+| `redis_host` | core-redis | ENV | Si | No | Infra interna |
+| `redis_port` | 6379 | ENV | Si | No | Infra interna |
+| `redis_password` | securetagredis | ENV | Si | No | Secreto de infra |
+| `securetag_system_secret` | s3cur3t4g-syst3m-s3cr3t-2025 | ENV | Si | No | Secreto para cifrado BYOK. **Cambiar en produccion** |
+| `log_level` | INFO | ENV | Si | No | DEBUG, INFO, WARNING, ERROR |
+| `mem_limit` (container) | 768m | DOCKER | Si (compose) | No | Ajustar segun RAM del servidor |
+| `uvicorn workers` | 1 | DOCKERFILE | Si | No | Escalar con CPU disponibles |
+
+### 12.2 Creditos y Pricing
+
+| Variable | Valor actual | Origen | Futuro: ENV | Futuro: Super Admin | Notas |
+|----------|-------------|--------|-------------|---------------------|-------|
+| `credit_cost_proxy` | 0.1 | ENV | Si | **Si — Global** | Costo por request proxeado exitoso |
+| `credit_cost_blocked` | 0.01 | ENV | Si | **Si — Global** | Costo por request bloqueado (fee de inspeccion) |
+
+> **Decision pendiente**: En produccion estos costos podrian variar por plan del tenant (Free/Premium/Enterprise). Esto requiere mover la logica de pricing de ENV a DB, con un campo `pricing_tier` en `ai_gateway_config`.
+
+### 12.3 Rate Limiting
+
+| Variable | Valor actual | Origen | Futuro: ENV | Futuro: Super Admin | Notas |
+|----------|-------------|--------|-------------|---------------------|-------|
+| `default_rpm_per_key` | 30 | ENV | Si | No | Default si la key no tiene config propia |
+| `default_rpm_per_tenant` | 60 | ENV | Si | No | Default si el tenant no tiene config propia |
+| `max_requests_per_minute` | 60 | DB/tenant | — | **Si — Por tenant** | RPM del tenant, override del default |
+| `rate_limit_rpm` | 30 | DB/key | — | **Si — Por API key** | RPM de la key, override del default |
+| Ventana de rate limit | 60 segundos | HARDCODED | Externalizar | No | Fijo en `rate_limit.py`, Redis TTL |
+
+### 12.4 Presidio PII — Fase 2 ✅
+
+| Variable | Valor actual | Origen | Futuro: ENV | Futuro: Super Admin | Notas |
+|----------|-------------|--------|-------------|---------------------|-------|
+| `pii_confidence_threshold` | 0.5 | ENV | Si | **Si — Global o por tenant** | Score minimo de Presidio para considerar PII. Rango: 0.0-1.0 |
+| `pii_action` | redact | DB/tenant | — | **Si — Por tenant** | Accion ante PII: `redact`, `block`, `log_only` |
+| `pii_entities` | [CREDIT_CARD, EMAIL_ADDRESS, PHONE_NUMBER, PERSON, US_SSN, IP_ADDRESS] | DB/tenant | — | **Si — Por tenant** | Entidades PII a detectar. Configurable por tenant |
+| Idiomas soportados | en, es | HARDCODED | Externalizar | **Si — Global** | Requiere instalar modelos spaCy adicionales |
+| Modelos spaCy | en_core_web_sm, es_core_news_sm | DOCKERFILE | Externalizar | No | `_sm` (~12MB c/u). Cambiar a `_lg` requiere mas RAM |
+| Escaneo de mensajes `system` | Desactivado (skip) | HARDCODED | No | No | Diseno: system prompts no se escanean |
+| Custom recognizers (CURP, RFC) | No implementado | — | — | — | Fase futura si hay demanda MX |
+
+**Entidades PII soportadas por Presidio (seleccionables por tenant via `pii_entities`):**
+
+| Entidad | Descripcion | Idioma | Ejemplo |
+|---------|-------------|--------|---------|
+| `PERSON` | Nombre de persona | EN, ES | "Juan Perez", "John Smith" |
+| `CREDIT_CARD` | Tarjeta de credito | EN, ES | "4111-1111-1111-1111" |
+| `EMAIL_ADDRESS` | Correo electronico | EN, ES | "user@email.com" |
+| `PHONE_NUMBER` | Telefono | EN, ES | "555-123-4567", "+52 55 1234 5678" |
+| `US_SSN` | Social Security Number | EN | "123-45-6789" |
+| `IP_ADDRESS` | Direccion IP | EN, ES | "192.168.1.1" |
+| `US_BANK_NUMBER` | Cuenta bancaria US | EN | Opcional |
+| `US_DRIVER_LICENSE` | Licencia de conducir US | EN | Opcional |
+| `MEDICAL_LICENSE` | Licencia medica | EN | Opcional |
+| `US_PASSPORT` | Pasaporte US | EN | Opcional |
+| `IBAN_CODE` | Codigo bancario intl | EN | Opcional |
+| `NRP` | National Registration | EN | Opcional |
+| `LOCATION` | Ubicacion geografica | EN, ES | Opcional (muchos false positives) |
+
+### 12.5 LLM Guard — Fase 3 (PENDIENTE)
+
+> Variables planificadas. Se finalizaran al implementar Fase 3.
+
+| Variable | Valor planificado | Origen previsto | Futuro: ENV | Futuro: Super Admin | Notas |
+|----------|------------------|-----------------|-------------|---------------------|-------|
+| `injection_score_threshold` | 0.8 | ENV | Si | **Si — Global o por tenant** | Score 0.0-1.0. Mayor = mas estricto. Fase 3 |
+| `prompt_injection_enabled` | true | DB/tenant | — | **Si — Por tenant** | Toggle deteccion de prompt injection |
+| `secrets_scanning_enabled` | true | DB/tenant | — | **Si — Por tenant** | Toggle deteccion de secrets/credenciales |
+| `output_scanning_enabled` | true | DB/tenant | — | **Si — Por tenant** | Toggle escaneo de respuestas del LLM |
+| Scanners a usar | PromptInjection + Secrets | HARDCODED | Externalizar | No | LLM Guard scanner selection |
+| Lista de secrets patterns | Default LLM Guard | HARDCODED | Externalizar | **Si — Global** | AWS keys, GitHub tokens, passwords, etc |
+
+### 12.6 LiteLLM Proxy
+
+| Variable | Valor actual | Origen | Futuro: ENV | Futuro: Super Admin | Notas |
+|----------|-------------|--------|-------------|---------------------|-------|
+| `llm_timeout_seconds` | 120 | ENV | Si | **Si — Global** | Timeout maximo por request al LLM |
+| `allowed_models` | ["*"] | DB/tenant | — | **Si — Por tenant** | Wildcard = todos. Ej: ["gpt-4o", "claude-sonnet-4-5"] |
+| `blocked_models` | [] | DB/tenant | — | **Si — Por tenant** | Modelos explicitamente bloqueados |
+| `max_tokens_per_request` | 4096 | DB/tenant | — | **Si — Por tenant** | Max tokens enviados al LLM |
+| `model_access` | ["*"] | DB/key | — | **Si — Por API key** | Modelos permitidos para esta key especifica |
+| `provider_keys_encrypted` | null | DB/key | — | **Si — Por API key** | BYOK keys cifradas. Formato: `{"openai": "sk-...", "anthropic": "sk-..."}` |
+| Streaming | Deshabilitado | HARDCODED | Externalizar | **Si — Global** | `stream: true` rechazado con 400. Planificado para fase futura |
+| LiteLLM fallback | No configurado | HARDCODED | Externalizar | No | Fallback entre providers si uno falla |
+
+### 12.7 Logging y Auditoria
+
+| Variable | Valor actual | Origen | Futuro: ENV | Futuro: Super Admin | Notas |
+|----------|-------------|--------|-------------|---------------------|-------|
+| `prompt_logging_mode` | hash | DB/tenant | — | **Si — Por tenant** | `hash`: SHA-256 del prompt. `encrypted`: AES-256-GCM del prompt completo |
+| `config_cache_ttl` | 60 | ENV | Si | No | Segundos que se cachea la config del tenant en memoria |
+| Log retention | Indefinido | HARDCODED | Externalizar | **Si — Global** | Dias antes de purgar logs antiguos. No implementado aun |
+| PII incident detail | Entidad + score + accion | HARDCODED | No | No | Se registra en `ai_gateway_pii_incident` |
+
+### 12.8 Seguridad y Auth
+
+| Variable | Valor actual | Origen | Futuro: ENV | Futuro: Super Admin | Notas |
+|----------|-------------|--------|-------------|---------------------|-------|
+| `ai_gateway_enabled` (tenant) | false | DB (tenant table) | — | **Si — Por tenant** | Toggle global AI Shield para el tenant |
+| `ai_gateway_enabled` (key) | false | DB (api_key table) | — | **Si — Por API key** | Toggle AI Shield para una key especifica |
+| `is_active` (key config) | true | DB/key | — | **Si — Por API key** | Revocar key config sin eliminar |
+| Ban check | Reutiliza `security_ban` | DB | — | **Si — Por tenant** | Misma tabla que SAST |
+| Cifrado BYOK | AES-256-GCM via HKDF | HARDCODED (algoritmo) | No | No | Algoritmo fijo, key derivada de `SECURETAG_SYSTEM_SECRET` |
+
+### 12.9 Docker / Infraestructura
+
+| Variable | Valor actual | Origen | Notas |
+|----------|-------------|--------|-------|
+| `mem_limit` ai-gateway | 768m | DOCKER | Aumentar a 2g con Droplet 8GB |
+| `mem_reservation` | No configurado | DOCKER | Agregar `mem_reservation: 512m` en 8GB |
+| Healthcheck interval | 30s | DOCKERFILE | `curl -f http://localhost:8000/healthz` |
+| Healthcheck start_period | 15s | DOCKERFILE | Tiempo antes del primer check |
+| Workers uvicorn | 1 | DOCKERFILE | Aumentar con mas CPU |
+| Puerto interno | 8000 | DOCKERFILE | Expuesto via Nginx en `/ai/` |
+| Nginx upstream | `/ai/` → core-ai-gateway:8000 | nginx/default.conf | Todo lo demas → core-api:8080 |
+
+---
+
+### 12.10 Resumen: Que va en ENV vs Super Admin
+
+**Variables de entorno (infraestructura, no cambian por tenant):**
+- Conexiones DB/Redis, secrets, log level, workers
+- Costos globales (credit_cost_proxy, credit_cost_blocked) — *aunque podrian moverse a DB por plan*
+- Defaults de rate limiting
+- Thresholds globales (pii_confidence, injection_score)
+- Cache TTL, LLM timeout
+
+**Super Admin Panel por tenant (la mayoria ya esta en DB, falta UI):**
+- Habilitar/deshabilitar AI Shield
+- PII action (redact/block/log_only) y entidades
+- Modelos permitidos/bloqueados
+- Rate limits
+- Prompt logging mode
+- Toggles de features (injection, secrets, output scanning)
+
+**Super Admin Panel por API key:**
+- Modelos permitidos
+- Rate limit RPM
+- BYOK provider keys
+- Revocar/activar
+
+**Pendiente de externalizar (actualmente HARDCODED):**
+- Ventana de rate limit (60s)
+- Idiomas PII soportados
+- Streaming toggle
+- Log retention policy
+- LiteLLM fallback config
+- Lista de secrets patterns

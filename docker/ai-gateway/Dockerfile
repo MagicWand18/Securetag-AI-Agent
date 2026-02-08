@@ -11,6 +11,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Descargar modelos spaCy para Presidio (EN + ES)
+RUN python -m spacy download en_core_web_sm && python -m spacy download es_core_news_sm
+
 # Copiar codigo
 COPY src ./src
 COPY pytest.ini .

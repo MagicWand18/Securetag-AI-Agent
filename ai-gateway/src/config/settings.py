@@ -29,6 +29,7 @@ class Settings(BaseSettings):
 
     # Pipeline
     injection_score_threshold: float = 0.8
+    pii_confidence_threshold: float = 0.5
 
     # Config cache TTL (segundos)
     config_cache_ttl: int = 60

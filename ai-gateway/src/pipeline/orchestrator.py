@@ -6,16 +6,17 @@ from fastapi import HTTPException
 from src.config.settings import get_settings
 from src.models.schemas import (
     AuthContext, ProxyRequest, TenantGatewayConfig, KeyConfig,
-    GatewayLogEntry, LogStatus
+    GatewayLogEntry, LogStatus, PiiAction, PiiIncident
 )
 from src.services.credits import (
     check_and_reserve_credits, charge_inspection_fee, get_balance
 )
-from src.services.audit_logger import fire_and_forget_log
+from src.services.audit_logger import fire_and_forget_log, fire_and_forget_log_with_pii
 from src.services.encryption import hash_prompt, encrypt_value
 from src.middleware.tenant_context import get_tenant_config, get_key_config
 from src.middleware.rate_limit import check_rate_limit
 from src.pipeline.llm_proxy import call_llm
+from src.pipeline.presidio_scan import scan_messages
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +31,7 @@ async def process_request(
     2. Credits check (upfront)
     3. Model validation
     4. LLM Guard input (stub Fase 3)
-    5. Presidio PII (stub Fase 2)
+    5. Presidio PII scan (redact/block/log_only)
     6. LiteLLM call
     7. LLM Guard output (stub Fase 3)
     8. Credits confirm
@@ -80,9 +81,49 @@ async def process_request(
     # 4. LLM Guard input scan (stub - Fase 3)
     # TODO: Fase 3 - PromptInjectionScanner + SecretsScanner
 
-    # 5. Presidio PII scan (stub - Fase 2)
-    # TODO: Fase 2 - PII detection + redaction
-    sanitized_messages = [m.model_dump() for m in request.messages]
+    # 5. Presidio PII scan
+    raw_messages = [m.model_dump() for m in request.messages]
+    pii_result = scan_messages(
+        messages=raw_messages,
+        pii_action=config.pii_action,
+        pii_entities=config.pii_entities,
+        tenant_id=auth.tenant_id,
+    )
+
+    pii_incidents_data = []
+    if pii_result.pii_found:
+        # Preparar modelos PiiIncident (log_id se asigna despues en fire_and_forget)
+        pii_incidents_data = [
+            PiiIncident(
+                log_id="pending",
+                tenant_id=auth.tenant_id,
+                entity_type=inc["entity_type"],
+                action_taken=inc["action"],
+                confidence=inc["score"],
+            )
+            for inc in pii_result.incidents
+        ]
+
+        if config.pii_action == PiiAction.BLOCK:
+            # Reembolso parcial y bloqueo
+            await charge_inspection_fee(
+                auth.tenant_id,
+                settings.credit_cost_proxy,
+                settings.credit_cost_blocked,
+            )
+            _log_blocked(auth, request, LogStatus.BLOCKED_PII, start_time)
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error": "PII detected in request",
+                    "entities": [
+                        {"type": inc["entity_type"], "score": inc["score"]}
+                        for inc in pii_result.incidents
+                    ],
+                }
+            )
+
+    sanitized_messages = pii_result.sanitized_messages
 
     # 6. Resolver provider key (BYOK)
     provider_key = _resolve_provider_key(request, key_config)
@@ -128,8 +169,13 @@ async def process_request(
         credits_charged=settings.credit_cost_proxy,
         latency_ms=latency_ms,
         status=LogStatus.SUCCESS,
+        pii_detected=pii_result.incidents if pii_result.pii_found else None,
     )
-    fire_and_forget_log(log_entry)
+
+    if pii_incidents_data:
+        fire_and_forget_log_with_pii(log_entry, pii_incidents_data)
+    else:
+        fire_and_forget_log(log_entry)
 
     return llm_response
 

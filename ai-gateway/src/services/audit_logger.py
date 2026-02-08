@@ -75,9 +75,34 @@ def fire_and_forget_log(entry: GatewayLogEntry) -> None:
     asyncio.create_task(_safe_log(entry))
 
 
+def fire_and_forget_log_with_pii(
+    entry: GatewayLogEntry, pii_incidents: list[PiiIncident]
+) -> None:
+    """
+    Lanza log + PII incidents de forma asincrona.
+    Encadena: log_request() → obtiene log_id → log_pii_incidents() con log_id real.
+    """
+    asyncio.create_task(_safe_log_with_pii(entry, pii_incidents))
+
+
 async def _safe_log(entry: GatewayLogEntry) -> None:
     """Wrapper seguro para logging asincrono."""
     try:
         await log_request(entry)
     except Exception as e:
         logger.error(f"Error en fire-and-forget log: {e}")
+
+
+async def _safe_log_with_pii(
+    entry: GatewayLogEntry, pii_incidents: list[PiiIncident]
+) -> None:
+    """Wrapper seguro para logging asincrono con PII incidents."""
+    try:
+        log_id = await log_request(entry)
+        if log_id and pii_incidents:
+            # Asignar el log_id real a cada incidente
+            for incident in pii_incidents:
+                incident.log_id = log_id
+            await log_pii_incidents(pii_incidents)
+    except Exception as e:
+        logger.error(f"Error en fire-and-forget log con PII: {e}")

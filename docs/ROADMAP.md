@@ -8,7 +8,7 @@
 
 ## Prioridad 0: EN DESARROLLO — AI Shield (AI Security Gateway) [F15]
 
-**Estado**: En progreso — Fase 0 y Fase 1 completadas (2026-02-08)
+**Estado**: En progreso — Fases 0, 1 y 2 completadas (2026-02-08)
 **Plan detallado**: [`docs/PLAN_AI_SHIELD.md`](./PLAN_AI_SHIELD.md)
 **Estimacion**: 27-35 dias (1 desarrollador)
 **Monetizacion**: 0.1 creditos/request proxeado, 0.01 creditos/request bloqueado
@@ -25,13 +25,13 @@ Proxy de seguridad entre desarrolladores y LLMs externos (OpenAI, Claude, Gemini
 |------|-----------|------|--------|
 | 0. Infra | Verificar RAM, mem_limit | 1 | ✅ Completada |
 | 1. Foundation | Proxy + auth + credits + logs | 5-7 | ✅ Completada |
-| 2. Presidio | PII detection (EN+ES) | 4-5 | Pendiente |
+| 2. Presidio | PII detection + redaction (EN+ES) | 4-5 | ✅ Completada |
 | 3. LLM Guard | Injection + secrets | 4-5 | Pendiente |
 | 4. Management API | CRUD + analytics Node.js | 5-6 | Pendiente |
 | 5. Hardening | Resilience + rate limiting | 3-4 | Pendiente |
 | 6. Frontend | Modulo AI Shield en dashboard | 5-7 | Pendiente |
 
-**Bug conocido**: `credits_balance` es INTEGER en DB. Cobro de 0.1 creditos se trunca a 0. Requiere migracion a NUMERIC(10,2). Ver detalles en PLAN_AI_SHIELD.md Fase 1.
+**Bug corregido**: `credits_balance` migrado de INTEGER a NUMERIC(10,2) (migracion 029). Cobro fraccionario de creditos ahora funciona correctamente.
 
 ---
 

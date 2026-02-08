@@ -42,7 +42,7 @@ SecureTag AI es una plataforma SaaS de ciberseguridad de nueva generacion con do
 | **Migrations** | Liquibase | `core-migrate` | Schema versioning |
 | **Backup** | PostgreSQL Alpine | `core-backup` | Backups cifrados automaticos |
 | **LLM** | Ollama / RunPod | Externo | Modelo `securetag-v1` (Llama 3.1 8B fine-tuned) |
-| **AI Gateway** | Python 3.11 (FastAPI) | `core-ai-gateway` | Proxy IA: LiteLLM + auth + credits + logging (PII/injection en fases futuras) |
+| **AI Gateway** | Python 3.11 (FastAPI) | `core-ai-gateway` | Proxy IA: LiteLLM + auth + credits + PII detection/redaction + logging |
 
 ### Herramientas integradas
 
@@ -63,7 +63,7 @@ Semgrep (SAST), Nmap, Nuclei, Ffuf, Gobuster, Amass, Subfinder, Httpx, Katana, S
 | **F11** | QA & Validacion | 5/5 | COMPLETADO |
 | **F12** | Enterprise Features | 4/5 | 80% |
 | **F13** | Offensive AI (xpl01t) | 0/3 | 0% |
-| **F15** | AI Shield (AI Security Gateway) | 2/6 | ~33% - EN PROGRESO |
+| **F15** | AI Shield (AI Security Gateway) | 3/6 | 50% - EN PROGRESO |
 | **F14** | Frontend SaaS | 5/5 | COMPLETADO |
 | **Backlog F0** | Hotfixes & Estabilizacion | Completo | COMPLETADO |
 | **Backlog F1** | Release Critical | Completo | COMPLETADO |
@@ -136,7 +136,7 @@ Semgrep (SAST), Nmap, Nuclei, Ffuf, Gobuster, Amass, Subfinder, Httpx, Katana, S
 #### EN DESARROLLO: AI Shield [F15] - Prioridad P0
 - [x] **F15.0**: Verificacion de infraestructura (RAM, mem_limit) ✅ 2026-02-08
 - [x] **F15.1**: Proxy basico funcional (FastAPI + LiteLLM + auth + credits) ✅ 2026-02-08
-- [ ] **F15.2**: Presidio PII detection + redaction (EN + ES)
+- [x] **F15.2**: Presidio PII detection + redaction (EN + ES) ✅ 2026-02-08
 - [ ] **F15.3**: LLM Guard injection + secrets scanning
 - [ ] **F15.4**: Management API Node.js (CRUD config, keys, analytics)
 - [ ] **F15.5**: Hardening + resilience
