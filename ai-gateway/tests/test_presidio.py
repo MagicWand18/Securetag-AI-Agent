@@ -206,7 +206,7 @@ class TestPiiModes:
 
         assert result.pii_found is True
         assert result.sanitized_messages[0]["content"] == "<PERSON> said hello"
-        assert result.incidents[0]["action"] == "redact"
+        assert result.incidents[0]["action"] == "redacted"
 
     def test_block_does_not_modify_content(self):
         """Modo block NO modifica el contenido (se bloquea en orchestrator)."""
@@ -221,7 +221,7 @@ class TestPiiModes:
 
         assert result.pii_found is True
         assert result.sanitized_messages[0]["content"] == "John Doe said hello"
-        assert result.incidents[0]["action"] == "block"
+        assert result.incidents[0]["action"] == "blocked"
 
     def test_log_only_does_not_modify_content(self):
         """Modo log_only NO modifica el contenido."""
@@ -236,14 +236,14 @@ class TestPiiModes:
 
         assert result.pii_found is True
         assert result.sanitized_messages[0]["content"] == "John Doe said hello"
-        assert result.incidents[0]["action"] == "log"
+        assert result.incidents[0]["action"] == "logged"
 
     def test_incident_labels_match_action(self):
-        """Los labels de accion coinciden con el modo configurado."""
+        """Los labels de accion coinciden con el modo configurado (DB constraint)."""
         for action, expected_label in [
-            (PiiAction.REDACT, "redact"),
-            (PiiAction.BLOCK, "block"),
-            (PiiAction.LOG_ONLY, "log"),
+            (PiiAction.REDACT, "redacted"),
+            (PiiAction.BLOCK, "blocked"),
+            (PiiAction.LOG_ONLY, "logged"),
         ]:
             _setup_mocks(
                 self._make_analyzer_with_person(),

@@ -170,8 +170,9 @@ def scan_messages(
             sanitized.append(msg.copy())
             continue
 
-        # Registrar incidentes
-        action_label = pii_action.value.rstrip("_only")  # redact, block, log
+        # Registrar incidentes (labels deben coincidir con DB check constraint)
+        _action_map = {"redact": "redacted", "block": "blocked", "log_only": "logged"}
+        action_label = _action_map.get(pii_action.value, pii_action.value)
         for result in merged:
             all_incidents.append({
                 "entity_type": result.entity_type,
