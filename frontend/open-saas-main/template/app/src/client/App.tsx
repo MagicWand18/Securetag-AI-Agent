@@ -36,6 +36,7 @@ export default function App() {
     const validAppPrefixes = [
       "/dashboard",
       "/sast",
+      "/chat",
       // "/waf", // WAF is coming soon, hide nav
       // "/osint", // OSINT is coming soon, hide nav
       "/settings",

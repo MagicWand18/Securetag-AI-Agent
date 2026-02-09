@@ -1,16 +1,19 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "../utils";
 import { useAuth } from "wasp/client/auth";
-import { 
-  LayoutDashboard, 
-  ShieldAlert, 
-  ScanSearch, 
-  FileText, 
+import {
+  LayoutDashboard,
+  ShieldAlert,
+  ScanSearch,
+  FileText,
   Settings,
   Plus,
   Users,
   CreditCard,
-  User
+  User,
+  MessageSquarePlus,
+  History,
+  Shield
 } from "lucide-react";
 
 interface SidebarItem {
@@ -25,7 +28,12 @@ export function Sidebar() {
   const { data: user } = useAuth();
 
   const getLinks = (): SidebarItem[] => {
-    if (path.startsWith("/sast")) {
+    if (path.startsWith("/chat")) {
+      return [
+        { name: "New Chat", to: "/chat", icon: MessageSquarePlus },
+        { name: "History", to: "/chat", icon: History },
+      ];
+    } else if (path.startsWith("/sast")) {
       return [
         { name: "Dashboard", to: "/sast", icon: LayoutDashboard },
         { name: "New Scan", to: "/sast/new", icon: Plus },
@@ -53,6 +61,7 @@ export function Sidebar() {
   };
 
   const getModuleHeader = () => {
+    if (path.startsWith("/chat")) return "// AI SHIELD";
     if (path.startsWith("/sast")) return "// SAST MODULE";
     if (path.startsWith("/waf")) return "// WAF DEFENSE";
     if (path.startsWith("/osint")) return "// INTELLIGENCE";

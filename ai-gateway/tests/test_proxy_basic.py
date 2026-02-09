@@ -69,14 +69,19 @@ class TestProxyEndpoint:
         assert data["choices"][0]["message"]["content"] == "Hello!"
         assert data["usage"]["total_tokens"] == 8
 
+    @patch("src.pipeline.orchestrator.scan_input")
+    @patch("src.pipeline.orchestrator.scan_messages")
+    @patch("src.pipeline.orchestrator.call_llm_stream")
+    @patch("src.pipeline.orchestrator.check_and_reserve_credits")
     @patch("src.pipeline.orchestrator.check_rate_limit")
     @patch("src.pipeline.orchestrator.get_key_config")
     @patch("src.pipeline.orchestrator.get_tenant_config")
     @patch("src.routes.proxy.authenticate_request")
-    def test_stream_not_supported(
-        self, mock_auth, mock_config, mock_key_config, mock_rate, client
+    def test_stream_returns_event_stream(
+        self, mock_auth, mock_config, mock_key_config, mock_rate,
+        mock_credits, mock_llm_stream, mock_scan_msg, mock_scan_input, client
     ):
-        """Request con stream=true retorna 400 (no soportado en MVP)."""
+        """Request con stream=true retorna StreamingResponse con content-type text/event-stream."""
         mock_auth.return_value = AuthContext(
             tenant_id="t", api_key_id="k", key_hash="h",
             ai_gateway_enabled=True,
@@ -85,6 +90,29 @@ class TestProxyEndpoint:
         mock_config.return_value = TenantGatewayConfig(tenant_id="t")
         mock_key_config.return_value = None
         mock_rate.return_value = None
+        mock_credits.return_value = True
+
+        from src.pipeline.llm_guard_scan import InputScanResult
+        mock_scan_input.return_value = InputScanResult()
+        from src.pipeline.presidio_scan import PiiScanResult
+        mock_scan_msg.return_value = PiiScanResult(
+            sanitized_messages=[{"role": "user", "content": "hi"}],
+            pii_found=False, incidents=[],
+        )
+
+        # Simular stream con un chunk
+        chunk = MagicMock()
+        chunk.model_dump.return_value = {
+            "id": "chatcmpl-test",
+            "object": "chat.completion.chunk",
+            "model": "gpt-4o",
+            "choices": [{"index": 0, "delta": {"content": "Hi"}, "finish_reason": None}],
+        }
+
+        async def async_iter():
+            yield chunk
+
+        mock_llm_stream.return_value = async_iter()
 
         response = client.post(
             "/v1/chat/completions",
@@ -95,8 +123,8 @@ class TestProxyEndpoint:
             },
             headers={"X-API-Key": "key"},
         )
-        assert response.status_code == 400
-        assert "stream" in response.json()["detail"].lower()
+        assert response.status_code == 200
+        assert response.headers["content-type"].startswith("text/event-stream")
 
 
 class TestHealthEndpoint:

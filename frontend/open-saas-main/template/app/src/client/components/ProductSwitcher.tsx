@@ -16,6 +16,7 @@ export function ProductSwitcher() {
   const getCurrentProduct = () => {
     const path = location.pathname;
     if (path.startsWith("/sast")) return "/sast";
+    if (path.startsWith("/chat")) return "/chat";
     if (path.startsWith("/waf")) return "/waf";
     if (path.startsWith("/osint")) return "/osint";
     return "/dashboard"; // Default to General
@@ -35,6 +36,7 @@ export function ProductSwitcher() {
       <SelectContent>
         <SelectItem value="/dashboard">General</SelectItem>
         <SelectItem value="/sast">SecureTag SAST</SelectItem>
+        <SelectItem value="/chat">AI Shield Chat</SelectItem>
         <SelectItem value="/waf">SecureTag WAF</SelectItem>
         <SelectItem value="/osint">SecureTag OSINT</SelectItem>
       </SelectContent>

@@ -169,6 +169,45 @@ page OsintScansPage {
 }
 //#endregion
 
+//#region AI Shield Chat
+route ChatRoute { path: "/chat", to: ChatPage }
+page ChatPage {
+  authRequired: true,
+  component: import ChatPage from "@src/client/pages/chat/ChatPage"
+}
+
+route ChatConversationRoute { path: "/chat/:id", to: ChatConversationPage }
+page ChatConversationPage {
+  authRequired: true,
+  component: import ChatPage from "@src/client/pages/chat/ChatPage"
+}
+
+query getConversations {
+  fn: import { getConversations } from "@src/server/actions/chat",
+  entities: [User, ChatConversation]
+}
+
+query getMessages {
+  fn: import { getMessages } from "@src/server/actions/chat",
+  entities: [User, ChatConversation, ChatMessage]
+}
+
+action createConversation {
+  fn: import { createConversation } from "@src/server/actions/chat",
+  entities: [User, ChatConversation]
+}
+
+action saveMessage {
+  fn: import { saveMessage } from "@src/server/actions/chat",
+  entities: [User, ChatConversation, ChatMessage]
+}
+
+action deleteConversation {
+  fn: import { deleteConversation } from "@src/server/actions/chat",
+  entities: [User, ChatConversation, ChatMessage]
+}
+//#endregion
+
 //#region Auth Pages
 route LoginRoute { path: "/login", to: LoginPage }
 page LoginPage {

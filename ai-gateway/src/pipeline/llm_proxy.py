@@ -46,3 +46,36 @@ async def call_llm(
     )
 
     return result
+
+
+async def call_llm_stream(
+    model: str,
+    messages: list[dict],
+    api_key: str | None = None,
+    temperature: float | None = None,
+    max_tokens: int | None = None,
+    timeout: int = 120,
+):
+    """
+    Llama al LLM en modo streaming via LiteLLM.
+    Retorna un async iterator de chunks (formato OpenAI SSE).
+    El ultimo chunk incluye usage con token counts gracias a stream_options.
+    """
+    kwargs: dict = {
+        "model": model,
+        "messages": messages,
+        "stream": True,
+        "stream_options": {"include_usage": True},
+        "timeout": timeout,
+    }
+
+    if api_key:
+        kwargs["api_key"] = api_key
+    if temperature is not None:
+        kwargs["temperature"] = temperature
+    if max_tokens is not None:
+        kwargs["max_tokens"] = max_tokens
+
+    logger.info(f"Llamando a LLM (stream): model={model} messages={len(messages)}")
+
+    return await litellm.acompletion(**kwargs)
