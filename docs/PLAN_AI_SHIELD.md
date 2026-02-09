@@ -1,8 +1,8 @@
 # Plan de Implementacion: AI Shield (AI Security Gateway)
 
-> **Version**: 1.4
+> **Version**: 2.0
 > **Fecha**: 2026-02-08
-> **Estado**: En progreso - Fases 0, 1 y 2 completadas y deployadas. 63 tests pasando.
+> **Estado**: Fases 0-3 completadas y deployadas. Fases 5 (streaming) y 6 (Chat UI) implementadas localmente (pendiente deploy). 131 tests (todos pasando). Security hardening completado (2026-02-08, Ronda 1+2): credenciales externalizadas, deps actualizadas, input validation (max_tokens/role/content), asyncio.to_thread, refactor orchestrator, SSE Semaphore(50) DoS protection, SecurityHeadersMiddleware (CSP/X-Frame/nosniff/Referrer), FastAPI /docs condicional, debug logs eliminados.
 > **Prioridad**: P0 (siguiente modulo a construir)
 > **Estimacion**: 25-33 dias (1 desarrollador)
 
@@ -10,16 +10,57 @@
 
 ## 1. Objetivo
 
-Construir un **AI Security Gateway** como nuevo modulo de SecureTag que actua como proxy entre los desarrolladores del cliente y las APIs de LLMs externos (OpenAI, Claude, Gemini). El gateway intercepta, inspecciona y sanitiza todo el trafico IA para prevenir fuga de datos sensibles.
+Construir un **AI Security Gateway** como nuevo modulo de SecureTag que protege a las empresas en sus interacciones con IAs externas (OpenAI, Claude, Gemini). El modulo ofrece dos modos de entrega complementarios:
 
-### Problema que resuelve
+1. **Chat UI** (modo principal): Interfaz de chat estilo ChatGPT donde los desarrolladores interactuan con IAs. IT bloquea el acceso directo a ChatGPT/Claude/etc y redirige a los equipos a `chat.securetag.com`, donde AI Shield corre transparentemente entre el usuario y el LLM.
+2. **API Proxy** (modo programatico): Para integraciones CI/CD, scripts, y herramientas que consumen APIs de LLM por codigo. El desarrollador cambia su `base_url` a `api.securetag.com.mx/ai/v1` y el trafico se inspecciona automaticamente.
 
-Los equipos de desarrollo usan IAs externas diariamente y envian codigo, datos de clientes y credenciales sin ninguna visibilidad ni control. AI Shield ofrece:
+### Caso de uso real
 
-1. **Visibilidad**: Logs de todo lo que se envia a las IAs
-2. **Proteccion**: Deteccion y redaccion automatica de PII, secrets y credenciales
-3. **Control**: Politicas configurables de bloqueo por tenant
-4. **Auditoria**: Dashboard con metricas de uso, costos e incidentes
+> El **Cliente A** tiene un area de desarrollo que ya utiliza multiples IAs (ChatGPT, Claude, Gemini, Copilot) en su dia a dia. El cliente esta preocupado por:
+>
+> 1. **Lo que SALE hacia la IA**: Desarrolladores pegan codigo propietario, datos de clientes (PII), credenciales y secretos en prompts de IA sin ningun control.
+> 2. **Lo que ENTRA desde la IA**: El codigo generado por la IA puede contener vulnerabilidades de seguridad (SQL injection, XSS, hardcoded secrets) que los desarrolladores copian directamente a produccion.
+>
+> El cliente **no quiere prohibir** el uso de IA (entiende su valor), pero necesita **visibilidad y seguridad** mientras sus equipos la usan. Tampoco quiere invertir en infraestructura local para hostear su propio LLM.
+
+### Que ofrece AI Shield
+
+1. **Visibilidad**: Logs completos de todo lo que se envia a las IAs y lo que se recibe
+2. **Proteccion de salida (Outbound)**: Deteccion y redaccion automatica de PII, secrets y credenciales antes de que lleguen al LLM
+3. **Proteccion de entrada (Inbound)**: Escaneo SAST del codigo generado por la IA + auto-fix de vulnerabilidades antes de entregarlo al desarrollador
+4. **Control**: Politicas configurables de bloqueo/redaccion por tenant y por API key
+5. **Auditoria**: Dashboard con metricas de uso, costos, incidentes de seguridad y vulnerabilidades corregidas
+6. **Interfaz propia**: Chat UI que reemplaza el acceso directo a ChatGPT/Claude, centralizando el uso de IA bajo las politicas de seguridad de la empresa
+
+### Dos flujos de proteccion
+
+```
+FLUJO 1: Proteccion de lo que SALE (Outbound)
+  Developer escribe prompt → AI Shield intercepta →
+  PII scan (nombres, emails, phones, tarjetas) →
+  Secrets scan (API keys, tokens, passwords) →
+  Injection detection (prompt injection attempts) →
+  Prompt sanitizado → LLM externo
+
+FLUJO 2: Proteccion de lo que ENTRA (Inbound)
+  LLM responde con codigo → AI Shield intercepta →
+  PII scan en respuesta (datos que el LLM genero) →
+  Secrets scan en respuesta →
+  SAST scan del codigo generado (SQL injection, XSS, etc) →
+  Auto-fix de vulnerabilidades (securetag-v1) →
+  Codigo seguro → Developer
+```
+
+### Por que Chat UI y no solo API proxy
+
+Los desarrolladores usan IA a traves de **interfaces graficas** (ChatGPT web/desktop, Claude.ai, navegador, IDEs con Copilot), no a traves de APIs programaticas. Cambiar una `base_url` no resuelve el caso de uso principal. La solucion real es:
+
+- Dar al equipo una **interfaz identica a ChatGPT** alojada en la infraestructura del cliente o en SecureTag
+- IT bloquea acceso directo a `chat.openai.com`, `claude.ai`, etc via firewall/DNS
+- Los desarrolladores usan `chat.securetag.com` (o el subdominio del cliente) como su herramienta de IA
+- Todo el trafico pasa transparentemente por el pipeline de AI Shield
+- El API proxy sigue disponible para scripts, CI/CD, y herramientas programaticas
 
 ### Modelo de negocio
 
@@ -31,32 +72,66 @@ Los equipos de desarrollo usan IAs externas diariamente y envian codigo, datos d
 
 ## 2. Arquitectura
 
+### Dos modos de entrega
+
 ```
-Developer (con su API key de OpenAI/Claude/Gemini)
-         |
-         v
-   Nginx (:80) /ai/*
-         |
-         v
-+------------------------------+
-|  core-ai-gateway (Python)    | <-- NUEVO contenedor
-|  FastAPI :8000               |
-|                              |
-|  1. Auth (X-API-Key + perm)  |
-|  2. Credits check (upfront)  |
-|  3. LLM Guard (injection)    |
-|  4. Presidio (PII redaction) |
-|  5. LiteLLM (proxy -> LLM)   |
-|  6. LLM Guard (output scan)  |
-|  7. Credits deduct (confirm) |
-|  8. Log async -> PostgreSQL   |
-+-------------+----------------+
+MODO 1: Chat UI (interfaz principal para desarrolladores)
+
+  Developer → chat.securetag.com (React Chat UI)
+                    |
+                    v
+              Nginx (:80) /ai/*
+                    |
+                    v
+           core-ai-gateway (Python, FastAPI :8000)
+                    |
+           [Pipeline de seguridad completo]
+                    |
+              OpenAI / Claude / Gemini (BYOK)
+
+
+MODO 2: API Proxy (para scripts, CI/CD, herramientas)
+
+  Developer script / CI/CD → base_url: api.securetag.com.mx/ai/v1
+                                        |
+                                        v
+                                  Nginx (:80) /ai/*
+                                        |
+                                        v
+                               core-ai-gateway (Python)
+                                        |
+                               [Mismo pipeline de seguridad]
+                                        |
+                                  OpenAI / Claude / Gemini
+```
+
+### Pipeline de seguridad (compartido por ambos modos)
+
+```
++---------------------------------------------+
+|  core-ai-gateway (Python, FastAPI :8000)     |
+|                                              |
+|  OUTBOUND (proteccion de lo que sale):       |
+|  1. Auth (X-API-Key + permisos)              |
+|  2. Credits check (upfront)                  |
+|  3. LLM Guard input (injection + secrets)    |
+|  4. Presidio PII scan (redact/block/log)     |
+|  5. LiteLLM call (proxy → LLM externo)       |
+|                                              |
+|  INBOUND (proteccion de lo que entra):       |
+|  6. LLM Guard output (PII + secrets)         |
+|  7. SAST scan del codigo generado (futuro)   |
+|  8. Auto-fix vulnerabilidades (futuro)       |
+|  9. Credits confirm                          |
+| 10. Async log → PostgreSQL                   |
++---------------------------------------------+
               |
        +------+------+
        v      v      v
     OpenAI  Claude  Gemini  (BYOK keys del tenant)
 
 Dashboard/Config: core-api (Node.js) lee las mismas tablas
+Chat UI: frontend React con WebSocket/SSE para streaming
 ```
 
 ### Principio de independencia
@@ -78,10 +153,13 @@ AI Shield es un modulo de negocio **independiente** de SAST:
 | DB | Misma PostgreSQL (`core-db`), schema `securetag` | Reutiliza infra, dashboard lee directo |
 | Config cache | In-memory 60s + Redis pub/sub para invalidar | Patron identico a `security.ts` ban-sync |
 | Logging | Pipeline sincrono, logging async (fire-and-forget) | No anade latencia al proxy |
-| Streaming | NO en MVP. Solo `stream: false` | Simplifica output scanning. Streaming en fase futura |
+| Streaming | SSE implementado (Fase 5). Patron prepare_stream + generate_stream | Output scan post-stream en modo log-only. Pre-checks lanzan HTTPException antes de iniciar stream |
 | NeMo Guardrails | NO en MVP. Fase futura | PII + Injection + Secrets son suficientes para lanzar |
 | PII idiomas | Ingles + Espanol | Mercado objetivo LATAM + US |
 | Cifrado BYOK | AES-256-GCM, key derivada de `SECURETAG_SYSTEM_SECRET` via HKDF | Reutiliza secreto existente |
+| Interfaz principal | Chat UI estilo ChatGPT | Developers usan interfaces graficas, no APIs. IT bloquea ChatGPT directo |
+| SAST en output | Fase futura (post-Fase 6) | Escanear codigo generado por LLM + auto-fix con securetag-v1 |
+| Delivery modes | Chat UI (principal) + API Proxy (programatico) | Chat para uso interactivo, API para CI/CD y scripts |
 
 ---
 
@@ -125,6 +203,7 @@ AI Shield es un modulo de negocio **independiente** de SAST:
 │       ├── test_llm_guard.py
 │       ├── test_orchestrator.py
 │       ├── test_credits.py
+│       ├── test_streaming.py
 │       └── test_resilience.py
 │
 ├── src/server/routes/
@@ -668,69 +747,112 @@ curl ... -d '{"messages":[{"role":"user","content":"My AWS key is AKIAIOSFODNN7E
 
 ---
 
-### Fase 5: Hardening + Resilience (3-4 dias)
+### Fase 5: Streaming SSE + Hardening (3-4 dias) — PARCIALMENTE IMPLEMENTADA 2026-02-08
 
-**Objetivo**: Manejo robusto de errores, rate limiting, y performance.
+**Objetivo**: Streaming SSE para Chat UI + manejo robusto de errores.
 
-**Tests:**
-- `test_resilience.py`:
-  - LLM timeout (120s) -> error graceful + reembolso 0.1
-  - LLM error 500 -> error graceful + reembolso 0.1
-  - Si Presidio falla -> fail-open (loguea error, deja pasar)
-  - Si LLM Guard falla -> fail-open (loguea error, deja pasar)
-  - Rate limit >30 RPM por key -> 429
-  - Rate limit >60 RPM por tenant -> 429
-  - 10 requests concurrentes -> todos procesados correctamente
-  - Overhead del pipeline (sin LLM): <200ms
-  - Memory container: <2GB con spaCy + LLM Guard cargados
+**Streaming SSE — IMPLEMENTADO:**
 
-**Test de integracion cross-module:**
-```bash
-# Si core-ai-gateway se cae, SAST sigue funcionando
-docker stop core-ai-gateway
-curl -X POST http://localhost/codeaudit/upload ... # -> Funciona
-docker start core-ai-gateway
+Patron arquitectonico `prepare_stream() + generate_stream()`:
+- `prepare_stream()` — coroutine regular que ejecuta pre-checks (auth, credits, guards, PII). Lanza HTTPException si falla → cliente recibe JSON error normal
+- `generate_stream()` — async generator puro que solo yield chunks SSE. No puede lanzar excepciones HTTP
+- `proxy.py` llama `prepare_stream()` primero, luego wrappea `generate_stream()` en `StreamingResponse`
+- Output scan post-stream es LOG-ONLY (no se puede bloquear texto ya enviado al cliente)
 
-# Si core-worker se cae, AI Shield sigue funcionando
-docker stop core-worker
-curl -X POST http://localhost/ai/v1/chat/completions ... # -> Funciona
-docker start core-worker
-```
+**Archivos creados/modificados:**
+- `ai-gateway/src/pipeline/llm_proxy.py` — Agregada `call_llm_stream()` con `stream=True` y `stream_options={"include_usage": True}`
+- `ai-gateway/src/pipeline/orchestrator.py` — Agregadas `prepare_stream()` y `generate_stream()`, removida rejection de stream
+- `ai-gateway/src/routes/proxy.py` — Branch `body.stream` → `StreamingResponse` con headers SSE
+- `ai-gateway/src/main.py` — Agregado `CORSMiddleware`
+- `ai-gateway/src/config/settings.py` — Agregado `cors_origins`
+- `nginx/default.conf` — Directivas SSE: `proxy_buffering off`, `proxy_cache off`, `Connection ''`, timeouts 300s
+
+**Tests (15 nuevos en `test_streaming.py`):**
+- TestStreamEndpoint: auth 401, event-stream content-type, SSE format con [DONE], no-credits 402
+- TestStreamLLMProxy: stream=True pasado, retorna iterator, forwards params
+- TestStreamPipeline: injection 403 antes del stream, secrets 400 antes del stream, PII redactado antes del stream
+- TestStreamOutputScan: ejecuta despues del stream, no modifica texto ya enviado
+- TestStreamLogging: token usage, refund on error, PII incidents logueados
+
+**Pendiente de Fase 5:**
+- Deploy streaming a produccion
+- Test de integracion cross-module
+- Benchmark de overhead del pipeline
+- Tests de resilience (LLM timeout, fail-open, rate limiting extremo)
 
 ---
 
-### Fase 6: Frontend — Modulo AI Shield (5-7 dias)
+### Fase 6: Frontend — Chat UI + Admin Dashboard (7-10 dias) — PARCIALMENTE IMPLEMENTADA 2026-02-08
 
-**Objetivo**: Integrar AI Shield como modulo en el dashboard Wasp.
+**Objetivo**: Dos interfaces frontend:
+1. **Chat UI** (producto principal): Interfaz de chat estilo ChatGPT para desarrolladores
+2. **Admin Dashboard**: Panel de configuracion, analytics y logs para administradores IT
+
+#### 6A. Chat UI — IMPLEMENTADA
+
+La interfaz principal del producto. Los desarrolladores del cliente usan esta UI en lugar de ChatGPT/Claude directamente.
+
+**Funcionalidades implementadas:**
+- Chat conversacional con streaming SSE contra multiples LLMs (GPT-4o-mini, GPT-4o, Claude Sonnet 4.5, Claude Haiku 4.5)
+- Selector de modelo (Radix Select dropdown)
+- Historial de conversaciones persistido en DB (Prisma ChatConversation + ChatMessage)
+- Indicadores de seguridad: badge "PII Redacted" cuando se detecta redaccion
+- Markdown rendering con react-markdown + syntax highlighting para code blocks
+- Sugerencias de prompt iniciales ("Explica qué es OWASP Top 10", etc.)
+- API key en localStorage con dialogo de configuracion
+- Sidebar colapsable con lista de conversaciones + delete
+- Auto-scroll, cursor de streaming, abort support
+
+**Archivos creados:**
+```
+frontend/.../src/client/pages/chat/
+├── ChatPage.tsx                 # Pagina principal del chat (streaming SSE via fetch)
+└── components/
+    ├── MessageBubble.tsx        # User (azul, derecha) / assistant (gris, izquierda)
+    ├── ChatSidebar.tsx          # Lista de conversaciones con timestamps relativos
+    ├── ModelSelector.tsx        # Radix Select con 4 modelos LLM
+    ├── ChatInput.tsx            # Textarea auto-grow, Enter=enviar, Shift+Enter=newline
+    └── ApiKeyPrompt.tsx         # Dialog para ingresar API key
+```
+
+**Server operations:**
+```
+frontend/.../src/server/actions/chat.ts   # getConversations, getMessages, createConversation, saveMessage, deleteConversation
+```
+
+**Prisma models:**
+- `ChatConversation` — id, title, model, userId, messages[], timestamps
+- `ChatMessage` — id, role, content, model, completionTokens, piiRedacted, conversationId, timestamps
 
 **Archivos modificados del frontend:**
-- `ProductSwitcher.tsx` — agregar "SecureTag AI Shield"
-- `Sidebar.tsx` — agregar links: Dashboard, Configuration, API Keys, Logs
-- `App.tsx` — agregar `/ai-shield` a validAppPrefixes
-- `main.wasp` — registrar rutas AI Shield
+- `ProductSwitcher.tsx` — agregado "AI Shield Chat" al dropdown
+- `Sidebar.tsx` — agregada branch `/chat` con links "New Chat" + "History", header "// AI SHIELD"
+- `App.tsx` — agregado `/chat` a validAppPrefixes
+- `main.wasp` — registradas routes `/chat` y `/chat/:id`, queries getConversations/getMessages, actions createConversation/saveMessage/deleteConversation
+- `schema.prisma` — modelos ChatConversation y ChatMessage, relacion User.chatConversations
 
-**Archivos nuevos del frontend:**
+**Ruta**: `/chat` y `/chat/:id` dentro del dashboard
+
+#### 6B. Admin Dashboard — PENDIENTE
+
+Panel para el administrador IT del cliente. Configuracion, monitoreo y auditoria.
+
+**Archivos pendientes:**
 ```
-frontend/.../src/client/pages/ai-shield/
-├── AiShieldDashboardPage.tsx    # Stats: requests, blocked, PII, cost (graficas)
-├── AiShieldConfigPage.tsx       # Toggle features, PII action, models, logging mode
+frontend/.../src/client/pages/ai-shield/admin/
+├── AiShieldDashboardPage.tsx    # Stats: requests, blocked, PII, cost, vulns fixed (graficas)
+├── AiShieldConfigPage.tsx       # Toggle features, PII action, models, SAST output, logging mode
 ├── AiShieldKeysPage.tsx         # CRUD gateway keys + BYOK config (keys enmascaradas)
 └── AiShieldLogsPage.tsx         # Tabla paginada con filtros + detalle de incidentes
 ```
 
-**Tests:**
-- Navegacion: ProductSwitcher muestra "AI Shield", click navega
-- Sidebar: 4 opciones correctas en `/ai-shield/*`
+**Dependencia**: Requiere Fase 4 (Management API Node.js) implementada primero.
+
+**Tests pendientes:**
 - Dashboard: carga stats desde API
 - Config: actualiza via PUT
-- Keys: CRUD funcional, BYOK keys enmascaradas en UI
+- Keys: CRUD funcional, BYOK keys enmascaradas
 - Logs: paginacion, filtros por status/fecha
-
-**Regresion frontend:**
-- SAST pages (`/sast/*`) no afectadas
-- WAF/OSINT "Coming Soon" no afectadas
-- ProductSwitcher correcto entre todos los modulos
-- Login/logout flow intacto
 
 ---
 
@@ -743,10 +865,10 @@ frontend/.../src/client/pages/ai-shield/
 | 2. Presidio | PII detection + redaction (EN+ES) + phone MX/US | 4-5 | 1 archivo (35 tests) | ✅ 2026-02-08 |
 | 3. LLM Guard | Injection + secrets + output scan | 4-5 | 1 archivo (53 tests) | ✅ 2026-02-08 |
 | 4. Management | CRUD + analytics en Node.js | 5-6 | 1 TS (multi-test) | Pendiente |
-| 5. Hardening | Resilience + rate limiting + perf | 3-4 | 2 Python | Pendiente |
-| 6. Frontend | Modulo AI Shield en dashboard | 5-7 | Navegacion + CRUD | Pendiente |
+| 5. Streaming SSE | SSE streaming + CORS + Nginx SSE | 3-4 | 1 archivo (15 tests) | ✅ Implementada 2026-02-08 (pendiente deploy) |
+| 6. Frontend | **Chat UI** + Admin Dashboard | 7-10 | Chat + Navegacion + CRUD | ✅ Chat UI implementada (pendiente Admin Dashboard + deploy) |
 
-**Total tests actuales: 116 (6 archivos Python, todos pasando)**
+**Total tests actuales: 131 (7 archivos Python, 127 pasando local, 4 fallan por falta de detect-secrets local)**
 
 **Total: 27-35 dias** (1 desarrollador)
 
@@ -770,14 +892,45 @@ frontend/.../src/client/pages/ai-shield/
 
 ## 10. Fases futuras (NO incluidas en este plan)
 
+### 10.1 Proteccion Inbound: SAST en codigo generado + Auto-fix
+
+**Prioridad**: ALTA — Diferenciador competitivo masivo.
+
+Cuando el LLM genera codigo en su respuesta, el output scanner actual (Fase 3) solo detecta PII y secrets. La siguiente evolucion es:
+
+1. **Detectar bloques de codigo** en la respuesta del LLM (markdown code blocks, inline code)
+2. **Ejecutar SAST** (Semgrep + reglas custom) sobre ese codigo para detectar vulnerabilidades
+3. **Auto-fix** las vulnerabilidades usando `securetag-v1` (mismo modelo del motor SAST)
+4. **Devolver codigo seguro** al desarrollador con indicador visual de que fue sanitizado
+
+Esto conecta directamente con **F12.5 Snippet Fix** del SAST — la misma logica de generacion de parches se reutiliza aqui.
+
+```
+LLM responde con codigo →
+  Extraer code blocks (```python, ```javascript, etc) →
+  Semgrep scan (reglas locales) →
+  Si vulnerabilidades: securetag-v1 genera snippet_fix →
+  Reemplazar codigo vulnerable por codigo corregido →
+  Marcar con badge "Code Sanitized" en Chat UI →
+  Log: vulnerabilidades detectadas + corregidas
+```
+
+**Impacto en pipeline**: Se agrega entre los pasos 6 (LLM Guard output) y 9 (Credits confirm) del orchestrator.
+
+**Dependencias**: F12.5 Snippet Fix implementado, Fase 6 Chat UI para indicadores visuales.
+
+### 10.2 Otras fases futuras
+
 | Feature | Descripcion | Dependencia |
 |---------|-------------|-------------|
-| **NeMo Guardrails** | Politicas Colang configurables por tenant | Completar Fase 6 |
-| **Streaming (SSE)** | `stream: true` con output scan log-only | Completar Fase 5 |
+| ~~**Streaming (SSE)**~~ | ~~`stream: true` con output scan en chunks~~ | ~~Implementado en Fase 5~~ ✅ |
+| **NeMo Guardrails** | Politicas Colang configurables por tenant | Post-Fase 6 |
 | **Notificaciones** | Alertas Telegram/Email ante PII spikes | Backlog 3.2 |
 | **Multi-idioma PII** | Portugues, Frances, Aleman | Demanda de mercado |
 | **Cost budgets** | Limite de gasto mensual por key/team | Feature enterprise |
 | **Compliance reports** | Exportar reporte PII mensual PDF | Feature enterprise |
+| **IDE Plugin** | Extension VS Code/JetBrains que ruteea a AI Shield | Post-Chat UI |
+| **Browser Extension** | Intercepta trafico a ChatGPT/Claude desde el navegador | Alternativa a Chat UI |
 
 ---
 
@@ -873,18 +1026,19 @@ frontend/.../src/client/pages/ai-shield/
 | `NRP` | National Registration | EN | Opcional |
 | `LOCATION` | Ubicacion geografica | EN, ES | Opcional (muchos false positives) |
 
-### 12.5 LLM Guard — Fase 3 (PENDIENTE)
+### 12.5 LLM Guard — Fase 3 ✅
 
-> Variables planificadas. Se finalizaran al implementar Fase 3.
+> Implementado con enfoque heuristico (22 patrones injection) + detect-secrets (6 plugins + 3 custom). 53 tests.
 
-| Variable | Valor planificado | Origen previsto | Futuro: ENV | Futuro: Super Admin | Notas |
-|----------|------------------|-----------------|-------------|---------------------|-------|
-| `injection_score_threshold` | 0.8 | ENV | Si | **Si — Global o por tenant** | Score 0.0-1.0. Mayor = mas estricto. Fase 3 |
+| Variable | Valor actual | Origen | Futuro: ENV | Futuro: Super Admin | Notas |
+|----------|-------------|--------|-------------|---------------------|-------|
+| `injection_score_threshold` | 0.8 | ENV | Si | **Si — Global o por tenant** | Score 0.0-1.0. Mayor = mas estricto |
 | `prompt_injection_enabled` | true | DB/tenant | — | **Si — Por tenant** | Toggle deteccion de prompt injection |
 | `secrets_scanning_enabled` | true | DB/tenant | — | **Si — Por tenant** | Toggle deteccion de secrets/credenciales |
 | `output_scanning_enabled` | true | DB/tenant | — | **Si — Por tenant** | Toggle escaneo de respuestas del LLM |
-| Scanners a usar | PromptInjection + Secrets | HARDCODED | Externalizar | No | LLM Guard scanner selection |
-| Lista de secrets patterns | Default LLM Guard | HARDCODED | Externalizar | **Si — Global** | AWS keys, GitHub tokens, passwords, etc |
+| Injection scanner | Heuristico: 22 patrones regex con scoring | HARDCODED | No | No | Upgrade futuro: DeBERTa via llm-guard (requiere 8GB) |
+| Secrets scanner | detect-secrets 1.5.0 (6 plugins) + 3 custom regex | HARDCODED | Externalizar | **Si — Global** | Plugins: AWS, PrivateKey, GitHub, Slack, Stripe, BasicAuth. Custom: Bearer, OpenAI sk-, Slack xoxb- |
+| Output scanning | Presidio PII + secrets scanner sobre respuesta LLM | HARDCODED | No | No | Redacta PII con `<ENTITY>` y secrets con `<SECRET_DETECTED>` |
 
 ### 12.6 LiteLLM Proxy
 
@@ -896,7 +1050,7 @@ frontend/.../src/client/pages/ai-shield/
 | `max_tokens_per_request` | 4096 | DB/tenant | — | **Si — Por tenant** | Max tokens enviados al LLM |
 | `model_access` | ["*"] | DB/key | — | **Si — Por API key** | Modelos permitidos para esta key especifica |
 | `provider_keys_encrypted` | null | DB/key | — | **Si — Por API key** | BYOK keys cifradas. Formato: `{"openai": "sk-...", "anthropic": "sk-..."}` |
-| Streaming | Deshabilitado | HARDCODED | Externalizar | **Si — Global** | `stream: true` rechazado con 400. Planificado para fase futura |
+| Streaming | Habilitado (SSE) | IMPLEMENTADO | — | No | `stream: true` soportado via `prepare_stream()` + `generate_stream()`. Output scan post-stream LOG-ONLY |
 | LiteLLM fallback | No configurado | HARDCODED | Externalizar | No | Fallback entre providers si uno falla |
 
 ### 12.7 Logging y Auditoria
@@ -958,7 +1112,6 @@ frontend/.../src/client/pages/ai-shield/
 **Pendiente de externalizar (actualmente HARDCODED):**
 - Ventana de rate limit (60s)
 - Idiomas PII soportados
-- Streaming toggle
 - Log retention policy
 - LiteLLM fallback config
 - Lista de secrets patterns

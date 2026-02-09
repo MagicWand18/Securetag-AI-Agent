@@ -8,19 +8,21 @@
 
 ## Prioridad 0: EN DESARROLLO — AI Shield (AI Security Gateway) [F15]
 
-**Estado**: En progreso — Fases 0, 1, 2 y 3 completadas y deployadas en produccion (2026-02-08)
+**Estado**: Fases 0-3 deployadas en produccion. Fases 5 (streaming SSE) y 6 (Chat UI) implementadas localmente (pendiente deploy). Fase 4 pendiente.
 **Plan detallado**: [`docs/PLAN_AI_SHIELD.md`](./PLAN_AI_SHIELD.md)
-**Estimacion restante**: ~13-17 dias (Fases 4-6)
+**Estimacion restante**: ~8-12 dias (Fase 4 + Admin Dashboard + deploys)
 **Monetizacion**: 0.1 creditos/request proxeado, 0.01 creditos/request bloqueado
-**Tests**: 116 tests Python pasando (6 archivos, todos pasando)
+**Tests**: 131 tests Python (todos pasando)
+**Security Hardening (Ronda 1+2, 2026-02-08)**: Credenciales externalizadas, deps actualizadas (litellm 1.61.20, redis:7.4-alpine, cryptography 44.0.3), input validation (max_tokens, role, content size), asyncio.to_thread en scans, SSE Semaphore(50) DoS protection, SecurityHeadersMiddleware (CSP/X-Frame/nosniff/Referrer), FastAPI /docs condicional, debug logs eliminados, error exposure removida. Ver `docs/reports/2026-02-08_dev-check_full.md`
 
-Proxy de seguridad entre desarrolladores y LLMs externos (OpenAI, Claude, Gemini) con:
-- PII detection + redaction (Presidio, EN+ES) con phone recognizer custom MX/US
-- Prompt injection detection (heuristico, 22 patrones, scoring 0.0-1.0) — completado
-- Secrets/credentials scanning (detect-secrets + patrones custom) — completado
-- Output scanning (PII + secrets en respuestas del LLM) — completado
+Gateway de seguridad para trafico IA empresarial. Dos modos de entrega:
+- **Chat UI** (principal): Interfaz estilo ChatGPT donde los desarrolladores interactuan con IAs. IT bloquea acceso directo a ChatGPT/Claude y redirige a chat.securetag.com
+- **API Proxy** (programatico): Para scripts, CI/CD y herramientas que consumen APIs de LLM por codigo
+
+Proteccion implementada:
+- **Outbound**: PII detection + redaction (Presidio EN+ES, phone MX/US), prompt injection detection (22 patrones), secrets scanning (detect-secrets + custom)
+- **Inbound**: Output scanning (PII + secrets en respuestas del LLM). SAST + auto-fix de codigo generado — planificado
 - BYOK (Bring Your Own Key) — los tenants usan sus propias API keys de LLM
-- Dashboard con metricas de uso, costos e incidentes — pendiente
 - Contenedor Python (FastAPI) independiente del SAST
 
 | Fase | Entregable | Dias | Estado |
@@ -30,8 +32,8 @@ Proxy de seguridad entre desarrolladores y LLMs externos (OpenAI, Claude, Gemini
 | 2. Presidio | PII detection + redaction (EN+ES) + phone MX/US + PII audit logging | 4-5 | ✅ Completada y deployada |
 | 3. LLM Guard | Injection + secrets + output scan | 4-5 | ✅ Completada y deployada |
 | 4. Management API | CRUD + analytics Node.js | 5-6 | Pendiente |
-| 5. Hardening | Resilience + rate limiting avanzado | 3-4 | Pendiente |
-| 6. Frontend | Modulo AI Shield en dashboard | 5-7 | Pendiente |
+| 5. Streaming SSE | SSE streaming + CORS + Nginx SSE + Semaphore DoS | 3-4 | ✅ Implementada (pendiente deploy) |
+| 6. Frontend | **Chat UI** + Admin Dashboard | 7-10 | ✅ Chat UI implementada (pendiente Admin Dashboard + deploy) |
 
 **Lo implementado en Fases 0-2 (verificado E2E en produccion):**
 - Auth via X-API-Key + permisos `ai_gateway_enabled` en tenant y api_key
@@ -60,6 +62,7 @@ Funcionalidades que directamente generan ingresos, reducen churn, o son bloquean
 - Output: JSON con `line` y `code` para parchar vulnerabilidades
 - **Extra**: Aplicar el fix, re-escanear, y mostrar si realmente corrigio el problema
 - Integrar en `LLMClient` y respuesta de analisis
+- **Conexion con AI Shield**: La misma logica de auto-fix se reutiliza en el output scanning de AI Shield para sanitizar codigo generado por LLMs externos antes de entregarlo al desarrollador
 - **Ref plan**: `docs/legacy/plan-multi-agentes/plans/PLAN_AUTOMATED_REMEDIATION.md`
 
 ### 1.2 Social Login + 2FA [Backlog 2.2]

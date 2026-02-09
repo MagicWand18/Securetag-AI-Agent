@@ -12,7 +12,7 @@
 SecureTag AI es una plataforma SaaS de ciberseguridad de nueva generacion con dos modulos core:
 
 1. **SAST Engine**: Analisis estatico de seguridad potenciado por IA cognitiva (`securetag-v1`)
-2. **AI Shield**: Gateway de seguridad para trafico IA empresarial (proteccion PII, injection, secrets)
+2. **AI Shield**: Gateway de seguridad para trafico IA empresarial — protege lo que SALE hacia las IAs (PII, secrets, injection) y lo que ENTRA desde las IAs (codigo vulnerable). Incluye Chat UI estilo ChatGPT como interfaz principal + API proxy para uso programatico.
 
 **Diferenciadores clave:**
 - Deteccion + Analisis IA + Validacion + Recomendacion en un solo flujo
@@ -20,7 +20,8 @@ SecureTag AI es una plataforma SaaS de ciberseguridad de nueva generacion con do
 - Modelo de creditos "Pay-per-Value" (cobro por profundidad de analisis)
 - Cross-file taint analysis poliglota
 - Pipeline automatizado de inteligencia de amenazas (Zero-Day detection)
-- AI Security Gateway con BYOK (Bring Your Own Key) para LLMs externos
+- AI Security Gateway con Chat UI propia + BYOK (Bring Your Own Key) para LLMs externos
+- SAST sobre codigo generado por IA + auto-fix de vulnerabilidades antes de llegar al desarrollador
 
 ---
 
@@ -42,7 +43,7 @@ SecureTag AI es una plataforma SaaS de ciberseguridad de nueva generacion con do
 | **Migrations** | Liquibase | `core-migrate` | Schema versioning |
 | **Backup** | PostgreSQL Alpine | `core-backup` | Backups cifrados automaticos |
 | **LLM** | Ollama / RunPod | Externo | Modelo `securetag-v1` (Llama 3.1 8B fine-tuned) |
-| **AI Gateway** | Python 3.11 (FastAPI) | `core-ai-gateway` | Proxy IA: LiteLLM + auth + credits + PII detection/redaction (EN+ES) + phone MX/US + logging. 63 tests |
+| **AI Gateway** | Python 3.11 (FastAPI) | `core-ai-gateway` | Proxy IA: LiteLLM + auth + credits + PII detection + injection detection + secrets scanning + output scan + streaming SSE. 131 tests. Security-hardened: credenciales externalizadas, SecurityHeadersMiddleware (CSP/X-Frame/nosniff), /docs condicional, Semaphore(50) SSE DoS, input validation, asyncio.to_thread, debug logs eliminados |
 
 ### Herramientas integradas
 
@@ -63,7 +64,7 @@ Semgrep (SAST), Nmap, Nuclei, Ffuf, Gobuster, Amass, Subfinder, Httpx, Katana, S
 | **F11** | QA & Validacion | 5/5 | COMPLETADO |
 | **F12** | Enterprise Features | 4/5 | 80% |
 | **F13** | Offensive AI (xpl01t) | 0/3 | 0% |
-| **F15** | AI Shield (AI Security Gateway) | 4/6 | 67% - EN PROGRESO |
+| **F15** | AI Shield (AI Security Gateway) | 5.5/6 | 92% - IMPLEMENTADO (Fases 0-3 deployadas, 5-6 pendiente deploy) |
 | **F14** | Frontend SaaS | 5/5 | COMPLETADO |
 | **Backlog F0** | Hotfixes & Estabilizacion | Completo | COMPLETADO |
 | **Backlog F1** | Release Critical | Completo | COMPLETADO |
@@ -71,7 +72,7 @@ Semgrep (SAST), Nmap, Nuclei, Ffuf, Gobuster, Amass, Subfinder, Httpx, Katana, S
 | **Backlog F3** | Growth & Engagement | 0% | PENDIENTE |
 | **Backlog F4** | Advanced AI | 0% | PENDIENTE |
 
-**Progreso global**: ~75% del scope total definido.
+**Progreso global**: ~80% del scope total definido.
 
 ---
 
@@ -139,15 +140,16 @@ Semgrep (SAST), Nmap, Nuclei, Ffuf, Gobuster, Amass, Subfinder, Httpx, Katana, S
 - [x] **F15.2**: Presidio PII detection + redaction (EN + ES) ✅ 2026-02-08
 - [x] **F15.3**: LLM Guard injection + secrets scanning ✅ 2026-02-08
 - [ ] **F15.4**: Management API Node.js (CRUD config, keys, analytics)
-- [ ] **F15.5**: Hardening + resilience
-- [ ] **F15.6**: Frontend modulo AI Shield en dashboard
+- [x] **F15.5**: Streaming SSE (prepare_stream + generate_stream, CORS, Nginx SSE, Semaphore DoS protection) ✅ 2026-02-08 (pendiente deploy)
+- [x] **F15.6a**: Chat UI (ChatPage + 5 subcomponentes, Prisma models, Wasp routes, React.memo) ✅ 2026-02-08 (pendiente deploy)
+- [ ] **F15.6b**: Admin Dashboard (Config, Keys, Logs, Analytics pages)
 
 > **Bug corregido F15.1**: `credits_balance` migrado de INTEGER a NUMERIC(10,2) (migracion 029).
 
 #### Pendiente de Fases Core
 - [ ] **F8.3**: CI/CD automatico (GitHub Actions en push a main)
 - [ ] **F10.4**: Polyglot expansion (C#/.NET, PHP/Laravel, Ruby/Rails, Go)
-- [ ] **F12.5**: Automated Remediation / Snippet Fix con validacion
+- [ ] **F12.5**: Automated Remediation / Snippet Fix (tambien se reutiliza en AI Shield output scanning para auto-fix de codigo generado por LLMs)
 
 #### Pendiente Backlog Fase 2 (Post-Launch)
 - [ ] Social Login (Google/GitHub) + 2FA

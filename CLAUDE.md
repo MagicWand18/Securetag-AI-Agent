@@ -5,7 +5,7 @@
 Plataforma SaaS de ciberseguridad con dos modulos:
 
 1. **SAST Engine** (Node.js/TypeScript) — Analisis estatico de seguridad con IA (`securetag-v1`)
-2. **AI Shield** (Python/FastAPI) — Gateway de seguridad para trafico IA empresarial
+2. **AI Shield** (Python/FastAPI) — Gateway de seguridad para trafico IA empresarial. Dos modos: **Chat UI** (interfaz estilo ChatGPT, producto principal) + **API Proxy** (para scripts/CI/CD). Protege lo que SALE hacia las IAs (PII, secrets, injection) y lo que ENTRA desde las IAs (codigo vulnerable → SAST + auto-fix)
 
 ## Stack Tecnologico
 
@@ -75,16 +75,31 @@ Plataforma SaaS de ciberseguridad con dos modulos:
   - Secrets/credentials scanning via detect-secrets + patrones custom (AWS, GitHub, OpenAI, Bearer, Slack)
   - Output scanning: reutiliza Presidio PII + secrets scanner sobre respuestas del LLM
   - Patron fail-open: si scanner falla, el request pasa (se loguea error)
-  - 116 tests Python pasando (53 de Fase 3, 35 de Fase 2, 28 de Fase 1)
+  - 131 tests Python pasando
 - **Fase 4**: Management API Node.js (CRUD, analytics) — PENDIENTE
-- **Fase 5**: Hardening + resilience — PENDIENTE
-- **Fase 6**: Frontend modulo AI Shield — PENDIENTE
+- **Fase 5**: Streaming SSE — IMPLEMENTADA (pendiente deploy)
+  - prepare_stream() + generate_stream() pattern, Nginx SSE config, CORS
+  - asyncio.Semaphore(50) limita conexiones SSE concurrentes (DoS protection)
+  - Output scan en streaming es LOG-ONLY (no se puede bloquear texto ya enviado)
+- **Fase 6**: Chat UI — IMPLEMENTADA (pendiente Admin Dashboard + deploy)
+  - ChatPage + 5 subcomponentes, Prisma models, Wasp routes, API key en localStorage
+  - React.memo en MessageBubble, ChatSidebar, ChatInput
+- **Security Hardening** (Ronda 1 + 2, 2026-02-08):
+  - Credenciales externalizadas (settings.py sin defaults, docker-compose con ${VAR})
+  - SecurityHeadersMiddleware: CSP, X-Frame-Options, nosniff, Referrer-Policy
+  - FastAPI /docs condicional: solo disponible si AI_GW_LOG_LEVEL=DEBUG
+  - Input validation: max_tokens (1-128K), content (100K chars), role allowlist
+  - asyncio.to_thread() en scans Presidio/secrets, @lru_cache en _derive_key
+  - Debug logs eliminados (35+ console.log('DEBUG:') removidos de produccion)
+  - Reporte completo: `docs/reports/2026-02-08_dev-check_full.md`
 
 ### Pipeline del request (orchestrator.py)
 ```
-POST /ai/v1/chat/completions → Auth → Credits → Model validation
-  → LLM Guard input (injection + secrets) → Presidio PII scan (redact/block/log_only)
-  → LiteLLM call → LLM Guard output (PII + secrets) → Async log (con PII incidents)
+POST /ai/v1/chat/completions (via Chat UI o API Proxy)
+  OUTBOUND: Auth → Credits → LLM Guard input (injection + secrets)
+    → Presidio PII scan (redact/block/log_only) → LiteLLM call
+  INBOUND: LLM Guard output (PII + secrets en respuesta)
+    → [futuro: SAST scan + auto-fix de codigo generado] → Async log
 ```
 
 ### Archivos clave AI Gateway
@@ -135,11 +150,11 @@ Dos DBs separadas:
 ### Variables de entorno (settings.py, prefijo AI_GW_)
 | Variable | Default | Descripcion |
 |----------|---------|-------------|
-| `AI_GW_DATABASE_URL` | postgres://...core-db... | Conexion a PostgreSQL |
+| `AI_GW_DATABASE_URL` | (requerido) | Conexion a PostgreSQL |
 | `AI_GW_REDIS_HOST` | core-redis | Host Redis |
 | `AI_GW_REDIS_PORT` | 6379 | Puerto Redis |
-| `AI_GW_REDIS_PASSWORD` | securetagredis | Password Redis |
-| `AI_GW_SECURETAG_SYSTEM_SECRET` | s3cur3t4g... | Secret para cifrado BYOK |
+| `AI_GW_REDIS_PASSWORD` | (requerido) | Password Redis |
+| `AI_GW_SECURETAG_SYSTEM_SECRET` | (requerido) | Secret para cifrado BYOK |
 | `AI_GW_CREDIT_COST_PROXY` | 0.1 | Creditos por request exitoso |
 | `AI_GW_CREDIT_COST_BLOCKED` | 0.01 | Creditos por request bloqueado |
 | `AI_GW_DEFAULT_RPM_PER_KEY` | 30 | Rate limit default por key |
@@ -188,4 +203,8 @@ Dos DBs separadas:
 - **mem_limit** de core-ai-gateway es 768m (Presidio + spaCy + detect-secrets)
 - **detect-secrets**: Usar `transient_settings` con plugins especificos (no `default_settings`) para evitar falsos positivos de HexHighEntropyString
 - **Injection patterns**: Compilados a nivel de modulo (inmutables), no recompilar en cada request
+- **SSE Semaphore**: MAX_CONCURRENT_STREAMS=50, wait_for(timeout=5.0) en proxy.py — 503 si no hay slots
+- **Security headers**: SecurityHeadersMiddleware en main.py aplica CSP/X-Frame/nosniff a TODAS las responses
+- **FastAPI /docs**: Condicional — `docs_url="/docs" if _is_debug else None`, deshabilitado en produccion (INFO)
+- **Streaming SSE**: `prepare_stream()` lanza HTTPException, `generate_stream()` es async generator puro (no excepciones)
 - **Proyecto en servidor**: `/opt/securetag` (NO `/root/securetag`)
