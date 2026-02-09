@@ -182,17 +182,13 @@ Formato:
 
     async analyzeFinding(finding: any, context?: ProjectContext, userContext?: any): Promise<AnalysisResult | null> {
         try {
-            console.log('DEBUG: analyzeFinding called for', finding.rule_id)
             if (this.isRunPod) {
-                console.log('DEBUG: Using RunPod analysis')
                 return await this.analyzeWithRunPod(finding, context, userContext)
             } else {
-                console.log('DEBUG: Using Ollama analysis')
                 return await this.analyzeWithOllama(finding, context, userContext)
             }
         } catch (err: any) {
             logger.error('LLM analysis failed', err)
-            console.error('DEBUG: LLM analysis error:', err)
             return null
         }
     }
@@ -238,21 +234,16 @@ Formato:
         const payload = { input: { prompt: `${systemPrompt}\n\n${prompt}` } }
 
         try {
-            console.log('DEBUG: Sending request to RunPod')
             const res = await this.client.post('/runsync', payload)
-            console.log('DEBUG: RunPod runsync response status:', res.status)
             const output = res.data && res.data.output ? res.data.output : null
-            
+
             if (output) {
-                console.log('DEBUG: RunPod sync output received')
                 return this.extractAndParse(output)
             }
 
             if (!output) {
-                console.log('DEBUG: RunPod sync output empty, trying async /run')
                 const submit = await this.client.post('/run', payload)
                 const jobId = submit.data && submit.data.id ? submit.data.id : null
-                console.log('DEBUG: RunPod job submitted, ID:', jobId)
                 
                 if (!jobId) {
                     logger.warn('RunPod did not return a job ID')
@@ -265,11 +256,9 @@ Formato:
                     await new Promise(resolve => setTimeout(resolve, pollInterval))
                     const statusResponse = await this.client.get(`/status/${jobId}`)
                     const status = statusResponse.data && statusResponse.data.status
-                    console.log(`DEBUG: RunPod job ${jobId} status: ${status}`)
-                    
+
                     if (status === 'COMPLETED') {
                         const o = statusResponse.data.output
-                        console.log('DEBUG: RunPod job completed, output:', JSON.stringify(o))
                         return this.extractAndParse(o)
                     } else if (status === 'FAILED') {
                         logger.warn(`RunPod job ${jobId} failed`)
@@ -283,7 +272,6 @@ Formato:
             return this.extractAndParse(output)
         } catch (err: any) {
             logger.error('RunPod runsync call failed', err)
-            console.error('DEBUG: RunPod error details:', err.response ? err.response.data : err.message)
             return null
         }
     }
@@ -310,8 +298,6 @@ Formato:
             logger.warn('RunPod output format not recognized')
             return null
         }
-
-        console.log('DEBUG: RunPod RAW content:', content) // Log raw content for debugging
 
         return this.parseResponse(content)
     }

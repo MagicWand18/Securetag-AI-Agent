@@ -38,7 +38,7 @@ services:
       - ADMIN_EMAILS=admin@example.com
       - SECURETAG_API_URL=http://core-gateway:80
       - SECURETAG_API_HOST=api.securetag.com.mx
-      - SECURETAG_SYSTEM_SECRET=s3cur3t4g-syst3m-s3cr3t-2025
+      - SECURETAG_SYSTEM_SECRET=${SECURETAG_SYSTEM_SECRET:-dev-secret-change-me}
     depends_on:
       - db
     networks:

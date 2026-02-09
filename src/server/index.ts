@@ -179,7 +179,6 @@ const server = http.createServer(async (req, res) => {
     const work = process.env.WORK_DIR || `/var/securetag/${authReq.tenantName}/work`
     // Parse Multipart manually (busboy/multer would be better but keeping it raw for now)
     const ct = req.headers['content-type'] || ''
-    console.log(`[DEBUG] Content-Type: ${ct}`)
     if (!ct.includes('multipart/form-data')) return send(res, 400, { ok: false })
     const boundary = ct.split('boundary=')[1]
     if (!boundary) return send(res, 400, { ok: false })
@@ -279,27 +278,22 @@ const server = http.createServer(async (req, res) => {
             const val = content.slice(0, endIdx >= 0 ? endIdx : undefined).trim().toLowerCase()
             if (val === 'true' || val === '1') doubleCheck = true
             else if (['all', 'critical', 'high', 'medium', 'low'].includes(val)) doubleCheck = val
-            console.log(`[DEBUG] Found double_check: ${val} -> ${doubleCheck}`)
           } else if (header.includes('name="double_check_level"')) {
             const endIdx = content.lastIndexOf('\r\n')
             doubleCheckLevel = content.slice(0, endIdx >= 0 ? endIdx : undefined).trim().toLowerCase()
-            console.log(`[DEBUG] Found double_check_level: ${doubleCheckLevel}`)
           } else if (header.includes('name="custom_rules"')) {
             const endIdx = content.lastIndexOf('\r\n')
             const val = content.slice(0, endIdx >= 0 ? endIdx : undefined).trim().toLowerCase()
             customRules = (val === 'true' || val === '1')
-            console.log(`[DEBUG] Found custom_rules: ${val} -> ${customRules}`)
           } else if (header.includes('name="custom_rules_qty"')) {
             const endIdx = content.lastIndexOf('\r\n')
             const val = content.slice(0, endIdx >= 0 ? endIdx : undefined).trim()
             const parsed = parseInt(val, 10)
             if (!isNaN(parsed)) customRulesQty = parsed
-            console.log(`[DEBUG] Found custom_rules_qty: ${val} -> ${customRulesQty}`)
           } else if (header.includes('name="custom_rule_model"')) {
             const endIdx = content.lastIndexOf('\r\n')
             const val = content.slice(0, endIdx >= 0 ? endIdx : undefined).trim().toLowerCase()
             if (['standard', 'pro', 'max'].includes(val)) customRulesModel = val
-            console.log(`[DEBUG] Found custom_rule_model: ${val} -> ${customRulesModel}`)
           } else if (header.includes('name="user_context"')) {
             const endIdx = content.lastIndexOf('\r\n')
             const rawJson = content.slice(0, endIdx >= 0 ? endIdx : undefined).trim()
@@ -663,9 +657,7 @@ const server = http.createServer(async (req, res) => {
   
   // Custom Rules Internal Endpoint
   if (method === 'POST' && url === '/queue/codeaudit') {
-          console.log('[DEBUG] Received POST /queue/codeaudit')
           const authReq = req as AuthenticatedRequest
-          // ... rest of code
       const isAuthenticated = await authenticate(authReq, res)
       if (!isAuthenticated) return
 

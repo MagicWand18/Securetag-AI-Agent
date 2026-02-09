@@ -43,9 +43,6 @@ async function run() {
   const useQueue = process.env.USE_QUEUE !== 'false' // Default to true for new architecture
 
   logger.info(`Worker starting. ID: ${workerId}, Tenant: ${tenant}, LoopMode: ${loopMode}, QueueMode: ${useQueue}`)
-  console.log('DEBUG: process.env.LOOP_MODE =', process.env.LOOP_MODE)
-  console.log('DEBUG: loopMode variable =', loopMode)
-  console.log('DEBUG: *** DOCKER WORKER IS ALIVE AND LOGGING ***')
 
   if (useQueue && loopMode) {
     logger.info('🚀 Starting Worker in Queue Mode (BullMQ)')

@@ -150,9 +150,6 @@ export const createScan = async (args: {
       customRulesModel: args.customRulesModel
   });
   
-  // Debug Log for Cost Calculation
-  console.log(`[Cost Calc] Base: ${costEstimation.breakdown.base}, CustomRules: ${costEstimation.breakdown.customRules || 0}. Total: ${costEstimation.total}`);
-
   if (context.user.credits < costEstimation.total) {
       throw new HttpError(402, `Insufficient credits. Required: ${costEstimation.total}, Available: ${context.user.credits}.`);
   }
@@ -165,10 +162,6 @@ export const createScan = async (args: {
   try {
     const buffer = Buffer.from(args.fileContent, 'base64');
     
-    // DEBUG: Verificar integridad del archivo (Primeros 100 caracteres)
-    console.log(`[DEBUG FILE] Name: ${args.fileName}, Size: ${buffer.length} bytes`);
-    console.log(`[DEBUG FILE] Preview: ${buffer.slice(0, 100).toString('utf-8').replace(/\n/g, '\\n')}`);
-
     const formData = new FormData();
     const blob = new Blob([buffer], { type: 'application/zip' });
     formData.append('file', blob, args.fileName);

@@ -374,15 +374,6 @@ export default function SastReportPage({ user }: { user: AuthUser }) {
 
   const selectedFinding = useMemo(() => {
     const finding = processedFindings.find((f: any) => f._uiId === selectedFindingId);
-    if (finding) {
-      console.log('[DEBUG] Selected Finding:', {
-        id: finding.id,
-        rule: finding.rule_name,
-        hasSnippet: !!finding.code_snippet,
-        snippetLength: finding.code_snippet?.length,
-        snippetPreview: finding.code_snippet?.substring(0, 50)
-      });
-    }
     return finding;
   }, [processedFindings, selectedFindingId]);
 
@@ -1041,18 +1032,14 @@ export default function SastReportPage({ user }: { user: AuthUser }) {
 
                 {/* 3. Evidencia de Código (Code Snippet) */}
                 {selectedFinding.code_snippet && (() => {
-                  console.log('[DEBUG] Snippet Raw Length:', selectedFinding.code_snippet.length);
                   const cleanSnippet = selectedFinding.code_snippet?.replace(/\n$/, '') || '';
-                  console.log('[DEBUG] Clean Snippet Length:', cleanSnippet.length);
                   const snippetLines = cleanSnippet.split('\n');
-                  console.log('[DEBUG] Snippet Lines:', snippetLines.length);
-                  
+
                   // Heuristic: If snippet has > 6 lines, assume it's the enhanced context (start at line - 5)
                   // Otherwise, assume it's standard Semgrep output (starts at line)
                   const isEnhanced = snippetLines.length > 6;
                   const startLine = isEnhanced ? Math.max(1, selectedFinding.line - 5) : selectedFinding.line;
                   const endLine = startLine + snippetLines.length - 1;
-                  console.log('[DEBUG] Line Range:', startLine, '-', endLine);
 
                   return (
                     <div className="space-y-4 pt-4">

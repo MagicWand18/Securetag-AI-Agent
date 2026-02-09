@@ -41,11 +41,9 @@ export class ExternalAIService {
     ): Promise<AIAnalysisResult | null> {
         
         const cost = this.getCost(config.level);
-        console.log(`DEBUG: [ExternalAIService] Cost for level ${config.level}: ${cost}`)
-        
+
         // 1. Check Credits
         const hasCredits = await this.creditsManager.hasSufficientCredits(tenantId, cost);
-        console.log(`DEBUG: [ExternalAIService] Tenant ${tenantId} has sufficient credits? ${hasCredits}`)
         if (!hasCredits) {
             logger.warn(`Tenant ${tenantId} has insufficient credits for ${config.level} double check.`);
             return null;
@@ -57,8 +55,6 @@ export class ExternalAIService {
         const openaiKey = process.env.AI_PROVIDER_OPENAI_KEY;
         const anthropicKey = process.env.AI_PROVIDER_ANTHROPIC_KEY;
         
-        console.log(`DEBUG: [ExternalAIService] Keys found - OpenAI: ${!!openaiKey}, Anthropic: ${!!anthropicKey}`)
-
         const providers: AIProvider[] = [];
 
         // Primary: OpenAI

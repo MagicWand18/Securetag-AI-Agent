@@ -5,16 +5,16 @@ from functools import lru_cache
 class Settings(BaseSettings):
     """Configuracion del AI Gateway via variables de entorno."""
 
-    # Base de datos
-    database_url: str = "postgres://securetag:securetagpwd@core-db:5432/securetag"
+    # Base de datos (REQUERIDO via AI_GW_DATABASE_URL)
+    database_url: str
 
     # Redis
     redis_host: str = "core-redis"
     redis_port: int = 6379
-    redis_password: str = "securetagredis"
+    redis_password: str  # REQUERIDO via AI_GW_REDIS_PASSWORD
 
-    # Cifrado BYOK keys
-    securetag_system_secret: str = "s3cur3t4g-syst3m-s3cr3t-2025"
+    # Cifrado BYOK keys (REQUERIDO via AI_GW_SECURETAG_SYSTEM_SECRET)
+    securetag_system_secret: str
 
     # Creditos
     credit_cost_proxy: float = 0.1
@@ -33,6 +33,9 @@ class Settings(BaseSettings):
 
     # Config cache TTL (segundos)
     config_cache_ttl: int = 60
+
+    # CORS (comma-separated origins)
+    cors_origins: str = "http://localhost:3000"
 
     # Logging
     log_level: str = "INFO"

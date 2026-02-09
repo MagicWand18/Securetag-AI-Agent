@@ -9,7 +9,7 @@ export function getPool(): Pool {
     const port = parseInt(process.env.POSTGRES_PORT || '5432', 10)
     const db = process.env.POSTGRES_DB || 'securetag'
     const user = process.env.POSTGRES_USER || 'securetag'
-    const password = process.env.POSTGRES_PASSWORD || 'securetagpwd'
+    const password = process.env.POSTGRES_PASSWORD || ''
     pool = url
       ? new Pool({ connectionString: url })
       : new Pool({ host, port, database: db, user, password })

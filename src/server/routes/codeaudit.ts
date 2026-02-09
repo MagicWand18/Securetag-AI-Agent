@@ -341,18 +341,10 @@ export async function codeauditDetail(req: http.IncomingMessage, res: http.Serve
           summary = sr.rows.length ? (sr.rows[0].summary_json || {}) : {}
         } catch { }
         try {
-          console.log('[DEBUG] Executing findings query for taskId:', id);
           const f = await dbQuery<any>('SELECT id, rule_id, rule_name, severity, cwe, cve, file_path, line, fingerprint, analysis_json, code_snippet FROM securetag.finding WHERE task_id=$1 ORDER BY created_at DESC', [id])
           findings = f.rows
-          console.log('[DEBUG] Findings retrieved:', findings.length);
-          if (findings.length > 0) {
-             console.log('[DEBUG] First finding sample (snippet length):', findings[0].code_snippet ? findings[0].code_snippet.length : 'null');
-             if (findings[0].code_snippet) {
-               console.log('[DEBUG] First finding snippet last 20 chars:', JSON.stringify(findings[0].code_snippet.slice(-20)));
-             }
-          }
-        } catch (err) { 
-          console.error('[DEBUG] Error fetching findings:', err);
+        } catch (err) {
+          console.error('Error fetching findings:', err);
         }
 
         // Logic for Retest Diffing

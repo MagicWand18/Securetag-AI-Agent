@@ -6,7 +6,7 @@ import assert from 'assert'
 const PORT = 8081
 process.env.PORT = String(PORT)
 process.env.TENANT_ID = 'test_tenant'
-process.env.DATABASE_URL = 'postgres://securetag:securetagpwd@localhost:5433/securetag'
+process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgres://securetag:${POSTGRES_PASSWORD}@localhost:5433/securetag'
 
 // Start server (we need to import it, but it starts on import if we are not careful. 
 // checking src/server/index.ts, it starts listening at the end. 

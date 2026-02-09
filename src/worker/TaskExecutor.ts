@@ -597,7 +597,6 @@ export class TaskExecutor {
 
                 } catch (err: any) {
                     logger.error(`Failed to analyze finding ${fingerprint}`, err)
-                    console.error(`DEBUG: Analysis Exception for ${ruleId}:`, err)
                     // Optionally log to a DB table for errors if needed, 
                     // for now we rely on the worker logs and the fact that analysis is null.
                 }

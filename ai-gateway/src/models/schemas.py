@@ -1,23 +1,40 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 from enum import Enum
 
 
 # --- Request/Response del proxy ---
 
+VALID_ROLES = {"user", "assistant", "system", "tool", "function"}
+
+
 class ChatMessage(BaseModel):
     role: str
     content: str
     name: Optional[str] = None
 
+    @field_validator("role")
+    @classmethod
+    def validate_role(cls, v: str) -> str:
+        if v not in VALID_ROLES:
+            raise ValueError(f"Invalid role '{v}'. Must be one of: {', '.join(sorted(VALID_ROLES))}")
+        return v
+
+    @field_validator("content")
+    @classmethod
+    def validate_content(cls, v: str) -> str:
+        if len(v) > 100_000:
+            raise ValueError("Message content exceeds 100,000 character limit")
+        return v
+
 
 class ProxyRequest(BaseModel):
     """Request OpenAI-compatible que recibe el gateway."""
     model: str
-    messages: list[ChatMessage]
-    temperature: Optional[float] = None
-    max_tokens: Optional[int] = None
-    top_p: Optional[float] = None
+    messages: list[ChatMessage] = Field(..., min_length=1, max_length=200)
+    temperature: Optional[float] = Field(None, ge=0.0, le=2.0)
+    max_tokens: Optional[int] = Field(None, ge=1, le=128_000)
+    top_p: Optional[float] = Field(None, ge=0.0, le=1.0)
     stream: bool = False
     # BYOK: el developer puede enviar su key directamente
     provider_key: Optional[str] = None

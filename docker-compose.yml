@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: securetag
       POSTGRES_USER: securetag
-      POSTGRES_PASSWORD: securetagpwd
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - ./data/postgres:/var/lib/postgresql
     networks:
@@ -18,10 +18,10 @@ services:
       retries: 5
 
   core-redis:
-    image: redis:alpine
+    image: redis:7.4-alpine
     container_name: core-redis
     mem_limit: 128m
-    command: redis-server --appendonly yes --requirepass securetagredis
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     ports:
       - "6379:6379"
     volumes:
@@ -29,7 +29,7 @@ services:
     networks:
       - core-net
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "securetagredis", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -61,7 +61,7 @@ services:
       UPLOADS_DIR: /var/securetag/${TENANT_ID:-tenantA}/uploads
       WORK_DIR: /var/securetag/${TENANT_ID:-tenantA}/work
       RESULTS_DIR: /var/securetag/${TENANT_ID:-tenantA}/results
-      DATABASE_URL: postgres://securetag:securetagpwd@core-db:5432/securetag
+      DATABASE_URL: postgres://securetag:${POSTGRES_PASSWORD}@core-db:5432/securetag
       OLLAMA_HOST: ${OLLAMA_HOST}
       RUNPOD_API_KEY: ${RUNPOD_API_KEY}
       MODEL: ${MODEL:-securetag-v1}
@@ -86,8 +86,8 @@ services:
       RESEARCH_RUN_ON_BOOT: ${RESEARCH_RUN_ON_BOOT:-false}
       REDIS_HOST: core-redis
       REDIS_PORT: 6379
-      REDIS_PASSWORD: securetagredis
-      SECURETAG_SYSTEM_SECRET: s3cur3t4g-syst3m-s3cr3t-2025
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      SECURETAG_SYSTEM_SECRET: ${SECURETAG_SYSTEM_SECRET}
     volumes:
       - ./data:/var/securetag
     networks:
@@ -107,7 +107,7 @@ services:
     environment:
       LIQUIBASE_COMMAND_URL: jdbc:postgresql://core-db:5432/securetag
       LIQUIBASE_COMMAND_USERNAME: securetag
-      LIQUIBASE_COMMAND_PASSWORD: securetagpwd
+      LIQUIBASE_COMMAND_PASSWORD: ${POSTGRES_PASSWORD}
       LIQUIBASE_SEARCH_PATH: /liquibase/changelog
     volumes:
       - ./migrations:/liquibase/changelog
@@ -126,8 +126,8 @@ services:
       POSTGRES_HOST: core-db
       POSTGRES_DB: securetag
       POSTGRES_USER: securetag
-      POSTGRES_PASSWORD: securetagpwd
-      BACKUP_ENCRYPTION_KEY: ${BACKUP_ENCRYPTION_KEY:-change_me_in_production_please}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      BACKUP_ENCRYPTION_KEY: ${BACKUP_ENCRYPTION_KEY}
       CRON_SCHEDULE: "0 2 * * *" # Run at 2:00 AM daily
     volumes:
       - ./data/backups:/backups
@@ -161,7 +161,7 @@ services:
       APP_HOST: core-api
       APP_PORT: 8080
       RESULTS_DIR: /var/securetag/${TENANT_ID:-tenantA}/results
-      DATABASE_URL: postgres://securetag:securetagpwd@core-db:5432/securetag
+      DATABASE_URL: postgres://securetag:${POSTGRES_PASSWORD}@core-db:5432/securetag
       SEMGREP_HAS_SHOWN_METRICS_NOTIFICATION: ${SEMGREP_HAS_SHOWN_METRICS_NOTIFICATION:-true}
       OLLAMA_HOST: ${OLLAMA_HOST}
       RUNPOD_API_KEY: ${RUNPOD_API_KEY}
@@ -172,7 +172,7 @@ services:
       WORKER_ID: worker-1
       REDIS_HOST: core-redis
       REDIS_PORT: 6379
-      REDIS_PASSWORD: securetagredis
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
       DB_DIR: /var/securetag/${TENANT_ID:-tenantA}/db
       UPLOADS_DIR: /var/securetag/${TENANT_ID:-tenantA}/uploads
       TASK_TIMEOUT_CODEAUDIT: 540000
@@ -211,11 +211,12 @@ services:
     container_name: core-ai-gateway
     mem_limit: 768m
     environment:
-      AI_GW_DATABASE_URL: postgres://securetag:securetagpwd@core-db:5432/securetag
+      AI_GW_DATABASE_URL: postgres://securetag:${POSTGRES_PASSWORD}@core-db:5432/securetag
       AI_GW_REDIS_HOST: core-redis
       AI_GW_REDIS_PORT: 6379
-      AI_GW_REDIS_PASSWORD: securetagredis
-      AI_GW_SECURETAG_SYSTEM_SECRET: s3cur3t4g-syst3m-s3cr3t-2025
+      AI_GW_REDIS_PASSWORD: ${REDIS_PASSWORD}
+      AI_GW_SECURETAG_SYSTEM_SECRET: ${SECURETAG_SYSTEM_SECRET}
+      AI_GW_CORS_ORIGINS: ${AI_GW_CORS_ORIGINS:-http://localhost:3000}
       AI_GW_LOG_LEVEL: INFO
       OPENAI_API_KEY: ${AI_PROVIDER_OPENAI_KEY}
     networks:

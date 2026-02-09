@@ -2,6 +2,7 @@ import os
 import base64
 import hashlib
 import logging
+from functools import lru_cache
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives import hashes
@@ -13,6 +14,7 @@ logger = logging.getLogger(__name__)
 _HKDF_INFO = b"securetag-ai-gateway-byok-encryption"
 
 
+@lru_cache(maxsize=1)
 def _derive_key(system_secret: str) -> bytes:
     """Deriva una clave AES-256 del SECURETAG_SYSTEM_SECRET usando HKDF."""
     hkdf = HKDF(
